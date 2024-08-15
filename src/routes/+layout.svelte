@@ -3,7 +3,7 @@
 </script>
 
 <Navbar style="background-color: #0b473b;">
-    <Image class="mx-auto w-50" src="logo/logo-cropped.svg" alt="Logo for EvA: Every Attendee" />
+    <Image class="mx-auto w-50" src="/logo/logo-cropped.svg" alt="Logo for EvA: Every Attendee" />
 </Navbar>
 
 <Container class="text-center mt-1 mb-4">
