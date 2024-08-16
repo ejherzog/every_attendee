@@ -19,7 +19,7 @@
 	<hr />
 	<p>
 		EveryAttendee is built and maintained with <strike>☕️ and 🍕</strike><br />
-		...<i>uhhh </i>I mean with 🧡 by Eva J Herzog.
+		...<i>errr that is</i> with 🧡 by Eva J Herzog.
 	</p>
 	<hr>
 	<a href="/credits" class="text-reset">Credits</a>

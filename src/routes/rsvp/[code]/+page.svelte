@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Event, findEvent } from "$lib/Event";
+	import { Event, findEvent } from "$lib/types/Event";
 	import { Card, CardBody } from "@sveltestrap/sveltestrap";
 
     /** @type {import('./$types').PageData} */

@@ -1,5 +1,5 @@
 import { addHours } from "date-fns";
-import { User } from "./User";
+import { User, Guest } from "./People";
 
 export class Event {
 
@@ -8,6 +8,7 @@ export class Event {
     created_by: User;
     start_time: Date;
     end_time: Date;
+    guests: Guest[];
 
     constructor(title: string, created_by: User) {
         this.title = title;
@@ -16,9 +17,11 @@ export class Event {
 
         this.start_time = new Date();
         this.end_time = addHours(this.start_time, 4);
+
+        this.guests = [];
     }
 }
 
-export function findEvent(code: string): Event | undefined {
+export function findEvent(code: string): Event {
     return new Event("Sample Event", new User("eowynecho88@gmail.com", "Eva"));
 }
