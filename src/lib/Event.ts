@@ -19,6 +19,6 @@ export class Event {
     }
 }
 
-export function findEvent(code: string) {
+export function findEvent(code: string): Event | undefined {
     return new Event("Sample Event", new User("eowynecho88@gmail.com", "Eva"));
 }
