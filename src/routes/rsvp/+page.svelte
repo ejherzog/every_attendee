@@ -1,23 +1,22 @@
 <script lang="ts">
-	// @ts-nocheck
-
 	import { Button, Form, FormGroup, Input, InputGroup, Label } from '@sveltestrap/sveltestrap';
 
 	let event_code = '';
-	const uppercase_letters = new RegExp('[A-Z]{6}');
+	const six_letters = new RegExp('([A-Z]{6})');
 
-	let validateCode = (event_code: string) => {
-		if (uppercase_letters.test(event_code)) {
-            console.log("valid");
+	const handleSubmit = (e: Event) => {
+		if (!six_letters.test(event_code.toUpperCase())) {
+			e.preventDefault();
+			alert("ERROR");
 		}
-	};
+	}
 </script>
 
-<Form class="mx-auto mt-4 w-25">
+<Form on:submit={handleSubmit} class="mx-auto mt-4 w-25" action={`/rsvp/${event_code}`} method="GET">
 	<InputGroup>
 		<FormGroup floating label="Enter an event code">
-			<Input bsSize="lg" default={event_code} bind:value={event_code} />
+			<Input feedback="Event codes must be six letters." required bsSize="lg" bind:value={event_code} />
 		</FormGroup>
 	</InputGroup>
-	<Button outline type="submit" style="background-color: #0b473b; color: #f9b13e;" on:click={validateCode(event_code)}>Find Event</Button>
+	<Button type="submit">Find Event</Button>
 </Form>
