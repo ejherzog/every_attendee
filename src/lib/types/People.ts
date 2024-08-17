@@ -1,12 +1,16 @@
+import type { Pronouns } from "./Pronouns";
+
 export class Person {
 
     name: string;
+    pronounList: Pronouns[];
     full_name?: string;
     phone?: string;
     email?: string;
 
     constructor(name: string, full_name?: string) {
         this.name = name;
+        this.pronounList = [];
         this.full_name = full_name;
     }
 
@@ -16,6 +20,10 @@ export class Person {
 
     setEmail(email: string) {
         this.email = email;
+    }
+
+    addPronouns(pronouns: Pronouns) {
+        this.pronounList.push(pronouns);
     }
 }
 

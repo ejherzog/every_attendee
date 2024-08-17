@@ -1,25 +1,18 @@
 <script lang="ts">
 	import { Button, Form, FormGroup, Input, InputGroup, Label } from '@sveltestrap/sveltestrap';
+	import { EventCodeValidator } from "$lib/StringValidator";
 
-	let event_code = '';
-	let feedback = '';
-	let validated = false;
-	const six_letters = new RegExp('([A-Z]{6})');
+	let event_code: string;
+	let feedback: string;
+	let validated: boolean;
+	let validator = new EventCodeValidator();
 
 	const handleSubmit = (e: Event) => {
-		if (event_code.length == 6) {
-			if (!six_letters.test(event_code.toUpperCase())) {
-				invalid(e, "The event code should only contain letters A-Z.");
-			}
-		} else {
-			invalid(e, "The event code should be six letters.");
+		if (!validator.isAcceptable(event_code)) {
+			e.preventDefault();
+			feedback = "The event code should be 6 letters (A-Z).";
+			validated = true;
 		}
-	}
-
-	const invalid = (e: Event, message: string) => {
-		e.preventDefault();
-		feedback = message;
-		validated = true;
 	}
 </script>
 
@@ -31,7 +24,6 @@
 			{:else}
 				<Input required bsSize="lg" bind:value={event_code} />
 			{/if}
-			
 		</FormGroup>
 	</InputGroup>
 	<Button type="submit">Find Event</Button>
