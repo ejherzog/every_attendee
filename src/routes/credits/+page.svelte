@@ -30,6 +30,9 @@
             <ListGroupItem class="text-reset bg-transparent">
                 Logo & Favicon Font: <a href="https://tribby.com/fonts/barlow/">Barlow Condensed</a>
             </ListGroupItem>
+            <ListGroupItem>
+                Sample Event Image: <a href="https://canweallgo.com/plus-size-stock-photos/">AllGo Free Stock Photos</a>
+            </ListGroupItem>
         </ListGroup>
     </Card>
 </Container>
