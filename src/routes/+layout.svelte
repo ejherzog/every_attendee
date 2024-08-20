@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Navbar, Container, Image, NavItem, NavLink, Icon } from '@sveltestrap/sveltestrap';
+	import { Navbar, Container, Image, NavLink, Icon, Row, Col } from '@sveltestrap/sveltestrap';
 
 	const kofi_words = ['coffee', 'pizza', 'bacon', 'chocolate', 'cheese'];
 	const kofi_emojis = ['☕️', '🍕', '🥓', '🍫', '🧀'];
@@ -9,12 +9,14 @@
 </script>
 
 <Navbar style="background-color: #0b473b;" container="md">
-	<NavItem>
-		<Image class="w-25" src="/logo/logo-icon-cropped.svg" alt="Logo for EvA: Every Attendee" />
-	</NavItem>
-	<NavItem class="fs-4">
-		<NavLink href="/rsvp/" style="color: #f9b13e">RSVP</NavLink>
-	</NavItem>
+	<Row class="w-100 justify-content-between align-items-center">
+		<Col class="col-md-3 col-6">
+			<Image class="w-100" src="/logo/logo-icon-cropped.svg" alt="Logo for EvA: Every Attendee" />
+		</Col>
+		<Col class="col-md-3 col-6 text-end">
+			<NavLink href="/rsvp/" style="color: #f9b13e">RSVP</NavLink>
+		</Col>
+	</Row>
 </Navbar>
 
 <Container class="text-center mt-1 mb-4">
@@ -25,7 +27,7 @@
 	<hr />
 	<p>
 		<i>EveryAttendee</i> is built and maintained Eva J Herzog.<br />
-		{emoji} Buy her some {treat} via <a href="https://ko-fi.com/evajherzog" target="_blank" class="text-reset">ko-fi</a> <Icon name="arrow-up-right-square-fill" />.
+		{emoji} Buy her some {treat} via <a href="https://ko-fi.com/evajherzog" target="_blank" class="text-reset">ko-fi</a> <Icon name="arrow-up-right-square-fill" style="font-size: .9rem;"/>.
 	</p>
 	<hr>
 	<a href="/credits" class="text-reset">Credits</a>
