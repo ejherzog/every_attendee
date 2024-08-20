@@ -1,5 +1,11 @@
 <script lang="ts">
-	import { Navbar, Container, Image, NavbarBrand, Nav, NavItem, NavLink } from '@sveltestrap/sveltestrap';
+	import { Navbar, Container, Image, NavItem, NavLink, Icon } from '@sveltestrap/sveltestrap';
+
+	const kofi_words = ['coffee', 'pizza', 'bacon', 'chocolate', 'cheese'];
+	const kofi_emojis = ['☕️', '🍕', '🥓', '🍫', '🧀'];
+	const index = Math.floor(Math.random() * kofi_emojis.length);
+	const treat = kofi_words[index];
+	const emoji = kofi_emojis[index];
 </script>
 
 <Navbar style="background-color: #0b473b;" container="md">
@@ -15,11 +21,11 @@
 	<slot></slot>
 </Container>
 
-<Container class="text-center mt-1 mb-4 fs-5">
+<Container class="text-center mt-1 mb-4 fs-6">
 	<hr />
 	<p>
-		EveryAttendee is built and maintained with <strike>☕️ and 🍕</strike><br />
-		...<i>errr that is</i>... with 🧡 by Eva J Herzog.
+		<i>EveryAttendee</i> is built and maintained Eva J Herzog.<br />
+		{emoji} Buy her some {treat} via <a href="https://ko-fi.com/evajherzog" target="_blank" class="text-reset">ko-fi</a> <Icon name="arrow-up-right-square-fill" />.
 	</p>
 	<hr>
 	<a href="/credits" class="text-reset">Credits</a>
