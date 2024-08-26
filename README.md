@@ -3,8 +3,8 @@
 Hosting an event? You should be able to invite anyone you know regardless of whether they use Facebook, Google Calendar, Discord, or any other platform.
 
 This application has two main features:
-- find a good date and time to get together with your guests
 - invite guests to an event you are planning
+- find a good date and time to get together with your guests
 
 We charge a small fee for each event because we firmly believe that your data is yours. We will never sell your data to advertisers or other companies. In fact, we won't even keep your data for more than a week after your event.
 
