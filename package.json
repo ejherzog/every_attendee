@@ -31,6 +31,7 @@
 	"type": "module",
 	"dependencies": {
 		"@sveltestrap/sveltestrap": "^6.2.7",
-		"date-fns": "^3.6.0"
+		"date-fns": "^3.6.0",
+		"svelte-multiselect": "^10.3.0"
 	}
 }

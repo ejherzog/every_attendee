@@ -5,16 +5,14 @@
 		Col,
 		Container,
 		Form,
-		FormGroup,
 		Image,
 		Input,
-		InputGroup,
-		InputGroupText,
 		Label,
 		ListGroup,
 		ListGroupItem,
 		Row
 	} from '@sveltestrap/sveltestrap';
+	import MultiSelect from 'svelte-multiselect';
 
 	/** @type {import('./$types').PageData} */
 	export let data;
@@ -24,6 +22,22 @@
 	let hosts = event.getHost();
 
 	let validated = false;
+	let other_pronoun = false;
+	let selected: string[] = [];
+	const more_pronouns = [
+		'they/them',
+		'she/her',
+		'he/him',
+		'any',
+		'ze/zir',
+		'fae/faer',
+		'xey/xem',
+		'other'
+	];
+
+	const checkOther = () => {
+		other_pronoun = selected.includes('other') ? true : false;
+	};
 </script>
 
 <Container class="my-3">
@@ -118,35 +132,27 @@
 				Note: you must provide at least one way to contact you.
 			</Col>
 		</Row>
-    <hr/>
+		<hr />
 		<Row class="text-start mx-1 my-3">
 			<Col class="col-md-2 col-5">
 				<Label class="text-reset"><tag class="h5">Pronouns</tag></Label>
 			</Col>
-			<Col class="col-md-4 col-7">
-				<Row>
-					<Col class="col-md-6 col-12">
-						<Input type="checkbox" label="they/them" />
-						<Input type="checkbox" label="she/her" />
+			<Col class="col-md-10 col-7">
+				<Row class="align-items-center">
+					<Col class="col-lg-7 col-12">
+						<MultiSelect bind:selected options={more_pronouns} --sms-bg="white" --sms-min-height="2.2rem"
+							on:add={checkOther} on:remove={checkOther}></MultiSelect>
 					</Col>
-					<Col class="col-md-6 col-12">
-						<Input type="checkbox" label="he/him" />
-						<Input type="checkbox" label="any" />
-					</Col>
+					{#if other_pronoun}
+						<Col class="col-lg-5 col-12">
+							<Input class="my-1" bsSize="sm" placeholder="enter your custom pronouns" />
+						</Col>
+					{/if}
 				</Row>
 			</Col>
-      <Col class="col-md-6 col-12">
-        <Row>
-          <i>put full pronoun multi-select list dropdown here</i>
-        </Row>
-        <Row>
-          <i>put custom pronoun input here</i>
-          <!-- <p>TODO: nest all the options in another set of rows and columns so that the label always stays in its own column</p> -->
-        </Row>
-      </Col>
 		</Row>
-    <hr/>
-    <Row class="text-start mx-1 my-3">
+		<hr />
+		<Row class="text-start mx-1 my-3">
 			<Col class="col-md-2 col-5">
 				<Label class="text-reset"><tag class="h5">Dietary Restrictions</tag></Label>
 			</Col>
@@ -155,26 +161,26 @@
 					<Col class="col-md-6 col-12">
 						<Input type="checkbox" label="Vegan" />
 						<Input type="checkbox" label="Vegetarian" />
-            <Input type="checkbox" label="Pescatarian" />
-            <Input type="checkbox" label="Gluten Free" />
+						<Input type="checkbox" label="Pescatarian" />
+						<Input type="checkbox" label="Gluten Free" />
 					</Col>
 					<Col class="col-md-6 col-12">
 						<Input type="checkbox" label="Tree Nut Allergy" />
 						<Input type="checkbox" label="Egg Allergy" />
-            <Input type="checkbox" label="Soy Allergy" />
+						<Input type="checkbox" label="Soy Allergy" />
 					</Col>
 				</Row>
 			</Col>
-      <Col class="col-md-6 col-12">
-          <Input type="checkbox" label="Peanut Allergy" />
-          <Input type="checkbox" label="Wheat Allergy" />
-          <Input type="checkbox" label="Shellfish Allergy" />
-        </Col>
+			<Col class="col-md-6 col-12">
+				<Input type="checkbox" label="Peanut Allergy" />
+				<Input type="checkbox" label="Wheat Allergy" />
+				<Input type="checkbox" label="Shellfish Allergy" />
+			</Col>
 		</Row>
-    <hr />
-    <Row class="text-start mx-1">
-      <h5>Section to Add Additional Guests</h5>
-    </Row>
+		<hr />
+		<Row class="text-start mx-1">
+			<h5>Section to Add Additional Guests</h5>
+		</Row>
 		<Row class="my-2">
 			<Col class="col-12">
 				<Button type="submit" style="background-color: #0b473b; color: #f9b13e;">Submit RSVP</Button
