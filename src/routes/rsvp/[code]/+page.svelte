@@ -7,6 +7,8 @@
 		Form,
 		Image,
 		Input,
+		InputGroup,
+		InputGroupText,
 		Label,
 		ListGroup,
 		ListGroupItem,
@@ -22,9 +24,10 @@
 	let hosts = event.getHost();
 
 	let validated = false;
+
 	let other_pronoun = false;
-	let selected: string[] = [];
-	const more_pronouns = [
+	let selected_pronouns: string[] = [];
+	const pronoun_list = [
 		'they/them',
 		'she/her',
 		'he/him',
@@ -35,8 +38,26 @@
 		'other'
 	];
 
-	const checkOther = () => {
-		other_pronoun = selected.includes('other') ? true : false;
+	const checkOtherPronoun = () => {
+		other_pronoun = selected_pronouns.includes('other') ? true : false;
+	};
+
+	let other_diet = false;
+	let selected_diets: string[] = [];
+	const diet_list = [
+		'Vegan',
+		'Vegetarian',
+		'Pescatarian',
+		'Gluten Free',
+		'Tree Nut Allergy',
+		'Egg Allergy',
+		'Peanut Allergy',
+		'Shellfish Allergy',
+		'Other'
+	];
+
+	const checkOtherDiet = () => {
+		other_diet = selected_pronouns.includes('t') ? true : false;
 	};
 </script>
 
@@ -91,6 +112,10 @@
 	</Row>
 </Container>
 
+<Container class="mt-2">
+	Our unique RSVP form allows you to respond on behalf of yourself or a group (friends, partners, kids, etc).
+</Container>
+
 <hr />
 
 <Container class="mt-2">
@@ -115,21 +140,44 @@
 				<Input />
 			</Col>
 		</Row>
-		<Row class="align-items-center text-start mx-1">
+		<Row class="text-start mx-1">
 			<Col class="col-md-2 col-5 my-3">
-				<Label class="text-reset"><tag class="h5">Phone Number</tag></Label>
+				<Label class="text-reset"><tag class="h5">Number Attending </tag><tag class="fw-lighter fst-italic">(required)</tag></Label>
 			</Col>
 			<Col class="col-md-4 col-7 my-3">
-				<Input required />
+				<InputGroup class="my-1" size="sm">
+					<InputGroupText class="justify-content-end" style="max-width: 40%; min-width: 35%;">Yes:</InputGroupText>
+					<Input type="number" min="0"/>
+				</InputGroup>
+				<InputGroup class="my-1" size="sm">
+					<InputGroupText class="justify-content-end" style="max-width: 40%; min-width: 35%;">Maybe:</InputGroupText>
+					<Input type="number" min="0"/>
+				</InputGroup>
+				<InputGroup class="my-1" size="sm">
+					<InputGroupText class="justify-content-end" style="max-width: 40%; min-width: 35%;">No:</InputGroupText>
+					<Input type="number" min="0"/>
+				</InputGroup>
 			</Col>
-			<Col class="col-md-2 col-5 my-3">
-				<Label class="text-reset"><tag class="h5">Email Address</tag></Label>
-			</Col>
-			<Col class="col-md-4 col-7 my-3">
-				<Input required />
-			</Col>
-			<Col class="fw-bolder fst-italic col-12 my-1 text-center">
-				Note: you must provide at least one way to contact you.
+			<Col class="col-md-6">
+				<Row>
+					<Col class="col-md-4 col-5 my-3">
+						<Label class="text-reset"><tag class="h5">Phone Number</tag></Label>
+					</Col>
+					<Col class="col-md-8 col-7 my-3">
+						<Input required />
+					</Col>
+				</Row>
+				<Row>
+					<Col class="col-md-4 col-5 my-3">
+						<Label class="text-reset"><tag class="h5">Email Address</tag></Label>
+					</Col>
+					<Col class="col-md-8 col-7 my-3">
+						<Input required />
+					</Col>
+					<Col class="fw-bolder fst-italic col-12 my-1 text-center">
+						Note: you must provide at least one way to contact you.
+					</Col>
+				</Row>
 			</Col>
 		</Row>
 		<hr />
@@ -139,42 +187,47 @@
 			</Col>
 			<Col class="col-md-10 col-7">
 				<Row class="align-items-center">
-					<Col class="col-lg-7 col-12">
-						<MultiSelect bind:selected options={more_pronouns} --sms-bg="white" --sms-min-height="2.2rem"
-							on:add={checkOther} on:remove={checkOther}></MultiSelect>
+					<Col class="col-lg-7 col-12 my-2">
+						<MultiSelect
+							bind:selected={selected_pronouns}
+							options={pronoun_list}
+							--sms-bg="white"
+							on:add={checkOtherPronoun}
+							on:remove={checkOtherPronoun}
+						></MultiSelect>
 					</Col>
-					{#if other_pronoun}
-						<Col class="col-lg-5 col-12">
-							<Input class="my-1" bsSize="sm" placeholder="enter your custom pronouns" />
-						</Col>
-					{/if}
+					<Col class="col-lg-5 col-12">
+						<Input bsSize="sm"
+							disabled={!other_pronoun}
+							placeholder="select 'other' to add custom pronouns"
+						/>
+					</Col>
 				</Row>
 			</Col>
 		</Row>
-		<hr />
 		<Row class="text-start mx-1 my-3">
 			<Col class="col-md-2 col-5">
 				<Label class="text-reset"><tag class="h5">Dietary Restrictions</tag></Label>
 			</Col>
-			<Col class="col-md-4 col-7">
-				<Row>
-					<Col class="col-md-6 col-12">
-						<Input type="checkbox" label="Vegan" />
-						<Input type="checkbox" label="Vegetarian" />
-						<Input type="checkbox" label="Pescatarian" />
-						<Input type="checkbox" label="Gluten Free" />
+			<Col class="col-md-10 col-7">
+				<Row class="align-items-center">
+					<Col class="col-lg-7 col-12 my-2">
+						<MultiSelect
+					bind:selected={selected_diets}
+					options={diet_list}
+					--sms-bg="white"
+					on:add={checkOtherDiet}
+					on:remove={checkOtherDiet}
+				></MultiSelect>
 					</Col>
-					<Col class="col-md-6 col-12">
-						<Input type="checkbox" label="Tree Nut Allergy" />
-						<Input type="checkbox" label="Egg Allergy" />
-						<Input type="checkbox" label="Soy Allergy" />
+					<Col class="col-lg-5 col-12">
+						<Input bsSize="sm"
+							disabled={!other_diet}
+							placeholder="select 'other' to add custom dietary needs"
+						/>
 					</Col>
 				</Row>
-			</Col>
-			<Col class="col-md-6 col-12">
-				<Input type="checkbox" label="Peanut Allergy" />
-				<Input type="checkbox" label="Wheat Allergy" />
-				<Input type="checkbox" label="Shellfish Allergy" />
+				
 			</Col>
 		</Row>
 		<hr />
