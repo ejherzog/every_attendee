@@ -57,7 +57,7 @@
 	];
 
 	const checkOtherDiet = () => {
-		other_diet = selected_pronouns.includes('t') ? true : false;
+		other_diet = selected_diets.includes('Other') ? true : false;
 	};
 </script>
 
@@ -97,7 +97,7 @@
 					<div class="h5 mb-0">What</div>
 				</ListGroupItem>
 				<ListGroupItem class="text-reset">
-					{event.description}
+					{@html event.description}
 				</ListGroupItem>
 			</ListGroup>
 			<ListGroup flush={false} horizontal={false} numbered={false} class="text-start shadow my-2">
@@ -110,10 +110,6 @@
 			</ListGroup>
 		</Col>
 	</Row>
-</Container>
-
-<Container class="mt-2">
-	Our unique RSVP form allows you to respond on behalf of yourself or a group (friends, partners, kids, etc).
 </Container>
 
 <hr />
@@ -146,15 +142,15 @@
 			</Col>
 			<Col class="col-md-4 col-7 my-3">
 				<InputGroup class="my-1" size="sm">
-					<InputGroupText class="justify-content-end" style="max-width: 40%; min-width: 35%;">Yes:</InputGroupText>
+					<InputGroupText style="max-width: 40%; min-width: 35%;">Yes:</InputGroupText>
 					<Input type="number" min="0"/>
 				</InputGroup>
 				<InputGroup class="my-1" size="sm">
-					<InputGroupText class="justify-content-end" style="max-width: 40%; min-width: 35%;">Maybe:</InputGroupText>
+					<InputGroupText style="max-width: 40%; min-width: 35%;">Maybe:</InputGroupText>
 					<Input type="number" min="0"/>
 				</InputGroup>
 				<InputGroup class="my-1" size="sm">
-					<InputGroupText class="justify-content-end" style="max-width: 40%; min-width: 35%;">No:</InputGroupText>
+					<InputGroupText style="max-width: 40%; min-width: 35%;">No:</InputGroupText>
 					<Input type="number" min="0"/>
 				</InputGroup>
 			</Col>
@@ -232,7 +228,7 @@
 		</Row>
 		<hr />
 		<Row class="text-start mx-1">
-			<h5>Section to Add Additional Guests</h5>
+			<h5>~~Section to Add Additional Guest(s)~~</h5>
 		</Row>
 		<Row class="my-2">
 			<Col class="col-12">
