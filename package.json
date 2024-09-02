@@ -6,6 +6,7 @@
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
+		"start": "node build/index.js",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
@@ -30,8 +31,9 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@sveltejs/adapter-node": "^5.2.2",
 		"@sveltestrap/sveltestrap": "^6.2.7",
 		"date-fns": "^3.6.0",
-		"svelte-multiselect": "^10.3.0"
+		"svelte-multiselect": "^10.2.0"
 	}
 }

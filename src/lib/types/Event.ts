@@ -1,4 +1,3 @@
-import { addHours } from "date-fns";
 import { User, Guest } from "./People";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
