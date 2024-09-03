@@ -17,6 +17,8 @@
 
 	/** @type {import('./$types').PageData} */
 	export let data;
+	let name_width: number;
+	let custom_width: number;
 
 	let event: Event = findEvent(data.code);
 	let when = event.getWhenHtml();
@@ -77,7 +79,7 @@
 
 <Container class="mt-1 mb-4">
 	<Row class="align-items-center">
-		<Col xs="12" md="6" class="mt-1">
+		<Col xs="12" lg="6" class="mt-1">
 			<Image
 				fluid
 				class="rounded shadow align-items-center"
@@ -85,7 +87,7 @@
 				src="https://images.unsplash.com/photo-1653540883470-bf726448911b"
 			/>
 		</Col>
-		<Col xs="12" md="6" class="mt-1">
+		<Col xs="12" lg="6" class="mt-1">
 			<ListGroup flush={false} horizontal={false} numbered={false} class="text-start shadow mb-2">
 				<ListGroupItem class="text-reset">
 					<div class="h5 mb-0">When</div>
@@ -125,29 +127,32 @@
 <Container style="background-color: #f9b13e66;" class="py-2 rounded">
 <Container class="mt-2">
 	<Form action="?/rsvp" method="POST">
-		<Row class="align-items-center text-start mx-1">
+		<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 			<Col class="col-md-2 col-5 my-3">
 				<Label class="text-reset"
-					><tag class="h5">Your Name</tag>
-					<tag class="fw-lighter fst-italic">(required)</tag></Label
+					><tag class="fw-bold text-responsive">Your Name</tag>
+					<tag class="fw-lighter fst-italic text-responsive fs-6">(required)</tag></Label
 				>
 			</Col>
 			<Col class="col-md-4 col-7 my-3">
-				<Input name="name" on:change={validate} bind:value={rsvp.guest.name} required placeholder="How should we address you?" />
+				<div bind:clientWidth={name_width}>
+				<Input name="name" on:change={validate} bind:value={rsvp.guest.name} required 
+					placeholder={name_width > 340 ? "How do you want to be addressed at this event?" : name_width < 240 ? "" : "How should we address you?"}
+				/></div>
 			</Col>
 			<Col class="col-md-2 col-5 my-3">
 				<Label class="text-reset"
-					><tag class="h5">Full Name</tag>
-					<tag class="fw-lighter fst-italic">(optional)</tag></Label
+					><tag class="fw-bold text-responsive">Full Name</tag>
+					<tag class="fw-lighter fst-italic text-responsive fs-6">(optional)</tag></Label
 				>
 			</Col>
 			<Col class="col-md-4 col-7 my-3">
 				<Input name="full_name" bind:value={rsvp.guest.full_name} />
 			</Col>
 		</Row>
-		<Row class="text-start mx-1">
+		<Row class="text-start mx-1 gx-1 gx-md-4">
 			<!-- <Col class="col-md-2 col-5 my-3">
-				<Label class="text-reset"><tag class="h5">Number Attending </tag><tag class="fw-lighter fst-italic">(required)</tag></Label>
+				<Label class="text-reset"><tag class="fw-bold text-responsive">Number Attending </tag><tag class="fw-lighter fst-italic">(required)</tag></Label>
 			</Col>
 			<Col class="col-md-4 col-7 my-3">
 				<InputGroup class="my-1" size="sm">
@@ -164,17 +169,17 @@
 				</InputGroup>
 			</Col> -->
 			<Col class="col-md-6 col-12">
-				<Row>
+				<Row class="gx-0 gx-md-4">
 					<Col class="col-md-4 col-5 my-3">
-						<Label class="text-reset"><tag class="h5">Phone Number</tag></Label>
+						<Label class="text-reset"><tag class="fw-bold text-responsive">Phone Number</tag></Label>
 					</Col>
 					<Col class="col-md-8 col-7 my-3">
 						<Input type="tel" name="phone" bind:value={rsvp.guest.phone} on:change={validate} />
 					</Col>
 				</Row>
-				<Row>
+				<Row class="gx-0 gx-md-4">
 					<Col class="col-md-4 col-5 my-3">
-						<Label class="text-reset"><tag class="h5">Email Address</tag></Label>
+						<Label class="text-reset"><tag class="fw-bold text-responsive">Email Address</tag></Label>
 					</Col>
 					<Col class="col-md-8 col-7 my-3">
 						<Input type="email" name="email" bind:value={rsvp.guest.email} on:change={validate} />
@@ -185,7 +190,7 @@
 				</Row>
 			</Col>
 			<Col class="col-md-2 col-5 my-3">
-				<Label class="text-reset"><tag class="h5">Are You Attending?</tag><tag class="fw-lighter fst-italic">(required)</tag></Label>
+				<Label class="text-reset"><tag class="fw-bold text-responsive">Are You Attending?</tag><tag class="fw-lighter fst-italic">(required)</tag></Label>
 			</Col>
 			<Col class="col-md-4 col-7 my-3">
 				{#each ['Yes', 'Maybe', 'No'] as option}
@@ -194,10 +199,10 @@
 			</Col>
 		</Row>
 		<hr />
-		<Row class="text-start mx-1 my-3  align-items-center">
+		<Row class="text-start mx-1 my-3 gx-1 gx-md-4 align-items-center">
 			<Col class="col-md-2 col-5">
 				<Label class="text-reset"
-					><tag class="h5">Pronouns </tag><tag class="fw-lighter fst-italic">(required)</tag></Label
+					><tag class="fw-bold text-responsive">Pronouns </tag><tag class="fw-lighter fst-italic">(required)</tag></Label
 				>
 			</Col>
 			<Col class="col-md-10 col-7">
@@ -211,17 +216,18 @@
 						></MultiSelect>
 					</Col>
 					<Col class="col-lg-5 col-12">
+						<div bind:clientWidth={custom_width}>
 						<Input bsSize="sm" name="custom_pronoun" on:change={validate}
 							disabled={!other_pronoun} bind:value={custom_pronoun}
-							placeholder="select 'other' to add custom pronouns"
-						/>
+							placeholder={custom_width > 280 ? "select 'other' to add custom pronouns" : "select 'other' to enable"}
+						/></div>
 					</Col>
 				</Row>
 			</Col>
 		</Row>
-		<Row class="text-start mx-1 my-3 align-items-center">
+		<Row class="text-start mx-1 my-3 align-items-center gx-1 gx-md-4">
 			<Col class="col-md-2 col-5">
-				<Label class="text-reset"><tag class="h5">Dietary Restrictions</tag></Label>
+				<Label class="text-reset"><tag class="fw-bold text-responsive">Dietary Restrictions</tag></Label>
 			</Col>
 			<Col class="col-md-10 col-7">
 				<Row class="align-items-center">
@@ -236,7 +242,7 @@
 					<Col class="col-lg-5 col-12">
 						<Input bsSize="sm" name="custom_diet" on:change={validate}
 							disabled={!other_diet} bind:value={custom_diet}
-							placeholder="select 'other' to add custom dietary needs"
+							placeholder={custom_width > 290 ? "select 'other' to add custom dietary needs" : "select 'other' to enable"}
 						/>
 					</Col>
 				</Row>
@@ -246,7 +252,7 @@
 		<Row class="align-items-center text-start mx-1">
 			<Col class="col-md-2 col-5 my-3">
 				<Label class="text-reset"
-					><tag class="h5">Note for the Host{#if event.hosts.length > 1}s{/if}:</tag>
+					><tag class="fw-bold text-responsive">Note for the Host{#if event.hosts.length > 1}s{/if}:</tag>
 					<tag class="fw-lighter fst-italic">(optional)</tag></Label
 				>
 			</Col>
@@ -268,3 +274,15 @@
 </Container>
 
 </Container>
+
+<style>
+	.text-responsive {
+		font-size: 1rem;
+	}
+
+	@media (min-width: 992px) {
+		.text-responsive {
+			font-size: 1.2rem;
+		}
+	}
+</style>
