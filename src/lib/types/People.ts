@@ -1,16 +1,14 @@
-import type { Pronouns } from "./Pronouns";
-
 export class Person {
 
     name: string;
-    pronounList: Pronouns[];
+    pronoun_list: string[];
     full_name?: string;
     phone?: string;
     email?: string;
 
     constructor(name: string, full_name?: string) {
         this.name = name;
-        this.pronounList = [];
+        this.pronoun_list = [];
         this.full_name = full_name;
     }
 
@@ -22,8 +20,8 @@ export class Person {
         this.email = email;
     }
 
-    addPronouns(pronouns: Pronouns) {
-        this.pronounList.push(pronouns);
+    addPronouns(pronouns: string) {
+        this.pronoun_list.push(pronouns);
     }
 }
 
@@ -32,19 +30,5 @@ export class User extends Person {
     constructor(name: string, email: string, full_name?: string) {
         super(name, full_name);
         this.email = email;
-    }
-}
-
-export class Guest extends Person {
-
-    diet: string[];
-    attending: string;
-    note: string;
-
-    constructor(name: string) {
-        super(name);
-        this.diet = [];
-        this.attending = '';
-        this.note = '';
     }
 }

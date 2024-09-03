@@ -1,4 +1,7 @@
-import { User, Guest } from "./People";
+import { User } from "./People";
+import type { Rsvp } from "./Rsvp";
+
+const six_letters = new RegExp('([A-Za-z]{6})');
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
     weekday: "short",
@@ -24,7 +27,7 @@ export class Event {
     address: string;
 
     description: string;
-    guests: Guest[];
+    rsvps: Rsvp[];
 
     constructor(title: string, created_by: User) {
         this.title = title;
@@ -39,7 +42,7 @@ export class Event {
         this.start_time = new Date("September 18, 2024 6:30 PM");
         this.end_time = new Date("September 18, 2024 10:00 PM");
 
-        this.guests = [];
+        this.rsvps = [];
         this.code = generateCode();
     }
 
@@ -90,7 +93,7 @@ export class Event {
 
 export function findEvent(code: string): Event {
     const sampleEvent = new Event("Full Moon-ish Karaoke", new User("Eva", "eowynecho88@gmail.com"));
-    sampleEvent.addDescription("Let's howl at the slightly waning full moon: YouTube living room karaoke style.<br><br>Pizza and cheesesteaks. BYO drinks and any food you'd like to share. Friends and partners welcome.");
+    sampleEvent.addDescription("Let's howl at the slightly waning full moon: YouTube living room karaoke style.<br><br>We'll provide pizza and cheesesteaks. BYO drinks and any food you'd like to share.<br><br>Friends and partners welcome; please add a note additional guests below or have them RSVP separately.");
     sampleEvent.setLocation("Cooper's House", "4725 Umbria St, Philadelphia, PA 19127");
     sampleEvent.addHosts([new User("Cooper", "cccccc@gmail.com")]);
     return sampleEvent;
@@ -104,4 +107,11 @@ function areSameDay(time1: Date, time2: Date) {
     return time1.getFullYear() == time2.getFullYear()
         && time1.getMonth() == time2.getMonth()
         && time1.getDate() == time2.getDate();
+}
+
+export class EventCodeValidator {
+
+    isAcceptable(code: string) {
+        return code.length == 6 && six_letters.test(code);
+    }
 }

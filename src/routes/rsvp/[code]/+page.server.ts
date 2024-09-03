@@ -1,3 +1,5 @@
+import { Rsvp } from '$lib/types/Rsvp';
+import { redirect } from '@sveltejs/kit';
 import type { Actions, PageServerLoad } from './$types';
 
 export function load({ params }) {
@@ -9,6 +11,11 @@ export function load({ params }) {
 
 export const actions = {
 	rsvp: async ({ request }) => {
-        console.log(await request.formData());
+        const formData = await request.formData();
+        console.log(formData);
+        const rsvp = Rsvp.fromFormData(formData);
+        console.log(rsvp);
+
+        throw redirect(303, '/rsvp/[code]/success');
 	},
 } satisfies Actions;

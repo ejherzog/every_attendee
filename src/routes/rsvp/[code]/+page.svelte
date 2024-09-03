@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { RsvpValidator } from '$lib/Validator';
 	import { Event, findEvent } from '$lib/types/Event';
+	import { Rsvp, RsvpValidator } from '$lib/types/Rsvp';
 	import {
 		Button,
 		Col,
@@ -23,8 +23,11 @@
 	let hosts = event.getHost();
 	let host_message = event.hosts.length > 1 ? "Anything else we should know?" : "Anything else the host should know?";
 
+	let rsvp = new Rsvp();
+
 	let other_pronoun = false;
-	let selected_pronouns: string[] = [];
+	let custom_pronoun: string;
+	rsvp.guest.pronoun_list = [];
 	const pronoun_list = [
 		'they/them',
 		'she/her',
@@ -37,12 +40,13 @@
 	];
 
 	const checkOtherPronoun = () => {
-		other_pronoun = selected_pronouns.includes('other') ? true : false;
+		other_pronoun = rsvp.guest.pronoun_list.includes('other') ? true : false;
 		validate();
 	};
 
 	let other_diet = false;
-	let selected_diets: string[] = [];
+	let custom_diet: string;
+	rsvp.diets = [];
 	const diet_list = [
 		'Vegan',
 		'Vegetarian',
@@ -56,16 +60,14 @@
 	];
 
 	const checkOtherDiet = () => {
-		other_diet = selected_diets.includes('Other') ? true : false;
+		other_diet = rsvp.diets.includes('Other') ? true : false;
+		validate();
 	};
 
-	let guest_name: string | undefined;
-	let phone: string | undefined;
-	let email: string | undefined;
-
 	let invalid_input = true;
+	let validator = new RsvpValidator();
 	const validate = () => {
-		invalid_input = selected_pronouns.length > 0 && guest_name && phone || email ? false : true;
+		invalid_input = !validator.isAcceptable(rsvp, custom_pronoun, custom_diet);
 	}
 </script>
 
@@ -131,7 +133,7 @@
 				>
 			</Col>
 			<Col class="col-md-4 col-7 my-3">
-				<Input name="name" on:change={validate} bind:value={guest_name} required placeholder="How should we address you?" />
+				<Input name="name" on:change={validate} bind:value={rsvp.guest.name} required placeholder="How should we address you?" />
 			</Col>
 			<Col class="col-md-2 col-5 my-3">
 				<Label class="text-reset"
@@ -140,7 +142,7 @@
 				>
 			</Col>
 			<Col class="col-md-4 col-7 my-3">
-				<Input name="full_name" />
+				<Input name="full_name" bind:value={rsvp.guest.full_name} />
 			</Col>
 		</Row>
 		<Row class="text-start mx-1">
@@ -167,7 +169,7 @@
 						<Label class="text-reset"><tag class="h5">Phone Number</tag></Label>
 					</Col>
 					<Col class="col-md-8 col-7 my-3">
-						<Input name="phone" bind:value={phone} on:change={validate} />
+						<Input type="tel" name="phone" bind:value={rsvp.guest.phone} on:change={validate} />
 					</Col>
 				</Row>
 				<Row>
@@ -175,7 +177,7 @@
 						<Label class="text-reset"><tag class="h5">Email Address</tag></Label>
 					</Col>
 					<Col class="col-md-8 col-7 my-3">
-						<Input name="email" bind:value={email} on:change={validate} />
+						<Input type="email" name="email" bind:value={rsvp.guest.email} on:change={validate} />
 					</Col>
 					<Col class="fw-bolder fst-italic col-12 my-1 text-center">
 						Note: you must provide at least one way to contact you.
@@ -187,7 +189,7 @@
 			</Col>
 			<Col class="col-md-4 col-7 my-3">
 				{#each ['Yes', 'Maybe', 'No'] as option}
-					<Input required name="attending" type="radio" value={option.charAt(0).toUpperCase()} label={option} class="h5"/>
+					<Input required name="attending" type="radio" on:change={validate} bind:group={rsvp.attending} value={option.charAt(0).toUpperCase()} label={option} class="h5"/>
 				{/each}
 			</Col>
 		</Row>
@@ -202,15 +204,15 @@
 				<Row class="align-items-center">
 					<Col class="col-lg-7 col-12 my-2">
 						<MultiSelect name="pronouns" required
-							bind:selected={selected_pronouns}
+							bind:selected={rsvp.guest.pronoun_list}
 							options={pronoun_list}
 							--sms-bg="white"
 							on:change={checkOtherPronoun}
 						></MultiSelect>
 					</Col>
 					<Col class="col-lg-5 col-12">
-						<Input bsSize="sm" name="custom_pronoun"
-							disabled={!other_pronoun}
+						<Input bsSize="sm" name="custom_pronoun" on:change={validate}
+							disabled={!other_pronoun} bind:value={custom_pronoun}
 							placeholder="select 'other' to add custom pronouns"
 						/>
 					</Col>
@@ -225,15 +227,15 @@
 				<Row class="align-items-center">
 					<Col class="col-lg-7 col-12 my-2">
 						<MultiSelect name="diet"
-					bind:selected={selected_diets}
+					bind:selected={rsvp.diets}
 					options={diet_list}
 					--sms-bg="white"
 					on:change={checkOtherDiet}
 				></MultiSelect>
 					</Col>
 					<Col class="col-lg-5 col-12">
-						<Input bsSize="sm" name="custom_diet"
-							disabled={!other_diet}
+						<Input bsSize="sm" name="custom_diet" on:change={validate}
+							disabled={!other_diet} bind:value={custom_diet}
 							placeholder="select 'other' to add custom dietary needs"
 						/>
 					</Col>
