@@ -34,6 +34,9 @@
             <ListGroupItem class="text-reset bg-transparent">
                 Sample Event Image: <a href="https://canweallgo.com/plus-size-stock-photos/">AllGo Free Stock Photos</a>
             </ListGroupItem>
+            <ListGroupItem class="text-reset bg-transparent">
+                Karaoke Event Image: Photo by <a href="https://unsplash.com/@kitera?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Kitera Dent</a> on <a href="https://unsplash.com/photos/a-full-moon-rises-over-a-desert-landscape-NPU1YdmnAvw?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+            </ListGroupItem>
         </ListGroup>
     </Card>
 </Container>

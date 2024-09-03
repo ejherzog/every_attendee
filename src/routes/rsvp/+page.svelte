@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button, Form, FormGroup, Input, InputGroup, Label } from '@sveltestrap/sveltestrap';
-	import { EventCodeValidator } from "$lib/StringValidator";
+	import { EventCodeValidator } from "$lib/types/Event";
 
 	let event_code: string;
 	let feedback: string;
