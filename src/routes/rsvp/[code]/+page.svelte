@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { RsvpValidator } from '$lib/Validator';
 	import { Event, findEvent } from '$lib/types/Event';
 	import {
 		Button,
@@ -7,8 +8,6 @@
 		Form,
 		Image,
 		Input,
-		InputGroup,
-		InputGroupText,
 		Label,
 		ListGroup,
 		ListGroupItem,
@@ -22,8 +21,7 @@
 	let event: Event = findEvent(data.code);
 	let when = event.getWhenHtml();
 	let hosts = event.getHost();
-
-	let validated = false;
+	let host_message = event.hosts.length > 1 ? "Anything else we should know?" : "Anything else the host should know?";
 
 	let other_pronoun = false;
 	let selected_pronouns: string[] = [];
@@ -40,6 +38,7 @@
 
 	const checkOtherPronoun = () => {
 		other_pronoun = selected_pronouns.includes('other') ? true : false;
+		validate();
 	};
 
 	let other_diet = false;
@@ -59,6 +58,15 @@
 	const checkOtherDiet = () => {
 		other_diet = selected_diets.includes('Other') ? true : false;
 	};
+
+	let guest_name: string | undefined;
+	let phone: string | undefined;
+	let email: string | undefined;
+
+	let invalid_input = true;
+	const validate = () => {
+		invalid_input = selected_pronouns.length > 0 && guest_name && phone || email ? false : true;
+	}
 </script>
 
 <Container class="my-3">
@@ -71,8 +79,8 @@
 			<Image
 				fluid
 				class="rounded shadow align-items-center"
-				alt="Group of five friends taking a selfie"
-				src="https://i0.wp.com/canweallgo.com/wp-content/uploads/2019/11/2A2A7302-1.jpg?w=1080&ssl=1"
+				alt="A full moon glows over the hills and desert near Joshua Tree National Park in California."
+				src="https://images.unsplash.com/photo-1653540883470-bf726448911b"
 			/>
 		</Col>
 		<Col xs="12" md="6" class="mt-1">
@@ -112,10 +120,9 @@
 	</Row>
 </Container>
 
-<hr />
-
+<Container style="background-color: #f9b13e66;" class="py-2 rounded">
 <Container class="mt-2">
-	<Form {validated} action="/rsvp" method="POST">
+	<Form action="?/rsvp" method="POST">
 		<Row class="align-items-center text-start mx-1">
 			<Col class="col-md-2 col-5 my-3">
 				<Label class="text-reset"
@@ -124,7 +131,7 @@
 				>
 			</Col>
 			<Col class="col-md-4 col-7 my-3">
-				<Input required placeholder="How should we address you?" />
+				<Input name="name" on:change={validate} bind:value={guest_name} required placeholder="How should we address you?" />
 			</Col>
 			<Col class="col-md-2 col-5 my-3">
 				<Label class="text-reset"
@@ -133,34 +140,34 @@
 				>
 			</Col>
 			<Col class="col-md-4 col-7 my-3">
-				<Input />
+				<Input name="full_name" />
 			</Col>
 		</Row>
 		<Row class="text-start mx-1">
-			<Col class="col-md-2 col-5 my-3">
+			<!-- <Col class="col-md-2 col-5 my-3">
 				<Label class="text-reset"><tag class="h5">Number Attending </tag><tag class="fw-lighter fst-italic">(required)</tag></Label>
 			</Col>
 			<Col class="col-md-4 col-7 my-3">
 				<InputGroup class="my-1" size="sm">
 					<InputGroupText style="max-width: 40%; min-width: 35%;">Yes:</InputGroupText>
-					<Input type="number" min="0"/>
+					<Input name="yes" type="number" min="0"/>
 				</InputGroup>
 				<InputGroup class="my-1" size="sm">
 					<InputGroupText style="max-width: 40%; min-width: 35%;">Maybe:</InputGroupText>
-					<Input type="number" min="0"/>
+					<Input name="maybe" type="number" min="0"/>
 				</InputGroup>
 				<InputGroup class="my-1" size="sm">
 					<InputGroupText style="max-width: 40%; min-width: 35%;">No:</InputGroupText>
-					<Input type="number" min="0"/>
+					<Input name="no" type="number" min="0"/>
 				</InputGroup>
-			</Col>
-			<Col class="col-md-6">
+			</Col> -->
+			<Col class="col-md-6 col-12">
 				<Row>
 					<Col class="col-md-4 col-5 my-3">
 						<Label class="text-reset"><tag class="h5">Phone Number</tag></Label>
 					</Col>
 					<Col class="col-md-8 col-7 my-3">
-						<Input required />
+						<Input name="phone" bind:value={phone} on:change={validate} />
 					</Col>
 				</Row>
 				<Row>
@@ -168,32 +175,41 @@
 						<Label class="text-reset"><tag class="h5">Email Address</tag></Label>
 					</Col>
 					<Col class="col-md-8 col-7 my-3">
-						<Input required />
+						<Input name="email" bind:value={email} on:change={validate} />
 					</Col>
 					<Col class="fw-bolder fst-italic col-12 my-1 text-center">
 						Note: you must provide at least one way to contact you.
 					</Col>
 				</Row>
 			</Col>
+			<Col class="col-md-2 col-5 my-3">
+				<Label class="text-reset"><tag class="h5">Are You Attending?</tag><tag class="fw-lighter fst-italic">(required)</tag></Label>
+			</Col>
+			<Col class="col-md-4 col-7 my-3">
+				{#each ['Yes', 'Maybe', 'No'] as option}
+					<Input required name="attending" type="radio" value={option.charAt(0).toUpperCase()} label={option} class="h5"/>
+				{/each}
+			</Col>
 		</Row>
 		<hr />
-		<Row class="text-start mx-1 my-3">
+		<Row class="text-start mx-1 my-3  align-items-center">
 			<Col class="col-md-2 col-5">
-				<Label class="text-reset"><tag class="h5">Pronouns</tag></Label>
+				<Label class="text-reset"
+					><tag class="h5">Pronouns </tag><tag class="fw-lighter fst-italic">(required)</tag></Label
+				>
 			</Col>
 			<Col class="col-md-10 col-7">
 				<Row class="align-items-center">
 					<Col class="col-lg-7 col-12 my-2">
-						<MultiSelect
+						<MultiSelect name="pronouns" required
 							bind:selected={selected_pronouns}
 							options={pronoun_list}
 							--sms-bg="white"
-							on:add={checkOtherPronoun}
-							on:remove={checkOtherPronoun}
+							on:change={checkOtherPronoun}
 						></MultiSelect>
 					</Col>
 					<Col class="col-lg-5 col-12">
-						<Input bsSize="sm"
+						<Input bsSize="sm" name="custom_pronoun"
 							disabled={!other_pronoun}
 							placeholder="select 'other' to add custom pronouns"
 						/>
@@ -201,40 +217,52 @@
 				</Row>
 			</Col>
 		</Row>
-		<Row class="text-start mx-1 my-3">
+		<Row class="text-start mx-1 my-3 align-items-center">
 			<Col class="col-md-2 col-5">
 				<Label class="text-reset"><tag class="h5">Dietary Restrictions</tag></Label>
 			</Col>
 			<Col class="col-md-10 col-7">
 				<Row class="align-items-center">
 					<Col class="col-lg-7 col-12 my-2">
-						<MultiSelect
+						<MultiSelect name="diet"
 					bind:selected={selected_diets}
 					options={diet_list}
 					--sms-bg="white"
-					on:add={checkOtherDiet}
-					on:remove={checkOtherDiet}
+					on:change={checkOtherDiet}
 				></MultiSelect>
 					</Col>
 					<Col class="col-lg-5 col-12">
-						<Input bsSize="sm"
+						<Input bsSize="sm" name="custom_diet"
 							disabled={!other_diet}
 							placeholder="select 'other' to add custom dietary needs"
 						/>
 					</Col>
 				</Row>
-				
 			</Col>
 		</Row>
 		<hr />
-		<Row class="text-start mx-1">
-			<h5>~~Section to Add Additional Guest(s)~~</h5>
+		<Row class="align-items-center text-start mx-1">
+			<Col class="col-md-2 col-5 my-3">
+				<Label class="text-reset"
+					><tag class="h5">Note for the Host{#if event.hosts.length > 1}s{/if}:</tag>
+					<tag class="fw-lighter fst-italic">(optional)</tag></Label
+				>
+			</Col>
+			<Col class="col-md-10 col-7 my-3">
+				<Input type="textarea" name="note" placeholder={host_message} />
+			</Col>
 		</Row>
+		<!-- <hr /> -->
+		<!-- <Row class="text-start mx-1">
+			<h5>~~Section to Add Additional Guest(s)~~</h5>
+		</Row> -->
 		<Row class="my-2">
 			<Col class="col-12">
-				<Button type="submit" style="background-color: #0b473b; color: #f9b13e;">Submit RSVP</Button
+				<Button type="submit" disabled={invalid_input} style="background-color: #0b473b; color: #f9b13e;">Submit RSVP</Button
 				>
 			</Col>
 		</Row>
 	</Form>
+</Container>
+
 </Container>

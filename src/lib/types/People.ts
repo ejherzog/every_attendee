@@ -38,9 +38,13 @@ export class User extends Person {
 export class Guest extends Person {
 
     diet: string[];
+    attending: string;
+    note: string;
 
     constructor(name: string) {
         super(name);
         this.diet = [];
+        this.attending = '';
+        this.note = '';
     }
 }

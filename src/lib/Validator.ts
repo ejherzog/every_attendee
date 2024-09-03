@@ -1,3 +1,5 @@
+import type { Guest } from "./types/People";
+
 interface StringValidator {
     isAcceptable(s: string): boolean;
 }
@@ -10,5 +12,12 @@ export class EventCodeValidator implements StringValidator {
 
     isAcceptable(s: string) {
         return s.length == 6 && six_letters.test(s);
+    }
+}
+
+export class RsvpValidator {
+    isAcceptable(formData: any) {
+        console.log(formData.phone);
+        return (formData.phone || formData['email']);
     }
 }
