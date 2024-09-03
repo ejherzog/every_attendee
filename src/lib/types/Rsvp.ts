@@ -44,6 +44,10 @@ export class RsvpValidator {
     }
 }
 
+export function findRsvp(code: string) {
+    return 'Except not really -- this app isn\'t hooked up to a functional database yet!';
+}
+
 function phoneNumberIsValid(rsvp: Rsvp) {
     if (rsvp.guest.phone) {
         return validator.isMobilePhone(rsvp.guest.phone);

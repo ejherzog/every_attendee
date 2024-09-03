@@ -1,10 +1,10 @@
 import { Rsvp } from '$lib/types/Rsvp';
 import { redirect } from '@sveltejs/kit';
-import type { Actions, PageServerLoad } from './$types';
+import type { Actions } from './$types';
 
 export function load({ params }) {
     return {
-        code: params.code
+        event: params.event
         // TODO find event data by code or return error
     };
 }
@@ -12,10 +12,10 @@ export function load({ params }) {
 export const actions = {
 	rsvp: async ({ request }) => {
         const formData = await request.formData();
-        console.log(formData);
         const rsvp = Rsvp.fromFormData(formData);
         console.log(rsvp);
-
-        throw redirect(303, '/rsvp/[code]/success');
+        const event = 'FLMNKR';
+        const response = 'RSVPCODE';
+        throw redirect(303, `/rsvp/${event}/success/${response}`);
 	},
 } satisfies Actions;
