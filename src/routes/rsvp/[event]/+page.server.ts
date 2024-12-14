@@ -1,6 +1,7 @@
 import { Rsvp } from '$lib/types/Rsvp';
 import { redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
+import { createUser } from '$lib/server/write';
 
 export function load({ params }) {
     return {
@@ -16,6 +17,7 @@ export const actions = {
         console.log(rsvp);
         const event = 'FLMNKR';
         const response = 'RSVPCODE';
+        await createUser('sampleName');
         throw redirect(303, `/rsvp/${event}/success/${response}`);
 	},
 } satisfies Actions;
