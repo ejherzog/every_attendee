@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Event, findEvent } from '$lib/types/Event';
 	import { Rsvp, RsvpValidator } from '$lib/types/Rsvp';
 	import {
 		Button,
@@ -16,11 +15,10 @@
 	import MultiSelect from 'svelte-multiselect';
 
 	/** @type {import('./$types').PageData} */
-	export let data;
+	export let event;
 	let name_width: number;
 	let custom_width: number;
 
-	let event: Event = findEvent(data.code);
 	let when = event.getWhenHtml();
 	let hosts = event.getHost();
 	let host_message = event.hosts.length > 1 ? "Anything else we should know?" : "Anything else the host should know?";

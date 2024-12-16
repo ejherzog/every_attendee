@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Button, Form, FormGroup, Input, InputGroup, Label } from '@sveltestrap/sveltestrap';
+	import { Button, Form, FormGroup, Input, InputGroup } from '@sveltestrap/sveltestrap';
 	import { EventCodeValidator } from "$lib/types/Event";
 
 	let event_code: string;

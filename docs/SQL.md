@@ -13,8 +13,8 @@ CREATE TABLE events (
     id char(6) PRIMARY KEY,
     host_id integer REFERENCES people,
     title varchar(200) NOT NULL,
-    start timestamptz,
-    end timestamptz,
+    start_time timestamptz,
+    end_time timestamptz,
     location text,
     address text,
     description text,
@@ -24,7 +24,7 @@ CREATE TABLE events (
 
 ```
 CREATE TABLE rsvps (
-    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    id char(6) PRIMARY KEY,
     respondent_id integer REFERENCES people,
     guest_id integer REFERENCES people,
     event_id integer REFERENCES events,

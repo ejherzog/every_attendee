@@ -1,12 +1,13 @@
 import { Rsvp } from '$lib/types/Rsvp';
 import { redirect } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { createUser } from '$lib/server/write';
+import { createPerson } from '$lib/server/write';
+import { lookupEvent } from '$lib/server/read';
 
-export function load({ params }) {
+export async function load({ params }) {
     return {
-        event: params.event
-        // TODO find event data by code or return error
+        // TODO encode and decode data between database and HTML
+        event: await lookupEvent(params.event)
     };
 }
 
@@ -17,7 +18,8 @@ export const actions = {
         console.log(rsvp);
         const event = 'FLMNKR';
         const response = 'RSVPCODE';
-        await createUser('sampleName');
+        const result = await createPerson(rsvp.guest);
+        console.log(result);
         throw redirect(303, `/rsvp/${event}/success/${response}`);
 	},
 } satisfies Actions;

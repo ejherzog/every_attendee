@@ -1,22 +1,22 @@
 ### People
-|Id|Short Name|Full Name|Email|Phone|Host?|Guest?
+|Id|Short Name|Full Name|Email|Phone|
 |---|---|---|---|---|---|---|
-|1|Eva|Eva J Herzog|fake@sample.mail|444-333-1111|Y|N
-|2|Jake|Jake Patterson|jake@sample.mail|555-666-2222|N|Y
-|3|Forest|Henry F Garfield|||N|Y|
-|4|Mary|Maria Elizabeth|||N|Y|
+|1|Eva|Eva J Herzog|fake@sample.mail|444-333-1111|
+|2|Jake|Jake Patterson|jake@sample.mail|555-666-2222|
+|3|Forest|Henry F Garfield|||
+|4|Mary|Maria Elizabeth|||
 
 ### Events
 |Id|Host Id|Title|Start|End|Location|Address|Description|Image URL|
 |---|---|---|---|---|---|---|---|---|
-|1|1|40th Birthday Party|{timestamp}|{timestamp}|McKenzie's|Somewhere|Lorem|{url}
+|ABCDEF|1|40th Birthday Party|{timestamp}|{timestamp}|McKenzie's|Somewhere|Lorem|{url}
 
 ### RSVPs
 |Id|Respondent Id|Guest Id|Event Id|Response|Comments
 |---|---|---|---|---|---|
-|1|2|2|1|Y|Lorem ipsum
-|1|2|3|1|N|Nihil vel doloribus culpa iusto quaerat.
-|1|2|4|1|Y|
+|WXYZ|2|2|ABCDEF|Y|Lorem ipsum
+|LMNO|2|3|ABCDEF|N|Nihil vel doloribus culpa iusto quaerat.
+|DEFG|2|4|ABCDEF|Y|
 
 ### Pronouns
 |Id|Subject|Object|Possessive|Determiner|Reflexive|Nickname

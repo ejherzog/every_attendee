@@ -81,22 +81,17 @@ export class Event {
 
     getWhenHtml() {
         let when = dateFormatter.format(this.start_time);
+        console.log(when);
         if (areSameDay(this.start_time, this.end_time)) {
+            console.log("same day");
             when = when.concat(`<br>${this.getTime()}`);
         } else {
             when = when.concat(`  ${timeFormatter.format(this.start_time)}<br>until<br>`);
             when = when.concat(`${dateFormatter.format(this.end_time)}  ${timeFormatter.format(this.end_time)}`);
         }
+        console.log(when);
         return when;
     }
-}
-
-export function findEvent(code: string): Event {
-    const sampleEvent = new Event("Full Moon-ish Karaoke", new User("Eva", "eowynecho88@gmail.com"));
-    sampleEvent.addDescription("Let's howl at the slightly waning full moon: YouTube living room karaoke style.<br><br>We'll provide pizza and cheesesteaks. BYO drinks and any food you'd like to share.<br><br>Friends and partners welcome; please add a note additional guests below or have them RSVP separately.");
-    sampleEvent.setLocation("Cooper's House", "4725 Umbria St, Philadelphia, PA 19127");
-    sampleEvent.addHosts([new User("Cooper", "cccccc@gmail.com")]);
-    return sampleEvent;
 }
 
 function generateCode() {
