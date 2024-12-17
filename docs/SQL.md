@@ -25,9 +25,9 @@ CREATE TABLE events (
 ```
 CREATE TABLE hosts (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    event_id integer REFERENCES events,
+    event_id char(6) REFERENCES events,
     host_id integer REFERENCES people
-)
+);
 ```
 
 ```

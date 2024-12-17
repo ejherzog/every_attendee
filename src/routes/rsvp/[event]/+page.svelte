@@ -20,10 +20,6 @@
 	let name_width: number;
 	let custom_width: number;
 
-	// let when = data.event.getWhenHtml();
-	// let hosts = data.event.getHost();
-	// 
-
 	let rsvp = new Rsvp();
 
 	let other_pronoun = false;
@@ -116,7 +112,7 @@
 					<div class="h5 mb-0">Hosted By</div>
 				</ListGroupItem>
 				<ListGroupItem class="text-reset">
-					<i>Hosts Go Here</i>
+					{data.event.hosts}
 				</ListGroupItem>
 			</ListGroup>
 		</Col>
@@ -257,8 +253,7 @@
 				>
 			</Col>
 			<Col class="col-md-10 col-7 my-3">
-				<!-- <Input type="textarea" name="note" placeholder={host_message} /> -->
-				<Input type="textarea" name="note"  />
+				<Input type="textarea" name="note" placeholder={data.host_message} />
 			</Col>
 		</Row>
 		<!-- <hr /> -->

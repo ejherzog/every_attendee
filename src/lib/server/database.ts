@@ -11,26 +11,24 @@ const query: PostgresQueryResult = (sql, params?) => pool.query(sql, params);
 
 // ** READ OPERATIONS ** //
 export async function findEventById(code: string): Promise<any[]> {
-    const result = await executeQuery(`SELECT * FROM events WHERE id='${code}'`);
+    const result = await executeQuery(`SELECT * FROM events WHERE id = '${code}'`);
     return result.rows;
 }
 
 export async function findHostsByEventId(code: string): Promise<any[]> {
-    const result = await executeQuery(`SELECT p.short_name AS host
-        FROM hosts h WHERE h.event_id='${code}'
-        JOIN people p ON p.id = h.host_id`);
+    const result = await executeQuery(`SELECT p.short_name AS name
+        FROM hosts h JOIN people p ON p.id = h.host_id
+        WHERE h.event_id = '${code}'`);
     return result.rows;
 }
 
 export async function getAllEventCodes(): Promise<string[]> {
     const result = await executeQuery('SELECT id FROM events');
-    console.log(result.rows);
     return ['ABCABC', 'DEFDEF'];
 }
 
 export async function getAllRsvpCodes(): Promise<string[]> {
     const result = await executeQuery('SELECT id FROM rsvps');
-    console.log(result.rows);
     return ['XYZXYZ', 'ABC'];
 }
 

@@ -14,8 +14,8 @@ const timeFormatter = new Intl.DateTimeFormat("en-US", {
 export function getHosts(hosts: Person[]) {
     const lf = new Intl.ListFormat('en');
     let host_names: string[] = [];
-    hosts.forEach(user => {
-        host_names.push(user.full_name || user.name);
+    hosts.forEach(person => {
+        host_names.push(person.name);
     });
     return lf.format(host_names);
 }
@@ -26,7 +26,6 @@ export function getWhenFromTimestamps(start_time?: string, end_time?: string) {
     const start = new Date(start_time);
     const end = new Date(end_time);
     let when = dateFormatter.format(start);
-    console.log(when);
     if (areSameDay(start, end)) {
         when = when.concat(`<br>${getTime(start, end)}`);
     } else {
