@@ -27,7 +27,7 @@ CREATE TABLE rsvps (
     id char(6) PRIMARY KEY,
     respondent_id integer REFERENCES people,
     guest_id integer REFERENCES people,
-    event_id integer REFERENCES events,
+    event_id char(6) REFERENCES events,
     attending varchar(20) NOT NULL,
     comments text
 );

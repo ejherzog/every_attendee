@@ -37,8 +37,7 @@ export class Event {
         this.description = '';
         this.location = '';
         this.address = '';
-
-        const now = new Date();
+        
         this.start_time = new Date("September 18, 2024 6:30 PM");
         this.end_time = new Date("September 18, 2024 10:00 PM");
 

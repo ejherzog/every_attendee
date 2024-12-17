@@ -1,4 +1,4 @@
-import { getAllEventCodes, getAllRsvpCodes } from "./read";
+import { getAllEventCodes, getAllRsvpCodes } from "./database";
 
 export async function validateEventCode(desiredCode: string): Promise<boolean> {
     const codes = await getAllEventCodes();

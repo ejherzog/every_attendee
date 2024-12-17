@@ -15,13 +15,15 @@
 	import MultiSelect from 'svelte-multiselect';
 
 	/** @type {import('./$types').PageData} */
-	export let event;
+	export let data;
+	console.log(data.event);
+
 	let name_width: number;
 	let custom_width: number;
 
-	let when = event.getWhenHtml();
-	let hosts = event.getHost();
-	let host_message = event.hosts.length > 1 ? "Anything else we should know?" : "Anything else the host should know?";
+	let when = data.event.getWhenHtml();
+	let hosts = data.event.getHost();
+	let host_message = data.event.hosts.length > 1 ? "Anything else we should know?" : "Anything else the host should know?";
 
 	let rsvp = new Rsvp();
 
@@ -72,7 +74,7 @@
 </script>
 
 <Container class="my-3">
-	<h1>RSVP for {event.title}</h1>
+	<h1>RSVP for {data.event.title}</h1>
 </Container>
 
 <Container class="mt-1 mb-4">
@@ -99,7 +101,7 @@
 					<div class="h5 mb-0">Where</div>
 				</ListGroupItem>
 				<ListGroupItem class="text-reset">
-					{event.location}<br />{event.address}
+					{data.event.location}<br />{data.event.address}
 				</ListGroupItem>
 			</ListGroup>
 			<ListGroup flush={false} horizontal={false} numbered={false} class="text-start shadow my-2">
@@ -107,7 +109,7 @@
 					<div class="h5 mb-0">What</div>
 				</ListGroupItem>
 				<ListGroupItem class="text-reset">
-					{@html event.description}
+					{@html data.event.description}
 				</ListGroupItem>
 			</ListGroup>
 			<ListGroup flush={false} horizontal={false} numbered={false} class="text-start shadow my-2">
@@ -250,7 +252,7 @@
 		<Row class="align-items-center text-start mx-1">
 			<Col class="col-md-2 col-5 my-3">
 				<Label class="text-reset"
-					><tag class="fw-bold text-responsive">Note for the Host{#if event.hosts.length > 1}s{/if}:</tag>
+					><tag class="fw-bold text-responsive">Note for the Host{#if data.event.hosts.length > 1}s{/if}:</tag>
 					<tag class="fw-lighter fst-italic">(optional)</tag></Label
 				>
 			</Col>

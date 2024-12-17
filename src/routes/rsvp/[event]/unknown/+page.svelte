@@ -1,38 +1,35 @@
-<script lang="ts">
-	import { page } from '$app/stores';
-	import { Alert, Button, Form, FormGroup, Input, InputGroup } from '@sveltestrap/sveltestrap';
+<!-- <script lang="ts">
+	import { Button, Form, FormGroup, Input, InputGroup, Alert } from '@sveltestrap/sveltestrap';
 	import { EventCodeValidator } from "$lib/types/Event";
-	
+
+    /** @type {import('./$types').PageData} */
+	export let data;
+
 	let event_code: string;
+	let feedback: string;
 	let validated: boolean;
 	let validator = new EventCodeValidator();
 
 	const handleSubmit = (e: Event) => {
 		if (!validator.isAcceptable(event_code)) {
 			e.preventDefault();
+			feedback = "The event code should be 6 letters (A-Z).";
 			validated = true;
-		} else {
-			validated = false;
 		}
 	}
 </script>
 
-{#if $page.url.searchParams.has('code')}
-	<Alert color="danger">
-		Hmmm. We couldn't find an event with the code <b>{$page.url.searchParams.get('code')?.toUpperCase()}</b>.<br>
-		If that wasn't a typo, please contact the event host.
-	</Alert>
-{/if}
+
 
 <Form on:submit={handleSubmit} class="mx-auto mt-4 w-25" action={`/rsvp/${event_code}`} method="GET">
 	<InputGroup>
 		<FormGroup floating label="Enter an event code">
 			{#if validated}
-				<Input feedback="The event code should be 6 letters (A-Z)." invalid required bsSize="lg" bind:value={event_code} />
+				<Input feedback={feedback} invalid required bsSize="lg" bind:value={event_code} />
 			{:else}
 				<Input required bsSize="lg" bind:value={event_code} />
 			{/if}
 		</FormGroup>
 	</InputGroup>
 	<Button type="submit" style="background-color: #0b473b; color: #f9b13e;">Find Event</Button>
-</Form>
+</Form> -->

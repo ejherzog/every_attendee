@@ -19,13 +19,14 @@
 |DEFG|2|4|ABCDEF|Y|
 
 ### Pronouns
-|Id|Subject|Object|Possessive|Determiner|Reflexive|Nickname
-|---|---|---|---|---|---|---|
-|1|they|them|their|theirs|themself|they/them
-|2|she|her|her|hers|herself|she/her
-|3|he|him|his|his|himself|he/him
-|4|ze|zir|zir|zirs|zirself|ze/zir
-5||||||any
+|Id|Subject|Object|Possessive|Determiner|Reflexive|Nickname|Custom
+|---|---|---|---|---|---|---|---|
+|1|they|them|their|theirs|themself|they/them|N
+|2|she|her|her|hers|herself|she/her|N
+|3|he|him|his|his|himself|he/him|N
+|4|ze|zir|zir|zirs|zirself|ze/zir|N
+5||||||any|N
+6||||||purple|Y
 
 ### PersonalPronouns
 |Id|Person Id|Pronoun Id
