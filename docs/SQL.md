@@ -23,6 +23,14 @@ CREATE TABLE events (
 ```
 
 ```
+CREATE TABLE hosts (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    event_id integer REFERENCES events,
+    host_id integer REFERENCES people
+)
+```
+
+```
 CREATE TABLE rsvps (
     id char(6) PRIMARY KEY,
     respondent_id integer REFERENCES people,

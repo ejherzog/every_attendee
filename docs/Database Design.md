@@ -7,9 +7,15 @@
 |4|Mary|Maria Elizabeth|||
 
 ### Events
-|Id|Host Id|Title|Start|End|Location|Address|Description|Image URL|
+|Id|Title|Start|End|Location|Address|Description|Image URL|
 |---|---|---|---|---|---|---|---|---|
-|ABCDEF|1|40th Birthday Party|{timestamp}|{timestamp}|McKenzie's|Somewhere|Lorem|{url}
+|ABCDEF|40th Birthday Party|{timestamp}|{timestamp}|McKenzie's|Somewhere|Lorem|{url}
+
+### Hosts
+|Id|Event|Host|
+|---|---|---|
+|1|ABCDEF|1|
+|1|ABCDEF|4|
 
 ### RSVPs
 |Id|Respondent Id|Guest Id|Event Id|Response|Comments

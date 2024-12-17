@@ -16,14 +16,13 @@
 
 	/** @type {import('./$types').PageData} */
 	export let data;
-	console.log(data.event);
 
 	let name_width: number;
 	let custom_width: number;
 
-	let when = data.event.getWhenHtml();
-	let hosts = data.event.getHost();
-	let host_message = data.event.hosts.length > 1 ? "Anything else we should know?" : "Anything else the host should know?";
+	// let when = data.event.getWhenHtml();
+	// let hosts = data.event.getHost();
+	// 
 
 	let rsvp = new Rsvp();
 
@@ -93,7 +92,7 @@
 					<div class="h5 mb-0">When</div>
 				</ListGroupItem>
 				<ListGroupItem class="text-reset">
-					{@html when}
+					{@html data.event.when}
 				</ListGroupItem>
 			</ListGroup>
 			<ListGroup flush={false} horizontal={false} numbered={false} class="text-start shadow my-2">
@@ -117,7 +116,7 @@
 					<div class="h5 mb-0">Hosted By</div>
 				</ListGroupItem>
 				<ListGroupItem class="text-reset">
-					{hosts}
+					<i>Hosts Go Here</i>
 				</ListGroupItem>
 			</ListGroup>
 		</Col>
@@ -251,13 +250,15 @@
 		<hr />
 		<Row class="align-items-center text-start mx-1">
 			<Col class="col-md-2 col-5 my-3">
-				<Label class="text-reset"
-					><tag class="fw-bold text-responsive">Note for the Host{#if data.event.hosts.length > 1}s{/if}:</tag>
+				<Label class="text-reset">
+					<!-- <tag class="fw-bold text-responsive">Note for the Host{#if data.event.hosts.length > 1}s{/if}:</tag> -->
+					<tag class="fw-bold text-responsive">Note for the Host:</tag>
 					<tag class="fw-lighter fst-italic">(optional)</tag></Label
 				>
 			</Col>
 			<Col class="col-md-10 col-7 my-3">
-				<Input type="textarea" name="note" placeholder={host_message} />
+				<!-- <Input type="textarea" name="note" placeholder={host_message} /> -->
+				<Input type="textarea" name="note"  />
 			</Col>
 		</Row>
 		<!-- <hr /> -->
