@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { Alert, Button, Form, FormGroup, Input, InputGroup } from '@sveltestrap/sveltestrap';
+	import { Alert, Button, Col, Form, FormGroup, Input, InputGroup, Row } from '@sveltestrap/sveltestrap';
 
 	const six_letters = new RegExp('([A-Za-z]{6})');
 	
@@ -24,15 +24,20 @@
 	</Alert>
 {/if}
 
-<Form on:submit={handleSubmit} class="mx-auto mt-4 w-25" action={`/rsvp/${event_code}`} method="GET">
-	<InputGroup>
-		<FormGroup floating label="Enter an event code">
-			{#if validated}
-				<Input feedback="The event code should be 6 letters (A-Z)." invalid required bsSize="lg" bind:value={event_code} />
-			{:else}
-				<Input required bsSize="lg" bind:value={event_code} />
-			{/if}
-		</FormGroup>
-	</InputGroup>
-	<Button type="submit" style="background-color: #0b473b; color: #f9b13e;">Find Event</Button>
-</Form>
+<Row>
+	<Col class="col-md-5 col-9">
+		<Form on:submit={handleSubmit} class="mx-auto" action={`/rsvp/${event_code}`} method="GET">
+			<InputGroup>
+				<FormGroup floating label="Enter an event code">
+					{#if validated}
+						<Input feedback="Event codes should be 6 letters (A-Z)." invalid required bsSize="lg" bind:value={event_code} />
+					{:else}
+						<Input required bsSize="lg" bind:value={event_code} />
+					{/if}
+				</FormGroup>
+			</InputGroup>
+			<Button type="submit" style="background-color: #0b473b; color: #f9b13e;">Find Event</Button>
+		</Form>
+	</Col>
+</Row>
+

@@ -30,7 +30,7 @@
 	};
 </script>
 
-<Container class="my-3">
+<Container class="my-2">
 	<h1>RSVP for {data.event.title}</h1>
 </Container>
 
@@ -85,19 +85,18 @@
 	<Container class="mt-2">
 		<Form action="?/rsvp" method="POST">
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
-				<Col class="col-md-2 col-5 my-3">
+				<Col class="col-md-2 col-4 my-2">
 					<Label class="text-reset"
-						><tag class="fw-bold text-responsive">Your Name</tag>
-						<tag class="fw-lighter fst-italic text-responsive fs-6">(required)</tag></Label
+						><tag class="fw-bold text-responsive">Your Name</tag></Label
 					>
 				</Col>
-				<Col class="col-md-4 col-7 my-3">
+				<Col class="col-md-4 col-8 my-2">
 					<div bind:clientWidth={name_width}>
 						<Input
 							name="name"
 							on:change={validate}
 							bind:value={rsvp.guest.name}
-							required
+							required aria-required="true"
 							placeholder={name_width > 340
 								? 'How do you want to be addressed at this event?'
 								: name_width < 240
@@ -106,21 +105,20 @@
 						/>
 					</div>
 				</Col>
-				<Col class="col-md-2 col-5 my-3">
+				<Col class="col-md-2 col-4 my-2">
 					<Label class="text-reset"
-						><tag class="fw-bold text-responsive">Full Name</tag>
-						<tag class="fw-lighter fst-italic text-responsive fs-6">(optional)</tag></Label
+						><tag class="fw-bold text-responsive">Full Name</tag></Label
 					>
 				</Col>
-				<Col class="col-md-4 col-7 my-3">
+				<Col class="col-md-4 col-8 my-2">
 					<Input name="full_name" bind:value={rsvp.guest.full_name} />
 				</Col>
 			</Row>
 			<Row class="text-start mx-1 gx-1 gx-md-4">
-				<!-- <Col class="col-md-2 col-5 my-3">
-				<Label class="text-reset"><tag class="fw-bold text-responsive">Number Attending </tag><tag class="fw-lighter fst-italic">(required)</tag></Label>
+				<!-- <Col class="col-md-2 col-4 my-2">
+				<Label class="text-reset"><tag class="fw-bold text-responsive">Number Attending </tag><tag class="fw-lighter fst-italic">(required aria-required="true")</tag></Label>
 			</Col>
-			<Col class="col-md-4 col-7 my-3">
+			<Col class="col-md-4 col-8 my-2">
 				<InputGroup class="my-1" size="sm">
 					<InputGroupText style="max-width: 40%; min-width: 35%;">Yes:</InputGroupText>
 					<Input name="yes" type="number" min="0"/>
@@ -136,61 +134,56 @@
 			</Col> -->
 				<Col class="col-md-6 col-12">
 					<Row class="gx-0 gx-md-4">
-						<Col class="col-md-4 col-5 my-3">
+						<Col class="col-md-4 col-4 my-2">
 							<Label class="text-reset"
 								><tag class="fw-bold text-responsive">Phone Number</tag></Label
 							>
 						</Col>
-						<Col class="col-md-8 col-7 my-3">
+						<Col class="col-md-8 col-8 my-2">
 							<Input type="tel" name="phone" bind:value={rsvp.guest.phone} on:change={validate} />
 						</Col>
 					</Row>
 					<Row class="gx-0 gx-md-4">
-						<Col class="col-md-4 col-5 my-3">
+						<Col class="col-md-4 col-4 my-2">
 							<Label class="text-reset"
 								><tag class="fw-bold text-responsive">Email Address</tag></Label
 							>
 						</Col>
-						<Col class="col-md-8 col-7 my-3">
+						<Col class="col-md-8 col-8 my-2">
 							<Input type="email" name="email" bind:value={rsvp.guest.email} on:change={validate} />
 						</Col>
-						<Col class="fw-bolder fst-italic col-12 my-1 text-center">
+						<Col class="fst-italic col-12 my-1 text-center">
 							Note: you must provide at least one way to contact you.
 						</Col>
 					</Row>
 				</Col>
-				<Col class="col-md-2 col-5 my-3">
+				<Col class="col-md-2 col-4 my-2">
 					<Label class="text-reset"
-						><tag class="fw-bold text-responsive">Are You Attending?</tag><tag
-							class="fw-lighter fst-italic">(required)</tag
-						></Label
+						><tag class="fw-bold text-responsive">Are You Attending?</tag></Label
 					>
 				</Col>
-				<Col class="col-md-4 col-7 my-3">
+				<Col class="col-md-4 col-8 my-2">
 					{#each ['Yes', 'Maybe', 'No'] as option}
 						<Input
-							required
+							required aria-required="true"
 							name="attending"
 							type="radio"
 							on:change={validate}
 							bind:group={rsvp.attending}
 							value={option.charAt(0).toUpperCase()}
 							label={option}
-							class="h5"
+							class="h6"
 						/>
 					{/each}
 				</Col>
 			</Row>
 			<hr />
-			<Row class="text-start mx-1 my-3 gx-1 gx-md-4 align-items-center">
-				<Col class="col-md-2 col-5">
+			<Row class="text-start mx-1 my-2 gx-1 gx-md-4 align-items-center">
+				<Col class="col-md-2 col-4">
 					<Label class="text-reset"
-						><tag class="fw-bold text-responsive">Pronouns </tag><tag class="fw-lighter fst-italic"
-							>(required)</tag
-						></Label
-					>
+						><tag class="fw-bold text-responsive">Pronouns</tag></Label>
 				</Col>
-				<Col class="col-md-10 col-7">
+				<Col class="col-md-10 col-8">
 					<MultiSelect
 						name="pronouns"
 						required
@@ -202,13 +195,13 @@
 					></MultiSelect>
 				</Col>
 			</Row>
-			<Row class="text-start mx-1 my-3 align-items-center gx-1 gx-md-4">
-				<Col class="col-md-2 col-5">
+			<Row class="text-start mx-1 my-2 align-items-center gx-1 gx-md-4">
+				<Col class="col-md-2 col-4">
 					<Label class="text-reset"
 						><tag class="fw-bold text-responsive">Dietary Restrictions</tag></Label
 					>
 				</Col>
-				<Col class="col-md-10 col-7">
+				<Col class="col-md-10 col-8">
 					<MultiSelect
 						name="diets"
 						allowUserOptions
@@ -220,15 +213,12 @@
 				</Col>
 			</Row>
 			<hr />
-			<Row class="align-items-center text-start mx-1">
-				<Col class="col-md-2 col-5 my-3">
+			<Row class="text-start mx-1 my-2 align-items-center gx-1 gx-md-4">
+				<Col class="col-md-2 col-4">
 					<Label class="text-reset">
-						<!-- <tag class="fw-bold text-responsive">Note for the Host{#if data.event.hosts.length > 1}s{/if}:</tag> -->
-						<tag class="fw-bold text-responsive">Note for the Host:</tag>
-						<tag class="fw-lighter fst-italic">(optional)</tag></Label
-					>
+						<tag class="fw-bold text-responsive">Notes for the Host{#if data.event.hosts.length > 1}s{/if}</tag></Label>
 				</Col>
-				<Col class="col-md-10 col-7 my-3">
+				<Col class="col-md-10 col-8">
 					<Input type="textarea" name="note" placeholder={data.host_message} />
 				</Col>
 			</Row>

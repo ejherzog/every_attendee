@@ -6,9 +6,10 @@ import { getBasicDietList, getBasicPronounList, getEventById } from '$lib/server
 
 export async function load({ params }) {
     try {
-        const event = await getEventById(params.event.toUpperCase());
-        const pronoun_list = await getBasicPronounList();
-        const diet_list = await getBasicDietList();
+        let [event, pronoun_list, diet_list] = await Promise.all([
+            getEventById(params.event.toUpperCase()), 
+            getBasicPronounList(), 
+            getBasicDietList()]);
         return {
             event: structuredClone(event),
             pronoun_list: structuredClone(pronoun_list),
