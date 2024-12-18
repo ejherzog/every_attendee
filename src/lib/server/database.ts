@@ -32,6 +32,16 @@ export async function getAllRsvpCodes(): Promise<string[]> {
     return ['XYZXYZ', 'ABC'];
 }
 
+export async function getBasicPronouns(): Promise<any[]> {
+    const result = await executeQuery(`SELECT id, nickname FROM pronouns WHERE custom = false`);
+    return result.rows;
+}
+
+export async function getBasicDiets(): Promise<any[]> {
+    const result = await executeQuery(`SELECT id, details FROM diets WHERE custom = false`);
+    return result.rows;
+}
+
 // ** WRITE OPERATIONS ** //
 import type { Person } from "$lib/types/People";
 

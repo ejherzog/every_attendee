@@ -1,6 +1,7 @@
 import type { DB_Event } from "$lib/types/db/DB_Event";
 import { Event } from "$lib/types/view/Event";
-import { findEventById, findHostsByEventId } from "./database";
+import { SelectOption } from "$lib/types/view/SelectOption";
+import { findEventById, findHostsByEventId, getBasicDiets, getBasicPronouns } from "./database";
 import { getHosts, getWhenFromTimestamps } from "./formatter";
 
 export async function getEventById(code: string): Promise<Event> {
@@ -22,4 +23,28 @@ export async function getEventById(code: string): Promise<Event> {
         when: getWhenFromTimestamps(event.start_time, event.end_time), hostCount: hostRows.length, hosts,
         location: event.location, address: event.address, description: event.description, image_url: event.image_url
     });
+}
+
+export async function getBasicPronounList(): Promise<SelectOption[]> {
+
+    const pronounRows = await getBasicPronouns();
+
+    let pronounList: SelectOption[] = [];
+    pronounRows.forEach(pronoun => {
+        pronounList.push(new SelectOption(pronoun.nickname, pronoun.id));
+    });
+
+    return pronounList;
+}
+
+export async function getBasicDietList(): Promise<SelectOption[]> {
+
+    const dietRows = await getBasicDiets();
+
+    let dietList: SelectOption[] = [];
+    dietRows.forEach(diet => {
+        dietList.push(new SelectOption(diet.details, diet.id));
+    });
+
+    return dietList;
 }

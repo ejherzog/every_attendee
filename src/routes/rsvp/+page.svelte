@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { Alert, Button, Form, FormGroup, Input, InputGroup } from '@sveltestrap/sveltestrap';
-	import { EventCodeValidator } from "$lib/types/Event";
+
+	const six_letters = new RegExp('([A-Za-z]{6})');
 	
 	let event_code: string;
 	let validated: boolean;
-	let validator = new EventCodeValidator();
 
 	const handleSubmit = (e: Event) => {
-		if (!validator.isAcceptable(event_code)) {
+		if (!(event_code.length == 6 && six_letters.test(event_code))) {
 			e.preventDefault();
 			validated = true;
 		} else {

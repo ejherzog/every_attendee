@@ -1,7 +1,7 @@
 // import { User } from "./People";
 // import type { Rsvp } from "./Rsvp";
 
-const six_letters = new RegExp('([A-Za-z]{6})');
+
 
 // const dateFormatter = new Intl.DateTimeFormat("en-US", {
 //     weekday: "short",
@@ -74,9 +74,3 @@ const six_letters = new RegExp('([A-Za-z]{6})');
 
 
 
-export class EventCodeValidator {
-
-    isAcceptable(code: string) {
-        return code.length == 6 && six_letters.test(code);
-    }
-}

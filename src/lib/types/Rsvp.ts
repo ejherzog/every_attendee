@@ -35,12 +35,10 @@ export class Rsvp {
 }
 
 export class RsvpValidator {
-    isAcceptable(rsvp: Rsvp, custom_pronoun: string | undefined, custom_diet: string | undefined) {
+    isAcceptable(rsvp: Rsvp) {
         return rsvp.guest.name.length > 0
             && validator.isIn(rsvp.attending, ['Y', 'M', 'N'])
-            && customPronounIsValid(rsvp, custom_pronoun)
             && (phoneNumberIsValid(rsvp) || emailAddressIsValid(rsvp))
-            && customDietIsValid(rsvp, custom_diet)
     }
 }
 
@@ -57,24 +55,6 @@ function phoneNumberIsValid(rsvp: Rsvp) {
 
 function emailAddressIsValid(rsvp: Rsvp) {
     return rsvp.guest.email ? validator.isEmail(rsvp.guest.email) : false;
-}
-
-function customPronounIsValid(rsvp: Rsvp, custom: string | undefined) {
-    if (rsvp.guest.pronoun_list.length > 0) {
-        if (rsvp.guest.pronoun_list.includes('other')) {
-            return custom ? custom.length > 0 : false;
-        }
-        return true;
-    }
-    return false;
-}
-
-function customDietIsValid(rsvp: Rsvp, custom: string | undefined) {
-    if (rsvp.diets.length > 0 && rsvp.diets.includes('Other')) {
-        if (custom) return custom.length > 0;
-        return false;
-    }
-    return true;
 }
 
 function fieldIsDefined(field: string | undefined) {

@@ -2,6 +2,7 @@ export class Person {
 
     name: string;
     pronoun_list: string[];
+    diets?: string[];
     full_name?: string;
     phone?: string;
     email?: string;
