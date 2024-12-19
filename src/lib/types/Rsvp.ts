@@ -1,5 +1,4 @@
 import { Person } from "./People";
-import validator from 'validator';
 
 export class Rsvp {
 
@@ -34,27 +33,8 @@ export class Rsvp {
     }
 }
 
-export class RsvpValidator {
-    isAcceptable(rsvp: Rsvp) {
-        return rsvp.guest.name.length > 0
-            && validator.isIn(rsvp.attending, ['Y', 'M', 'N'])
-            && (phoneNumberIsValid(rsvp) || emailAddressIsValid(rsvp))
-    }
-}
-
 export function findRsvp(code: string) {
     return 'Except not really -- this app isn\'t hooked up to a functional database yet!';
-}
-
-function phoneNumberIsValid(rsvp: Rsvp) {
-    if (rsvp.guest.phone) {
-        return validator.isMobilePhone(rsvp.guest.phone);
-    }
-    return false;
-}
-
-function emailAddressIsValid(rsvp: Rsvp) {
-    return rsvp.guest.email ? validator.isEmail(rsvp.guest.email) : false;
 }
 
 function fieldIsDefined(field: string | undefined) {

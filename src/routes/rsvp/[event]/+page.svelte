@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Rsvp, RsvpValidator } from '$lib/types/Rsvp';
+	import { Rsvp } from '$lib/types/Rsvp';
 	import {
 		Button,
 		Col,
@@ -13,6 +13,7 @@
 		Row
 	} from '@sveltestrap/sveltestrap';
 	import MultiSelect from 'svelte-multiselect';
+	import validator from 'validator';
 
 	/** @type {import('./$types').PageData} */
 	export let data;
@@ -24,30 +25,26 @@
 	rsvp.guest.diets = [];
 
 	let invalid_input = true;
-	let validator = new RsvpValidator();
 	const validate = () => {
-		invalid_input = !validator.isAcceptable(rsvp);
+		invalid_input = !(
+			rsvp.guest.name.length > 0 &&
+			validator.isIn(rsvp.attending, ['Y', 'M', 'N']) &&
+			((rsvp.guest.phone && validator.isMobilePhone(rsvp.guest.phone)) ||
+				(rsvp.guest.email && validator.isEmail(rsvp.guest.email)))
+		);
 	};
 </script>
 
 <Container class="my-2">
-	<h1>RSVP for {data.event.title}</h1>
+	<h2>RSVP for {data.event.title}</h2>
 </Container>
 
 <Container class="mt-1 mb-4">
 	<Row class="align-items-center">
 		<Col xs="12" lg="6" class="mt-1">
-			<Image
-				fluid
-				class="rounded shadow align-items-center"
-				alt="A full moon glows over the hills and desert near Joshua Tree National Park in California."
-				src="https://images.unsplash.com/photo-1653540883470-bf726448911b"
-			/>
-		</Col>
-		<Col xs="12" lg="6" class="mt-1">
-			<ListGroup flush={false} horizontal={false} numbered={false} class="text-start shadow mb-2">
+			<ListGroup flush={false} horizontal={false} numbered={false} class="text-start shadow my-2">
 				<ListGroupItem class="text-reset">
-					<div class="h5 mb-0">When</div>
+					<div class="h6 mb-0">When</div>
 				</ListGroupItem>
 				<ListGroupItem class="text-reset">
 					{@html data.event.when}
@@ -55,7 +52,7 @@
 			</ListGroup>
 			<ListGroup flush={false} horizontal={false} numbered={false} class="text-start shadow my-2">
 				<ListGroupItem class="text-reset">
-					<div class="h5 mb-0">Where</div>
+					<div class="h6 mb-0">Where</div>
 				</ListGroupItem>
 				<ListGroupItem class="text-reset">
 					{data.event.location}<br />{data.event.address}
@@ -63,18 +60,30 @@
 			</ListGroup>
 			<ListGroup flush={false} horizontal={false} numbered={false} class="text-start shadow my-2">
 				<ListGroupItem class="text-reset">
-					<div class="h5 mb-0">What</div>
-				</ListGroupItem>
-				<ListGroupItem class="text-reset">
-					{@html data.event.description}
-				</ListGroupItem>
-			</ListGroup>
-			<ListGroup flush={false} horizontal={false} numbered={false} class="text-start shadow my-2">
-				<ListGroupItem class="text-reset">
-					<div class="h5 mb-0">Hosted By</div>
+					<div class="h6 mb-0">Hosted By</div>
 				</ListGroupItem>
 				<ListGroupItem class="text-reset">
 					{data.event.hosts}
+				</ListGroupItem>
+			</ListGroup>
+		</Col>
+		<Col xs="12" lg="6" class="p-4">
+			<Image
+				fluid
+				class="rounded shadow align-items-center"
+				alt="A full moon glows over the hills and desert near Joshua Tree National Park in California."
+				src="https://images.unsplash.com/photo-1653540883470-bf726448911b"
+			/>
+		</Col>
+	</Row>
+	<Row class="align-items-center">
+		<Col class="mt-1 my-2">
+			<ListGroup flush={false} horizontal={false} numbered={false} class="text-start shadow">
+				<ListGroupItem class="text-reset">
+					<div class="h6 mb-0">Details</div>
+				</ListGroupItem>
+				<ListGroupItem class="text-reset">
+					{@html data.event.description}
 				</ListGroupItem>
 			</ListGroup>
 		</Col>
@@ -85,35 +94,36 @@
 	<Container class="mt-2">
 		<Form action="?/rsvp" method="POST">
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
-				<Col class="col-md-2 col-4 my-2">
-					<Label class="text-reset"
-						><tag class="fw-bold text-responsive">Your Name</tag></Label
-					>
+				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
+					<Label
+						><tag class="text-reset fw-bold text-responsive fs-5">Your Name </tag>
+						<tag class="fw-lighter fst-italic text-responsive fs-6">(required)</tag><br />
+						<tag class="fw-lighter fst-italic text-responsive fs-6">How should we address you?</tag>
+					</Label>
 				</Col>
-				<Col class="col-md-4 col-8 my-2">
+				<Col xs="12" sm="6" md="7" lg="3" class="my-auto">
 					<div bind:clientWidth={name_width}>
 						<Input
+							class="text-end"
 							name="name"
 							on:change={validate}
 							bind:value={rsvp.guest.name}
-							required aria-required="true"
-							placeholder={name_width > 340
-								? 'How do you want to be addressed at this event?'
-								: name_width < 240
-									? ''
-									: 'How should we address you?'}
+							required
+							aria-required="true"
 						/>
 					</div>
 				</Col>
-				<Col class="col-md-2 col-4 my-2">
-					<Label class="text-reset"
-						><tag class="fw-bold text-responsive">Full Name</tag></Label
+				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
+					<Label
+						><tag class="text-reset fw-bold text-responsive fs-5">Full Name </tag>
+						<tag class="fw-lighter fst-italic text-responsive fs-6">(optional)</tag></Label
 					>
 				</Col>
-				<Col class="col-md-4 col-8 my-2">
-					<Input name="full_name" bind:value={rsvp.guest.full_name} />
+				<Col xs="12" sm="6" md="7" lg="4" class="my-auto">
+					<Input class="text-end" name="full_name" bind:value={rsvp.guest.full_name} />
 				</Col>
 			</Row>
+			<hr />
 			<Row class="text-start mx-1 gx-1 gx-md-4">
 				<!-- <Col class="col-md-2 col-4 my-2">
 				<Label class="text-reset"><tag class="fw-bold text-responsive">Number Attending </tag><tag class="fw-lighter fst-italic">(required aria-required="true")</tag></Label>
@@ -132,94 +142,110 @@
 					<Input name="no" type="number" min="0"/>
 				</InputGroup>
 			</Col> -->
-				<Col class="col-md-6 col-12">
-					<Row class="gx-0 gx-md-4">
-						<Col class="col-md-4 col-4 my-2">
-							<Label class="text-reset"
-								><tag class="fw-bold text-responsive">Phone Number</tag></Label
-							>
-						</Col>
-						<Col class="col-md-8 col-8 my-2">
-							<Input type="tel" name="phone" bind:value={rsvp.guest.phone} on:change={validate} />
-						</Col>
-					</Row>
-					<Row class="gx-0 gx-md-4">
-						<Col class="col-md-4 col-4 my-2">
-							<Label class="text-reset"
-								><tag class="fw-bold text-responsive">Email Address</tag></Label
-							>
-						</Col>
-						<Col class="col-md-8 col-8 my-2">
-							<Input type="email" name="email" bind:value={rsvp.guest.email} on:change={validate} />
-						</Col>
-						<Col class="fst-italic col-12 my-1 text-center">
-							Note: you must provide at least one way to contact you.
-						</Col>
-					</Row>
+				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
+					<Label><tag class="text-reset fw-bold text-responsive fs-5">Phone Number</tag></Label>
 				</Col>
-				<Col class="col-md-2 col-4 my-2">
-					<Label class="text-reset"
-						><tag class="fw-bold text-responsive">Are You Attending?</tag></Label
+				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
+					<Input
+						class="text-end"
+						type="tel"
+						name="phone"
+						bind:value={rsvp.guest.phone}
+						on:change={validate}
+					/>
+				</Col>
+				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
+					<Label><tag class="text-reset fw-bold text-responsive fs-5">Email Address</tag></Label>
+				</Col>
+				<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
+					<Input
+						class="text-end"
+						type="email"
+						name="email"
+						bind:value={rsvp.guest.email}
+						on:change={validate}
+					/>
+				</Col>
+				<Col class="fst-italic col-12 my-1 text-center">
+					Note: you must provide at least one way to contact you.
+				</Col>
+			</Row>
+			<hr />
+			<Row class="text-start mx-1 gx-1 gx-md-4">
+				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
+					<Label
+						><tag class="text-reset fw-bold text-responsive fs-5">Are You Attending?</tag></Label
 					>
 				</Col>
-				<Col class="col-md-4 col-8 my-2">
-					{#each ['Yes', 'Maybe', 'No'] as option}
+				<Col xs="12" sm="6" md="7" lg="9" class="my-auto">
+					{#each ['Yes', 'No', 'Maybe'] as option}
 						<Input
-							required aria-required="true"
+							required
+							aria-required="true"
 							name="attending"
 							type="radio"
 							on:change={validate}
 							bind:group={rsvp.attending}
 							value={option.charAt(0).toUpperCase()}
 							label={option}
-							class="h6"
+							class="h5 form-check form-check-inline"
 						/>
 					{/each}
 				</Col>
 			</Row>
 			<hr />
 			<Row class="text-start mx-1 my-2 gx-1 gx-md-4 align-items-center">
-				<Col class="col-md-2 col-4">
-					<Label class="text-reset"
-						><tag class="fw-bold text-responsive">Pronouns</tag></Label>
+				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
+					<Label><tag class="text-reset fw-bold text-responsive fs-5">Pronouns</tag></Label>
 				</Col>
-				<Col class="col-md-10 col-8">
-					<MultiSelect
-						name="pronouns"
-						required
-						allowUserOptions
-						createOptionMsg="Press enter or click here to add your custom option"
-						bind:selected={rsvp.guest.pronoun_list}
-						options={data.pronoun_list}
-						--sms-bg="white"
-					></MultiSelect>
+				<Col xs="12" sm="6" md="7" lg="9" class="my-auto pb-1">
+					<div class="form-control">
+						<MultiSelect
+							name="pronouns"
+							required
+							allowUserOptions
+							createOptionMsg="Press enter or click here to add your custom option"
+							bind:selected={rsvp.guest.pronoun_list}
+							options={data.pronoun_list}
+							--sms-bg="white"
+							--sms-border="0"
+						></MultiSelect>
+					</div>
 				</Col>
 			</Row>
-			<Row class="text-start mx-1 my-2 align-items-center gx-1 gx-md-4">
-				<Col class="col-md-2 col-4">
-					<Label class="text-reset"
-						><tag class="fw-bold text-responsive">Dietary Restrictions</tag></Label
+			<hr />
+			<Row class="text-start mx-1 gx-1 gx-md-4">
+				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
+					<Label
+						><tag class="text-reset fw-bold text-responsive fs-5">Dietary Restrictions</tag></Label
 					>
 				</Col>
-				<Col class="col-md-10 col-8">
-					<MultiSelect
-						name="diets"
-						allowUserOptions
-						createOptionMsg="Press enter or click here to add your custom option"
-						bind:selected={rsvp.guest.diets}
-						options={data.diet_list}
-						--sms-bg="white"
-					></MultiSelect>
+				<Col xs="12" sm="6" md="7" lg="9" class="my-auto pb-1">
+					<div class="form-control">
+						<MultiSelect
+							name="diets"
+							allowUserOptions
+							createOptionMsg="Press enter or click here to add your custom option"
+							bind:selected={rsvp.guest.diets}
+							options={data.diet_list}
+							--sms-bg="white"
+							--sms-border="0"
+						></MultiSelect>
+					</div>
 				</Col>
 			</Row>
 			<hr />
 			<Row class="text-start mx-1 my-2 align-items-center gx-1 gx-md-4">
-				<Col class="col-md-2 col-4">
-					<Label class="text-reset">
-						<tag class="fw-bold text-responsive">Notes for the Host{#if data.event.hosts.length > 1}s{/if}</tag></Label>
+				<Col xs="12" sm="6" md="3">
+					<Label>
+						<tag class="text-reset fw-bold text-responsive fs-5"
+							>Notes for the Host{#if data.event.hosts.length > 1}s{/if}</tag
+						><br />
+						<tag class="fw-lighter fst-italic text-responsive fs-6">{data.host_message}</tag></Label
+					>
 				</Col>
-				<Col class="col-md-10 col-8">
-					<Input type="textarea" name="note" placeholder={data.host_message} />
+				<Col xs="12" sm="6" md="9">
+					<Input type="textarea" name="note"/>
 				</Col>
 			</Row>
 			<!-- <hr /> -->
