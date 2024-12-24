@@ -1,7 +1,8 @@
 import type { DB_Event } from "$lib/types/db/DB_Event";
+import { Person } from "$lib/types/People";
 import { Event } from "$lib/types/view/Event";
 import { SelectOption } from "$lib/types/view/SelectOption";
-import { findEventById, findHostsByEventId, getBasicDiets, getBasicPronouns } from "./database";
+import { createPerson, findEventById, findHostsByEventId, getBasicDiets, getBasicPronouns } from "./database";
 import { getHosts, getWhenFromTimestamps } from "./formatter";
 
 export async function getEventById(code: string): Promise<Event> {
@@ -47,4 +48,26 @@ export async function getBasicDietList(): Promise<SelectOption[]> {
     });
 
     return dietList;
+}
+
+export async function recordRsvp(formData: any): Promise<string> {
+
+    // Person
+    const guest = new Person(formData.get("name"));
+    guest.full_name = formData.get("full_name");
+    guest.phone = formData.get("phone");
+    guest.email = formData.get("email");
+
+    const guest_id = await createPerson(guest);
+
+    // TODO get database ID of guest
+    // TODO use guest ID for pronouns and diets and RSVP
+
+    // Pronouns
+
+    // Diets
+
+    // RSVP
+
+    return 'FAKECODE';
 }

@@ -1,5 +1,6 @@
 import pg, { type QueryResult } from 'pg';
 import { DATABASE_URL } from '$env/static/private';
+import type { Person } from "$lib/types/People";
 
 const pool = new pg.Pool({
     max: 5,
@@ -43,12 +44,11 @@ export async function getBasicDiets(): Promise<any[]> {
 }
 
 // ** WRITE OPERATIONS ** //
-import type { Person } from "$lib/types/People";
-
-export async function createPerson(person: Person): Promise<QueryResult> {
-    const insertPerson = 'INSERT INTO people(short_name, full_name, phone, email) VALUES($1, $2, $3, $4) RETURNING *';
+export async function createPerson(person: Person): Promise<string> {
+    const insertPerson = 'INSERT INTO people(short_name, full_name, phone, email) VALUES($1, $2, $3, $4) RETURNING id';
     const values = [`${person.name}`, `${person.full_name}`, `${person.phone}`, `${person.email}`];
-    return await executeQuery(insertPerson, values);
+    const result = await executeQuery(insertPerson, values);
+    return result.rows[0].id;
 }
 
 // ** UTILITY FUNCTIONS ** //
