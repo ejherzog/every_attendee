@@ -17,7 +17,7 @@ export async function load({ params }) {
             host_message: event.hostCount && event.hostCount > 1 ? "Anything else we should know?" : "Anything else the host should know?"
         };
     } catch (err: any) {
-        throw redirect(303, `/rsvp?code=${params.event}`);
+        redirect(303, `/rsvp?code=${params.event}`);
     }
 }
 
@@ -31,6 +31,6 @@ export const actions = {
         const response = 'RSVPCODE';
         // const result = await createPerson(rsvp.guest);
         // console.log(result);
-        throw redirect(303, `/rsvp/${event}/success/${response}`);
+        redirect(303, `/rsvp/${event}/success/${response}`);
 	},
 } satisfies Actions;

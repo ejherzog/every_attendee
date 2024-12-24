@@ -4,7 +4,6 @@
 		Alert,
 		Button,
 		Col,
-		Container,
 		Form,
 		FormGroup,
 		Input,
@@ -26,6 +25,10 @@
 		}
 	};
 </script>
+
+<svelte:head>
+	<title>Find Event</title>
+</svelte:head>
 
 {#if $page.url.searchParams.has('code')}
 	<Alert class="col-md-5 col-9 mx-auto" color="danger">

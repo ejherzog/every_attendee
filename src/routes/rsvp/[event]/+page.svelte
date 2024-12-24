@@ -18,8 +18,6 @@
 	/** @type {import('./$types').PageData} */
 	export let data;
 
-	let name_width: number;
-
 	let rsvp = new Rsvp();
 	rsvp.guest.pronoun_list = [];
 	rsvp.guest.diets = [];
@@ -27,13 +25,17 @@
 	let invalid_input = true;
 	const validate = () => {
 		invalid_input = !(
-			rsvp.guest.name.length > 0 &&
-			validator.isIn(rsvp.attending, ['Y', 'M', 'N']) &&
+			rsvp.guest.name.length > 0 && rsvp.attending &&
+			rsvp.guest.pronoun_list.length > 0 &&
 			((rsvp.guest.phone && validator.isMobilePhone(rsvp.guest.phone)) ||
 				(rsvp.guest.email && validator.isEmail(rsvp.guest.email)))
 		);
 	};
 </script>
+
+<svelte:head>
+	<title>RSVP for {data.event.title}</title>
+</svelte:head>
 
 <Container class="my-2">
 	<h2>RSVP for {data.event.title}</h2>
@@ -101,8 +103,7 @@
 						<tag class="fw-lighter fst-italic text-responsive fs-6">How should we address you?</tag>
 					</Label>
 				</Col>
-				<Col xs="12" sm="6" md="7" lg="3" class="my-auto">
-					<div bind:clientWidth={name_width}>
+				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
 						<Input
 							class="text-end"
 							name="name"
@@ -111,7 +112,6 @@
 							required
 							aria-required="true"
 						/>
-					</div>
 				</Col>
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
 					<Label
@@ -166,8 +166,8 @@
 						on:change={validate}
 					/>
 				</Col>
-				<Col class="fst-italic col-12 my-1 text-center">
-					Note: you must provide at least one way to contact you.
+				<Col class="fw-lighter fst-italic col-12 my-1 text-center">
+					You must provide at least one way to contact you.
 				</Col>
 			</Row>
 			<hr />
@@ -207,6 +207,7 @@
 							createOptionMsg="Press enter or click here to add your custom option"
 							bind:selected={rsvp.guest.pronoun_list}
 							options={data.pronoun_list}
+							on:change={validate}
 							--sms-bg="white"
 							--sms-border="0"
 						></MultiSelect>

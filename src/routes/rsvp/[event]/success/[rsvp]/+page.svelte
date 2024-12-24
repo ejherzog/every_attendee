@@ -5,6 +5,10 @@
 	export let data;
 </script>
 
+<svelte:head>
+	<title>RSVP Successful!</title>
+</svelte:head>
+
 <Container class="my-3">
 	<p>{data.event}</p>
 	<p>{data.rsvp}</p>
