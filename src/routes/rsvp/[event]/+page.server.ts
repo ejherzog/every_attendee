@@ -1,14 +1,12 @@
-import { Rsvp } from '$lib/types/Rsvp';
-import { redirect } from '@sveltejs/kit';
+import { redirect, error } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { createPerson } from '$lib/server/database';
 import { getBasicDietList, getBasicPronounList, getEventById, recordRsvp } from '$lib/server/server';
 
 export async function load({ params }) {
     try {
         let [event, pronoun_list, diet_list] = await Promise.all([
-            getEventById(params.event.toUpperCase()), 
-            getBasicPronounList(), 
+            getEventById(params.event.toUpperCase()),
+            getBasicPronounList(),
             getBasicDietList()]);
         return {
             event: structuredClone(event),
@@ -22,15 +20,18 @@ export async function load({ params }) {
 }
 
 export const actions = {
-	rsvp: async ({ request }) => {
+    rsvp: async ({ request }) => {
         const formData = await request.formData();
-        console.log(formData);
 
-        await recordRsvp(formData);
+        if (formData.get("event_id") && request.headers.get("referer") &&
+            !request.headers.get("referer")!.endsWith(formData.get("event_id")!.toString())) {
+            error(400, {
+                message: 'Bad request: Event ID in URL does not match Event ID in submitted form.'
+            });
+        } else {
+            const response = await recordRsvp(formData);
 
-        const event = 'FLMNKR';
-        const response = 'RSVPCODE';
-
-        redirect(303, `/rsvp/${event}/success/${response}`);
-	},
+            redirect(303, `/rsvp/${formData.get("event_id")}/success/${response}`);
+        }
+    },
 } satisfies Actions;

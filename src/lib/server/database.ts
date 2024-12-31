@@ -51,6 +51,48 @@ export async function createPerson(person: Person): Promise<string> {
     return result.rows[0].id;
 }
 
+export async function addPronounToPerson(person_id: string, pronoun_id: string) {
+    const insertPersonPronoun = 'INSERT INTO person_pronouns(person_id, pronoun_id) VALUES($1, $2)';
+    await executeQuery(insertPersonPronoun, [`${person_id}`, `${pronoun_id}`]);
+}
+
+export async function createOrFindCustomPronoun(pronoun_nickname: string): Promise<string> {
+    // check if custom pronoun nickname already exists
+    const customPronouns = await executeQuery('SELECT id, nickname FROM pronouns WHERE custom = true');
+    const customPronoun = customPronouns.rows.find(item => item.nickname === pronoun_nickname);
+
+    if (customPronoun) return customPronoun.id;
+
+    // if custom pronoun is brand new, add it to the database
+    const insertPronoun = `INSERT INTO pronouns(nickname, custom) VALUES('${pronoun_nickname}', true) RETURNING id`;
+    const result = await executeQuery(insertPronoun);
+    return result.rows[0].id;
+}
+
+export async function addDietToPerson(person_id: string, diet_id: string) {
+    const insertPersonDiet = 'INSERT INTO person_diets(person_id, diet_id) VALUES($1, $2)';
+    await executeQuery(insertPersonDiet, [`${person_id}`, `${diet_id}`]);
+}
+
+export async function createOrFindCustomDiet(diet_details: string): Promise<string> {
+    // check if custom diet details already exists
+    const customPronouns = await executeQuery('SELECT id, details FROM diets WHERE custom = true');
+    const customPronoun = customPronouns.rows.find(item => item.details === diet_details);
+
+    if (customPronoun) return customPronoun.id;
+
+    // if custom diate is brand new, add it to the database
+    const insertPronoun = `INSERT INTO diets(details, custom) VALUES('${diet_details}', true) RETURNING id`;
+    const result = await executeQuery(insertPronoun);
+    return result.rows[0].id;
+}
+
+export async function createRsvp(rsvp_id: string, event_id: string, guest_id: string, respondent_id: string, attending: string, comments: string) {
+    const insertRsvp = 'INSERT INTO rsvps(id, respondent_id, guest_id, event_id, attending, comments) VALUES($1, $2, $3, $4, $5, $6)';
+    const values = [`${rsvp_id}`, `${respondent_id}`, `${guest_id}`, `${event_id}`, `${attending}`, `${comments}`];
+    await executeQuery(insertRsvp, values);
+}
+
 // ** UTILITY FUNCTIONS ** //
 async function executeQuery(query_string: string, values?: string[]): Promise<QueryResult> {
     try {

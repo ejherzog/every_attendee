@@ -2,7 +2,8 @@ import type { DB_Event } from "$lib/types/db/DB_Event";
 import { Person } from "$lib/types/People";
 import { Event } from "$lib/types/view/Event";
 import { SelectOption } from "$lib/types/view/SelectOption";
-import { createPerson, findEventById, findHostsByEventId, getBasicDiets, getBasicPronouns } from "./database";
+import { generateRsvpCode } from "./codes";
+import { addDietToPerson, addPronounToPerson, createOrFindCustomDiet, createOrFindCustomPronoun, createPerson, createRsvp, findEventById, findHostsByEventId, getBasicDiets, getBasicPronouns } from "./database";
 import { getHosts, getWhenFromTimestamps } from "./formatter";
 
 export async function getEventById(code: string): Promise<Event> {
@@ -20,7 +21,7 @@ export async function getEventById(code: string): Promise<Event> {
         hosts = getHosts(hostRows);
     }
 
-    return new Event(event.title, {
+    return new Event(event.title, { id: event.id,
         when: getWhenFromTimestamps(event.start_time, event.end_time), hostCount: hostRows.length, hosts,
         location: event.location, address: event.address, description: event.description, image_url: event.image_url
     });
@@ -52,7 +53,7 @@ export async function getBasicDietList(): Promise<SelectOption[]> {
 
 export async function recordRsvp(formData: any): Promise<string> {
 
-    // Person
+    // Guest
     const guest = new Person(formData.get("name"));
     guest.full_name = formData.get("full_name");
     guest.phone = formData.get("phone");
@@ -60,14 +61,35 @@ export async function recordRsvp(formData: any): Promise<string> {
 
     const guest_id = await createPerson(guest);
 
-    // TODO get database ID of guest
-    // TODO use guest ID for pronouns and diets and RSVP
-
     // Pronouns
+    const pronouns = JSON.parse(formData.get("pronouns"));
+    pronouns.forEach(async (item: { value: any; label: any; }) => {
+        if (item.value) {
+            await addPronounToPerson(guest_id, item.value);
+        } else {
+            const custom_pronoun_id = await createOrFindCustomPronoun(item.label);
+            await addPronounToPerson(guest_id, custom_pronoun_id);
+        }
+    });
 
     // Diets
+    const diets = JSON.parse(formData.get("diets"));
+    diets.forEach(async (item: { value: any; label: any; }) => {
+        if (item.value) {
+            await addDietToPerson(guest_id, item.value);
+        } else {
+            const custom_diet_id = await createOrFindCustomDiet(item.label);
+            await addDietToPerson(guest_id, custom_diet_id);
+        }
+    });
 
     // RSVP
+    const event_id = formData.get("event_id");
+    const attending = formData.get("attending");
+    const comments = formData.get("notes");
+    const rsvp_id = await generateRsvpCode();
 
-    return 'FAKECODE';
+    await createRsvp(rsvp_id, event_id, guest_id, guest_id, attending, comments);
+
+    return rsvp_id;
 }

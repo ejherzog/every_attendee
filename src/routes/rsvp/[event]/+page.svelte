@@ -95,6 +95,7 @@
 <Container style="background-color: #f9b13e66;" class="py-2 rounded">
 	<Container class="mt-2">
 		<Form action="?/rsvp" method="POST">
+			<input type="hidden" name="event_id" value={data.event.id} />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
 					<Label
@@ -186,7 +187,7 @@
 							type="radio"
 							on:change={validate}
 							bind:group={rsvp.attending}
-							value={option.charAt(0).toUpperCase()}
+							value={option}
 							label={option}
 							class="h5 form-check form-check-inline"
 						/>
@@ -246,7 +247,7 @@
 					>
 				</Col>
 				<Col xs="12" sm="6" md="9">
-					<Input type="textarea" name="note"/>
+					<Input type="textarea" name="notes"/>
 				</Col>
 			</Row>
 			<!-- <hr /> -->

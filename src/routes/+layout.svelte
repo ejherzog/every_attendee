@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Navbar, NavbarBrand, Container, Image, NavLink, Icon, Row, Col } from '@sveltestrap/sveltestrap';
+	import { Navbar, NavbarBrand, Container, NavLink, Row, Col } from '@sveltestrap/sveltestrap';
 
 	// const kofi_words = ['coffee', 'pizza', 'bacon', 'chocolate', 'cheese'];
 	// const kofi_emojis = ['☕️', '🍕', '🥓', '🍫', '🧀'];
@@ -22,14 +22,13 @@
 
 <Container class="text-center mt-1 mb-4">
 	<slot></slot>
+	<hr>
 </Container>
 
-<Container class="text-center mt-1 mb-4 fs-6">
-	<hr />
+<Container class="text-center mt-1 mb-4 w-75 fs-6">
 	<p>
 		<i>EveryAttendee</i> is built and maintained Eva J Herzog.<br />
 		<!-- {emoji} Buy her some {treat} via <a href="https://ko-fi.com/evajherzog" target="_blank" class="text-reset">ko-fi</a> <Icon name="arrow-up-right-square-fill" style="font-size: .9rem;"/>. -->
 	</p>
-	<hr>
 	<a href="/credits" class="text-reset">Credits</a>
 </Container>

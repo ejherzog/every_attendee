@@ -9,7 +9,11 @@
 	<title>RSVP Successful!</title>
 </svelte:head>
 
-<Container class="my-3">
-	<p>{data.event}</p>
-	<p>{data.rsvp}</p>
+<Container class="mt-3 mb-4">
+	<h5 class="fw-lighter fst-italic text-responsive">Thanks! We've received your response.</h5>
+	<hr>
+	<h3>Confirmation Code: <tag class="fw-bolder">{data.rsvp}</tag></h3>
+	<hr>
+	<h5>Event Code: {data.event}</h5>
+	<h6 class="fw-lighter fst-italic text-responsive">If you need to edit your response before the event, you will need both the event code and your confirmation code.</h6>
 </Container>

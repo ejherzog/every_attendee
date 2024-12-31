@@ -32,7 +32,7 @@ CREATE TABLE hosts (
 
 ```
 CREATE TABLE rsvps (
-    id char(6) PRIMARY KEY,
+    id char(4) PRIMARY KEY,
     respondent_id integer REFERENCES people,
     guest_id integer REFERENCES people,
     event_id char(6) REFERENCES events,
