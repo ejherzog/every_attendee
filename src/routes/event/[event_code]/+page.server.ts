@@ -5,7 +5,7 @@ import { getBasicDietList, getBasicPronounList, getEventById, recordRsvp } from 
 export async function load({ params }) {
     try {
         let [event, pronoun_list, diet_list] = await Promise.all([
-            getEventById(params.event.toUpperCase()),
+            getEventById(params.event_code.toUpperCase()),
             getBasicPronounList(),
             getBasicDietList()]);
         return {
@@ -15,7 +15,7 @@ export async function load({ params }) {
             host_message: event.hostCount && event.hostCount > 1 ? "Anything else we should know?" : "Anything else the host should know?"
         };
     } catch (err: any) {
-        redirect(303, `/rsvp?code=${params.event}`);
+        redirect(303, `/event?event_code=${params.event_code}`);
     }
 }
 

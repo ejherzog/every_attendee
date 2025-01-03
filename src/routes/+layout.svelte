@@ -15,7 +15,7 @@
 			<NavbarBrand href="/" style="color: #f9b13e" class="fs-2">EveryAttendee <tag class="fs-4 fw-lighter fst-italic">(𝛂 v0.1)</tag></NavbarBrand>
 		</Col>
 		<Col class="col-md-3 col-6 text-end">
-			<NavLink href="/rsvp/" style="color: #f9b13e" class="fs-5">RSVP</NavLink>
+			<NavLink href="/event/" style="color: #f9b13e" class="fs-5">RSVP</NavLink>
 		</Col>
 	</Row>
 </Navbar>
