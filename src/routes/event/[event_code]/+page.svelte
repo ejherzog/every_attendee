@@ -95,7 +95,7 @@
 <Container style="background-color: #f9b13e66;" class="py-2 rounded">
 	<Container class="mt-2">
 		<Form action="?/rsvp" method="POST">
-			<input type="hidden" name="event_id" value={data.event.id} />
+			<input type="hidden" name="event_code" value={data.event.id} />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
 					<Label

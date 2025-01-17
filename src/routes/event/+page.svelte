@@ -50,8 +50,8 @@
 	<title>Find Event</title>
 </svelte:head>
 
-<Accordion class="mt-3" flush>
-	<AccordionItem header="Find Event" active style="bs-accordion-active-bg: #fef3df48; color: #0b473b;">
+<Accordion class="mt-3">
+	<AccordionItem header="Find Event" active>
 		{#if $page.url.searchParams.has('event_code')}
 			<Alert class="col-md-7 col-10 mx-auto" color="danger">
 				Hmmm. We couldn't find an event with the code <b

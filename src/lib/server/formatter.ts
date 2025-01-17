@@ -11,8 +11,9 @@ const timeFormatter = new Intl.DateTimeFormat("en-US", {
     timeStyle: "short"
 });
 
+const lf = new Intl.ListFormat('en');
+
 export function getHosts(hosts: Person[]) {
-    const lf = new Intl.ListFormat('en');
     let host_names: string[] = [];
     hosts.forEach(person => {
         host_names.push(person.name);

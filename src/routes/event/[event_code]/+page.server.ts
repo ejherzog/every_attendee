@@ -23,15 +23,14 @@ export const actions = {
     rsvp: async ({ request }) => {
         const formData = await request.formData();
 
-        if (formData.get("event_id") && request.headers.get("referer") &&
-            !request.headers.get("referer")!.endsWith(formData.get("event_id")!.toString())) {
+        if (formData.get("event_code") && request.headers.get("referer") 
+            && !request.headers.get("referer")!.includes(formData.get("event_code")!.toString().toLowerCase())) {
             error(400, {
                 message: 'Bad request: Event ID in URL does not match Event ID in submitted form.'
             });
-        } else {
-            const response = await recordRsvp(formData);
-
-            redirect(303, `/rsvp/${formData.get("event_id")}/success/${response}`);
         }
+
+        const confirmation_code = await recordRsvp(formData);
+        redirect(303, `/event/${formData.get("event_code")}/confirm/${confirmation_code}`);
     },
 } satisfies Actions;

@@ -1,14 +1,17 @@
 import { redirect, error } from '@sveltejs/kit';
-import { getBasicDietList, getBasicPronounList, getEventById, recordRsvp } from '$lib/server/server';
+import type { Actions } from './$types';
+import { getBasicDietList, getBasicPronounList, getEventById, getRsvp, changeRsvp } from '$lib/server/server';
 
 export async function load({ params }) {
     try {
-        let [event, pronoun_list, diet_list] = await Promise.all([
+        let [event, rsvp, pronoun_list, diet_list] = await Promise.all([
             getEventById(params.event_code.toUpperCase()),
+            getRsvp(params.event_code.toUpperCase(), params.confirm_code.toUpperCase()),
             getBasicPronounList(),
             getBasicDietList()]);
         return {
             event: structuredClone(event),
+            rsvp: structuredClone(rsvp),
             pronoun_list: structuredClone(pronoun_list),
             diet_list: structuredClone(diet_list),
             host_message: event.hostCount && event.hostCount > 1 ? "Anything else we should know?" : "Anything else the host should know?"
@@ -17,3 +20,19 @@ export async function load({ params }) {
         redirect(303, `/event?event_code=${params.event_code}&confirm_code=${params.confirm_code}`);
     }
 }
+
+export const actions = {
+    rsvp: async ({ request }) => {
+        const formData = await request.formData();
+
+        if (formData.get("event_code") && request.headers.get("referer") 
+            && !request.headers.get("referer")!.includes(formData.get("event_code")!.toString().toLowerCase())) {
+            error(400, {
+                message: 'Bad request: Event ID in URL does not match Event ID in submitted form.'
+            });
+        }
+
+        const confirmation_code = await changeRsvp(formData);
+        redirect(303, `/event/${formData.get("event_code")}/confirm/${confirmation_code}`);
+    },
+} satisfies Actions;

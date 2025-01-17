@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { Rsvp } from '$lib/types/Rsvp';
+	import { Rsvp } from '$lib/types/view/Rsvp';
 	import {
 		Button,
 		Col,
@@ -18,17 +18,15 @@
 	/** @type {import('./$types').PageData} */
 	export let data;
 
-	let rsvp = new Rsvp();
-	rsvp.guest.pronoun_list = [];
-	rsvp.guest.diets = [];
+	let rsvp: Rsvp = data.rsvp;
 
-	let invalid_input = true;
+	let invalid_input = false;
 	const validate = () => {
 		invalid_input = !(
-			rsvp.guest.name.length > 0 && rsvp.attending &&
-			rsvp.guest.pronoun_list.length > 0 &&
-			((rsvp.guest.phone && validator.isMobilePhone(rsvp.guest.phone)) ||
-				(rsvp.guest.email && validator.isEmail(rsvp.guest.email)))
+			rsvp.name.length > 0 && rsvp.attending &&
+			rsvp.pronouns.length > 0 &&
+			((rsvp.phone && validator.isMobilePhone(rsvp.phone)) ||
+				(rsvp.email && validator.isEmail(rsvp.email)))
 		);
 	};
 </script>
@@ -95,7 +93,9 @@
 <Container style="background-color: #f9b13e66;" class="py-2 rounded">
 	<Container class="mt-2">
 		<Form action="?/rsvp" method="POST">
-			<input type="hidden" name="event_id" value={data.event.id} />
+			<input type="hidden" name="event_code" value={data.event.id} />
+			<input type="hidden" name="confirmation_code" value={data.rsvp.confirmation_code} />
+			<input type="hidden" name="guest_id" value={data.rsvp.guest_id} />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
 					<Label
@@ -109,7 +109,7 @@
 							class="text-end"
 							name="name"
 							on:change={validate}
-							bind:value={rsvp.guest.name}
+							bind:value={rsvp.name}
 							required
 							aria-required="true"
 						/>
@@ -121,7 +121,7 @@
 					>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto">
-					<Input class="text-end" name="full_name" bind:value={rsvp.guest.full_name} />
+					<Input class="text-end" name="full_name" bind:value={rsvp.full_name} />
 				</Col>
 			</Row>
 			<hr />
@@ -151,7 +151,7 @@
 						class="text-end"
 						type="tel"
 						name="phone"
-						bind:value={rsvp.guest.phone}
+						bind:value={rsvp.phone}
 						on:change={validate}
 					/>
 				</Col>
@@ -163,7 +163,7 @@
 						class="text-end"
 						type="email"
 						name="email"
-						bind:value={rsvp.guest.email}
+						bind:value={rsvp.email}
 						on:change={validate}
 					/>
 				</Col>
@@ -206,7 +206,7 @@
 							required
 							allowUserOptions
 							createOptionMsg="Press enter or click here to add your custom option"
-							bind:selected={rsvp.guest.pronoun_list}
+							bind:selected={rsvp.pronouns}
 							options={data.pronoun_list}
 							on:change={validate}
 							--sms-bg="white"
@@ -228,7 +228,7 @@
 							name="diets"
 							allowUserOptions
 							createOptionMsg="Press enter or click here to add your custom option"
-							bind:selected={rsvp.guest.diets}
+							bind:selected={rsvp.diets}
 							options={data.diet_list}
 							--sms-bg="white"
 							--sms-border="0"
@@ -247,7 +247,7 @@
 					>
 				</Col>
 				<Col xs="12" sm="6" md="9">
-					<Input type="textarea" name="notes"/>
+					<Input type="textarea" name="notes" bind:value={rsvp.comments} />
 				</Col>
 			</Row>
 			<!-- <hr /> -->

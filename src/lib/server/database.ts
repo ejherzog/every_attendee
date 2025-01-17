@@ -23,14 +23,22 @@ export async function findHostsByEventId(code: string): Promise<any[]> {
     return result.rows;
 }
 
+export async function findRsvp(event_code: string, confirmation_code: string): Promise<any[]> {
+    const result = await executeQuery(`SELECT r.id, r.guest_id, 
+        p.short_name AS name, p.full_name, p.phone, p.email, r.attending, r.comments
+        FROM rsvps r JOIN people p ON p.id = r.respondent_id
+        WHERE r.id = '${confirmation_code}' AND r.event_id = '${event_code}'`);
+    return result.rows;
+}
+
 export async function getAllEventCodes(): Promise<string[]> {
     const result = await executeQuery('SELECT id FROM events');
-    return ['ABCABC', 'DEFDEF'];
+    return result.rows;
 }
 
 export async function getAllRsvpCodes(): Promise<string[]> {
     const result = await executeQuery('SELECT id FROM rsvps');
-    return ['XYZXYZ', 'ABC'];
+    return result.rows;
 }
 
 export async function getBasicPronouns(): Promise<any[]> {
@@ -38,8 +46,22 @@ export async function getBasicPronouns(): Promise<any[]> {
     return result.rows;
 }
 
+export async function getPronounsForPerson(person_id: number): Promise<any[]> {
+    const result = await executeQuery(`SELECT n.id, n.nickname FROM pronouns n
+        JOIN person_pronouns pp ON pp.pronoun_id = n.id
+        JOIN people p ON pp.person_id = p.id WHERE p.id = ${person_id}`);
+    return result.rows;
+}
+
 export async function getBasicDiets(): Promise<any[]> {
     const result = await executeQuery(`SELECT id, details FROM diets WHERE custom = false`);
+    return result.rows;
+}
+
+export async function getDietsForPerson(person_id: number): Promise<any[]> {
+    const result = await executeQuery(`SELECT d.id, d.details FROM diets d
+        JOIN person_diets pd ON pd.diet_id = d.id
+        JOIN people p ON pd.person_id = p.id WHERE p.id = ${person_id}`);
     return result.rows;
 }
 
@@ -49,6 +71,23 @@ export async function createPerson(person: Person): Promise<string> {
     const values = [`${person.name}`, `${person.full_name}`, `${person.phone}`, `${person.email}`];
     const result = await executeQuery(insertPerson, values);
     return result.rows[0].id;
+}
+
+export async function updatePerson(id: number, params: {
+    short_name?: string, full_name?: string, phone?: string, email?: string
+}) {
+
+    const updateClauses: string[] = [];
+    if (params.short_name) updateClauses.push(`short_name = '${params.short_name}'`);
+    if (params.full_name) updateClauses.push(`full_name = '${params.full_name}'`);
+    if (params.phone) updateClauses.push(`phone = '${params.phone}'`);
+    if (params.email) updateClauses.push(`email = '${params.email}'`);
+
+    let updatePerson = 'UPDATE people SET ';
+    updatePerson = updatePerson.concat(updateClauses.join(', '));
+    updatePerson= updatePerson.concat(` WHERE id = ${id}`);
+
+    await executeQuery(updatePerson);
 }
 
 export async function addPronounToPerson(person_id: string, pronoun_id: string) {
@@ -69,6 +108,11 @@ export async function createOrFindCustomPronoun(pronoun_nickname: string): Promi
     return result.rows[0].id;
 }
 
+export async function removeAllPronounsFromPerson(person_id: string) {
+    const deletePersonPronoun = `DELETE FROM person_pronouns WHERE person_id = ${person_id}`;
+    await executeQuery(deletePersonPronoun);
+}
+
 export async function addDietToPerson(person_id: string, diet_id: string) {
     const insertPersonDiet = 'INSERT INTO person_diets(person_id, diet_id) VALUES($1, $2)';
     await executeQuery(insertPersonDiet, [`${person_id}`, `${diet_id}`]);
@@ -87,10 +131,20 @@ export async function createOrFindCustomDiet(diet_details: string): Promise<stri
     return result.rows[0].id;
 }
 
+export async function removeAllDietsFromPerson(person_id: string) {
+    const deletePersonDiet = `DELETE FROM person_diets WHERE person_id = ${person_id}`;
+    await executeQuery(deletePersonDiet);
+}
+
 export async function createRsvp(rsvp_id: string, event_id: string, guest_id: string, respondent_id: string, attending: string, comments: string) {
     const insertRsvp = 'INSERT INTO rsvps(id, respondent_id, guest_id, event_id, attending, comments) VALUES($1, $2, $3, $4, $5, $6)';
     const values = [`${rsvp_id}`, `${respondent_id}`, `${guest_id}`, `${event_id}`, `${attending}`, `${comments}`];
     await executeQuery(insertRsvp, values);
+}
+
+export async function updateRsvp(rsvp_id: string, attending: string, comments: string) {
+    const updateRsvp = `UPDATE rsvps SET attending = '${attending}', comments = '${comments}' WHERE id = '${rsvp_id}'`;
+    await executeQuery(updateRsvp);
 }
 
 // ** UTILITY FUNCTIONS ** //
