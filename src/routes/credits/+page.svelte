@@ -13,7 +13,7 @@
         <CardBody>
             <CardLink href="https://github.com/ejherzog" target="_blank" class="text-reset">Github</CardLink>
             <CardLink href="https://ejherzog.github.io" target="_blank" class="text-reset">Portfolio</CardLink>
-            <CardLink href="https://www.linkedin.com/in/evajherzog" target="_blank" class="text-reset">LinkedIn</CardLink>
+            <CardLink href="https://www.linkedin.com/in/ejherzog" target="_blank" class="text-reset">LinkedIn</CardLink>
             <CardLink href="https://ko-fi.com/evajherzog" target="_blank" class="text-reset">Ko-Fi</CardLink>
         </CardBody>
     </Card>

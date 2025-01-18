@@ -1,5 +1,3 @@
-import type { SelectOption } from "../view/SelectOption";
-
 export class DB_Rsvp {
 
     id: string;
