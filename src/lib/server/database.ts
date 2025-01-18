@@ -4,7 +4,10 @@ import type { Person } from "$lib/types/People";
 
 const pool = new pg.Pool({
     max: 5,
-    connectionString: DATABASE_URL
+    connectionString: DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 type PostgresQueryResult = (sql: string, params?: any[]) => Promise<QueryResult<any>>
