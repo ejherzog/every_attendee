@@ -11,7 +11,6 @@ CREATE TABLE people (
 ```
 CREATE TABLE events (
     id char(6) PRIMARY KEY,
-    host_id integer REFERENCES people,
     title varchar(200) NOT NULL,
     start_time timestamptz,
     end_time timestamptz,

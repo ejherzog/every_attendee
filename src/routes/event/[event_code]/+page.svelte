@@ -73,8 +73,7 @@
 			<Image
 				fluid
 				class="rounded shadow align-items-center"
-				alt="A full moon glows over the hills and desert near Joshua Tree National Park in California."
-				src="https://images.unsplash.com/photo-1653540883470-bf726448911b"
+				src={data.event.image_url}
 			/>
 		</Col>
 	</Row>

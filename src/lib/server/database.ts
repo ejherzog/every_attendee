@@ -1,14 +1,17 @@
 import pg, { type QueryResult } from 'pg';
 import { DATABASE_URL } from '$env/static/private';
 import type { Person } from "$lib/types/People";
+import { dev } from '$app/environment';
 
-const pool = new pg.Pool({
+let pool_settings: pg.PoolConfig = {
     max: 5,
-    connectionString: DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
-});
+    connectionString: DATABASE_URL
+}
+if (!dev) {
+    pool_settings.ssl = { rejectUnauthorized: false }
+}
+
+const pool = new pg.Pool(pool_settings);
 
 type PostgresQueryResult = (sql: string, params?: any[]) => Promise<QueryResult<any>>
 const query: PostgresQueryResult = (sql, params?) => pool.query(sql, params);
