@@ -21,6 +21,7 @@
     <p><b>Note: </b>Hosts can export event and guest data at any time before it is removed from the EveryAttendee database.</p>
 	<hr>
 	<h4>Project Status</h4>
-	<p>The alpha version of this app was released in January 2025. It is intended for use by those personally invited by Eva.</p>
+	<p>The alpha version of this app was released in January 2025. It is intended for use by those personally invited to events hosted by Eva.</p>
 	<p>Please message Eva with any reports of unexpected behavior (take screenshots, if possible!). Thank you.</p>
+	<p>If you are interested in using this app, let Eva know! It isn't ready for anyone else to make their own events yet, but with your motivation and encouragement, it could be available soon!</p>
 </Container>
