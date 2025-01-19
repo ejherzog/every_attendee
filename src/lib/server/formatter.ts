@@ -36,6 +36,10 @@ export function getWhenFromTimestamps(start_time?: string, end_time?: string) {
     return when;
 }
 
+export function containsIgnoreCase(big_string: string, sub_string: string) {
+    return big_string.toLowerCase().includes(sub_string.toLowerCase());
+}
+
 function getTime(start: Date, end: Date) {
     return `${timeFormatter.format(start)} - ${timeFormatter.format(end)}`;
 }

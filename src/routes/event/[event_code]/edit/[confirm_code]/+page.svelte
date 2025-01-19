@@ -71,8 +71,7 @@
 			<Image
 				fluid
 				class="rounded shadow align-items-center"
-				alt="A full moon glows over the hills and desert near Joshua Tree National Park in California."
-				src="https://images.unsplash.com/photo-1653540883470-bf726448911b"
+				src={data.event.image_url}
 			/>
 		</Col>
 	</Row>
@@ -92,7 +91,7 @@
 
 <Container style="background-color: #f9b13e66;" class="py-2 rounded">
 	<Container class="mt-2">
-		<Form action="?/rsvp" method="POST">
+		<Form method="POST">
 			<input type="hidden" name="event_code" value={data.event.id} />
 			<input type="hidden" name="confirmation_code" value={data.rsvp.confirmation_code} />
 			<input type="hidden" name="guest_id" value={data.rsvp.guest_id} />

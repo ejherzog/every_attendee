@@ -1,6 +1,7 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { Actions } from './$types';
 import { getBasicDietList, getBasicPronounList, getEventById, recordRsvp } from '$lib/server/server';
+import { containsIgnoreCase } from '$lib/server/formatter';
 
 export async function load({ params }) {
     try {
@@ -20,11 +21,11 @@ export async function load({ params }) {
 }
 
 export const actions = {
-    rsvp: async ({ request }) => {
+    default: async ({ request }) => {
         const formData = await request.formData();
 
-        if (formData.get("event_code") && request.headers.get("referer") 
-            && !request.headers.get("referer")!.includes(formData.get("event_code")!.toString().toLowerCase())) {
+        if (formData.get("event_code") && request.headers.get("referer")
+            && !containsIgnoreCase(request.headers.get("referer")!, formData.get("event_code")!.toString())) {
             error(400, {
                 message: 'Bad request: Event ID in URL does not match Event ID in submitted form.'
             });
