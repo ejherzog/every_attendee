@@ -91,7 +91,7 @@
 	</Row>
 </Container>
 
-<Container style="background-color: #f9b13e66;" class="py-2 rounded">
+<Container style="background-color: #ffcf8355;" class="py-2 rounded">
 	<Container class="mt-2">
 		<Form method="POST">
 			<input type="hidden" name="event_code" value={data.event.id} />
