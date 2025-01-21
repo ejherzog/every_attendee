@@ -99,8 +99,8 @@
 				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
 					<Label
 						><tag class="text-reset fw-bold text-responsive fs-5">Your Name </tag>
-						<tag class="fw-lighter fst-italic text-responsive fs-6">(required)</tag><br />
-						<tag class="fw-lighter fst-italic text-responsive fs-6">How should we address you?</tag>
+						<tag class="fst-italic text-responsive fs-6">(required)</tag><br />
+						<tag class="fst-italic text-responsive fs-6">How should we address you?</tag>
 					</Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
@@ -116,7 +116,7 @@
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
 					<Label
 						><tag class="text-reset fw-bold text-responsive fs-5">Full Name </tag>
-						<tag class="fw-lighter fst-italic text-responsive fs-6">(optional)</tag></Label
+						<tag class="fst-italic text-responsive fs-6">(optional)</tag></Label
 					>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto">
@@ -166,7 +166,7 @@
 						on:change={validate}
 					/>
 				</Col>
-				<Col class="fw-lighter fst-italic col-12 my-1 text-center">
+				<Col class="fst-italic col-12 my-1 text-center">
 					You must provide at least one way to contact you.
 				</Col>
 			</Row>
@@ -242,7 +242,7 @@
 						<tag class="text-reset fw-bold text-responsive fs-5"
 							>Notes for the Host{#if data.event.hosts.length > 1}s{/if}</tag
 						><br />
-						<tag class="fw-lighter fst-italic text-responsive fs-6">{data.host_message}</tag></Label
+						<tag class="fst-italic text-responsive fs-6">{data.host_message}</tag></Label
 					>
 				</Col>
 				<Col xs="12" sm="6" md="9">
