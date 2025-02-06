@@ -2,6 +2,7 @@ import pg, { type QueryResult } from 'pg';
 import { DATABASE_URL } from '$env/static/private';
 import type { Person } from "$lib/types/People";
 import { dev } from '$app/environment';
+import type { Session } from './auth';
 
 let pool_settings: pg.PoolConfig = {
     max: 5,
@@ -15,6 +16,26 @@ const pool = new pg.Pool(pool_settings);
 
 type PostgresQueryResult = (sql: string, params?: any[]) => Promise<QueryResult<any>>
 const query: PostgresQueryResult = (sql, params?) => pool.query(sql, params);
+
+// ** USER AUTH OPERATIONS ** //
+export async function insertSession(session: Session) {
+    await executeQuery(`INSERT INTO user_session (id, user_id, expires_at) 
+        VALUES (${session.id}, ${session.userId}, ${session.expiresAt})`);
+}
+
+export async function retrieveSession(sessionId: string): Promise<any> {
+    const result = await executeQuery(`SELECT user_session.id, user_session.user_id, user_session.expires_at, app_user.id 
+        FROM user_session INNER JOIN user ON app_user.id = user_session.user_id WHERE id = ${sessionId}`);
+    return result.rows[0];
+}
+
+export async function updateSessionExpiration(session: Session) {
+    await executeQuery(`UPDATE user_session SET expires_at = ${session.expiresAt} WHERE id = ${session.id}`);
+}
+
+export async function deleteSession(sessionId: string) {
+    await executeQuery(`DELETE FROM user_session WHERE id = ${sessionId}`);
+}
 
 // ** READ OPERATIONS ** //
 export async function findEventById(code: string): Promise<any[]> {
