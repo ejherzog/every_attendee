@@ -1,7 +1,21 @@
+import { hash, verify } from "@node-rs/argon2";
 import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding";
 import { sha256 } from "@oslojs/crypto/sha2";
 import { deleteSession, insertSession, retrieveSession, updateSessionExpiration } from "./database";
 import type { RequestEvent } from "@sveltejs/kit";
+
+export async function hashPassword(password: string): Promise<string> {
+	return await hash(password, {
+		memoryCost: 19456,
+		timeCost: 2,
+		outputLen: 32,
+		parallelism: 1
+	});
+}
+
+export async function verifyPassword(hash: string, password: string): Promise<boolean> {
+	return await verify(hash, password);
+}
 
 export function generateSessionToken(): string {
 	const bytes = new Uint8Array(20);
@@ -23,27 +37,22 @@ export async function createSession(token: string, userId: number): Promise<Sess
 
 export async function validateSessionToken(token: string): Promise<SessionValidationResult> {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
-	const row = await retrieveSession(sessionId);
-	if (row === null) {
-		return { session: null, user: null };
-	}
+	const result = await retrieveSession(sessionId);
 	const session: Session = {
-		id: row[0],
-		userId: row[1],
-		expiresAt: row[2]
+		id: result.id,
+		userId: result.user_id,
+		expiresAt: result.expires_at
 	};
-	const user: User = {
-		id: row[3]
-	};
+
 	if (Date.now() >= session.expiresAt.getTime()) {
         await deleteSession(session.id);
-		return { session: null, user: null };
+		return { session: null };
 	}
 	if (Date.now() >= session.expiresAt.getTime() - 1000 * 60 * 60 * 24 * 15) {
 		session.expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 30);
 		await updateSessionExpiration(session);
 	}
-	return { session, user };
+	return { session };
 }
 
 export async function invalidateSession(sessionId: string): Promise<void> {
@@ -71,8 +80,8 @@ export function deleteSessionTokenCookie(event: RequestEvent): void {
 }
 
 export type SessionValidationResult =
-	| { session: Session; user: User }
-	| { session: null; user: null };
+	| { session: Session }
+	| { session: null };
 
 export interface Session {
 	id: string;

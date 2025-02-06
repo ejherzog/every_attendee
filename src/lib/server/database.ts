@@ -3,6 +3,7 @@ import { DATABASE_URL } from '$env/static/private';
 import type { Person } from "$lib/types/People";
 import { dev } from '$app/environment';
 import type { Session } from './auth';
+import type { DB_AppUser } from '$lib/types/db/DB_AppUser';
 
 let pool_settings: pg.PoolConfig = {
     max: 5,
@@ -18,23 +19,34 @@ type PostgresQueryResult = (sql: string, params?: any[]) => Promise<QueryResult<
 const query: PostgresQueryResult = (sql, params?) => pool.query(sql, params);
 
 // ** USER AUTH OPERATIONS ** //
+export async function getUser(username: string): Promise<DB_AppUser> {
+    const result = await executeQuery(`SELECT * FROM app_users WHERE username = '${username}'`);
+    return result.rows[0] as DB_AppUser;
+}
+
+export async function getUsername(user_id: number): Promise<string> {
+    const result = await executeQuery(`SELECT username FROM app_users WHERE id = ${user_id}`);
+    return result.rows[0].username;
+}
+
 export async function insertSession(session: Session) {
-    await executeQuery(`INSERT INTO user_session (id, user_id, expires_at) 
-        VALUES (${session.id}, ${session.userId}, ${session.expiresAt})`);
+    const insertQuery = 'INSERT INTO user_sessions(id, user_id, expires_at) VALUES ($1, $2, $3)';
+    await executeQuery(insertQuery, [session.id, `${session.userId}`, session.expiresAt.toUTCString()]);
 }
 
 export async function retrieveSession(sessionId: string): Promise<any> {
-    const result = await executeQuery(`SELECT user_session.id, user_session.user_id, user_session.expires_at, app_user.id 
-        FROM user_session INNER JOIN user ON app_user.id = user_session.user_id WHERE id = ${sessionId}`);
+    const result = await executeQuery(`SELECT user_sessions.id, user_sessions.user_id, user_sessions.expires_at 
+        FROM user_sessions WHERE user_sessions.id = '${sessionId}'`);
+
     return result.rows[0];
 }
 
 export async function updateSessionExpiration(session: Session) {
-    await executeQuery(`UPDATE user_session SET expires_at = ${session.expiresAt} WHERE id = ${session.id}`);
+    await executeQuery(`UPDATE user_sessions SET expires_at = ${session.expiresAt} WHERE id = ${session.id}`);
 }
 
 export async function deleteSession(sessionId: string) {
-    await executeQuery(`DELETE FROM user_session WHERE id = ${sessionId}`);
+    await executeQuery(`DELETE FROM user_sessions WHERE id = ${sessionId}`);
 }
 
 // ** READ OPERATIONS ** //
