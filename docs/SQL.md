@@ -81,16 +81,24 @@ CREATE TABLE person_diets (
 ------
 
 ```
-CREATE TABLE app_user (
-    id SERIAL PRIMARY KEY,
-    username TEXT NOT NULL UNIQUE
+CREATE TABLE app_users (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    username text NOT NULL UNIQUE
 );
 ```
 
 ```
-CREATE TABLE user_session (
-    id TEXT NOT NULL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES app_user,
+CREATE TABLE user_sessions (
+    id text NOT NULL PRIMARY KEY,
+    user_id integer NOT NULL REFERENCES app_users,
     expires_at TIMESTAMPTZ NOT NULL
+);
+```
+
+```
+CREATE TABLE app_users_events (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    app_user_id integer NOT NULL REFERENCES app_users,
+    event_id char(6) REFERENCES events
 );
 ```

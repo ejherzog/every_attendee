@@ -5,7 +5,7 @@ import { Event } from "$lib/types/view/Event";
 import { Rsvp } from "$lib/types/view/Rsvp";
 import { SelectOption } from "$lib/types/view/SelectOption";
 import { generateRsvpCode } from "./codes";
-import { addDietToPerson, addPronounToPerson, createOrFindCustomDiet, createOrFindCustomPronoun, createPerson, createRsvp, findEventById, findHostsByEventId, findRsvp, getBasicDiets, getBasicPronouns, getDietsForPerson, getPronounsForPerson, removeAllDietsFromPerson, removeAllPronounsFromPerson, updatePerson, updateRsvp } from "./database";
+import { addDietToPerson, addPronounToPerson, createOrFindCustomDiet, createOrFindCustomPronoun, createPerson, createRsvp, findEventById, findEventsByUserId, findHostsByEventId, findRsvp, getBasicDiets, getBasicPronouns, getDietsForPerson, getPronounsForPerson, removeAllDietsFromPerson, removeAllPronounsFromPerson, updatePerson, updateRsvp } from "./database";
 import { getHosts, getWhenFromTimestamps } from "./formatter";
 
 export async function getEventById(code: string): Promise<Event> {
@@ -74,6 +74,20 @@ export async function getBasicDietList(): Promise<SelectOption[]> {
     });
 
     return dietList;
+}
+
+export async function getUsersEvents(app_user_id: number): Promise<Event[]> {
+
+    const events_data = await findEventsByUserId(app_user_id);
+
+    return events_data.map(event => {
+        return new Event(event.title, {
+            id: event.event_id,
+            when: getWhenFromTimestamps(event.start_time, event.end_time),
+            location: event.location, address: event.address, 
+            description: event.description, image_url: event.image_url
+        });
+    });
 }
 
 export async function recordRsvp(formData: any): Promise<string> {
