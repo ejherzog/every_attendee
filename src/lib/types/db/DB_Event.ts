@@ -1,7 +1,6 @@
 export class DB_Event {
 
     id: string;
-    host_id: number;
     title: string;
     start_time?: string;
     end_time?: string;
@@ -10,12 +9,11 @@ export class DB_Event {
     description?: string;
     image_url?: string;
 
-    constructor(id: string, host_id: number, title: string, params?: {
+    constructor(id: string, title: string, params?: {
         start_time?: string, end_time?: string, location?: string,
         address?: string, description?: string, image_url?: string
     }) {
         this.id = id;
-        this.host_id = host_id;
         this.title = title;
 
         if (params) {

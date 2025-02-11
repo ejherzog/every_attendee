@@ -2,13 +2,14 @@ import type { DB_Event } from "$lib/types/db/DB_Event";
 import type { DB_Rsvp } from "$lib/types/db/DB_Rsvp";
 import { Person } from "$lib/types/People";
 import { Event } from "$lib/types/view/Event";
+import { Event_Details } from "$lib/types/view/Event_Details";
 import { Rsvp } from "$lib/types/view/Rsvp";
 import { SelectOption } from "$lib/types/view/SelectOption";
 import { generateRsvpCode } from "./codes";
 import { addDietToPerson, addPronounToPerson, createOrFindCustomDiet, createOrFindCustomPronoun, createPerson, createRsvp, findEventById, findEventsByUserId, findHostsByEventId, findRsvp, getBasicDiets, getBasicPronouns, getDietsForPerson, getPronounsForPerson, removeAllDietsFromPerson, removeAllPronounsFromPerson, updatePerson, updateRsvp } from "./database";
-import { getHosts, getWhenFromTimestamps } from "./formatter";
+import { convertToDateTimeLocalString, getHosts, getWhenFromTimestamps } from "./formatter";
 
-export async function getEventById(code: string): Promise<Event> {
+export async function getEventInfoById(code: string): Promise<Event> {
 
     const eventRows = await findEventById(code);
 
@@ -28,6 +29,22 @@ export async function getEventById(code: string): Promise<Event> {
         when: getWhenFromTimestamps(event.start_time, event.end_time), hostCount: hostRows.length, hosts,
         location: event.location, address: event.address, description: event.description, image_url: event.image_url
     });
+}
+
+export async function getEventDetailsById(code: string): Promise<Event_Details> {
+
+    const eventRows = await findEventById(code);
+
+    if (eventRows.length < 1) throw new Error(`No event found with code ${code}.`);
+    if (eventRows.length > 1) throw new Error(`Multiple events found with code ${code}.`);
+
+    const raw_event = eventRows[0] as DB_Event;
+    const start_time = convertToDateTimeLocalString(new Date(raw_event.start_time!));
+    const end_time = convertToDateTimeLocalString(new Date(raw_event.end_time!));
+
+    return new Event_Details(raw_event.id, raw_event.title, start_time, end_time,
+        raw_event.location!, raw_event.address!, raw_event.description!, raw_event.image_url!
+    );
 }
 
 export async function getRsvp(event_code: string, confirmation_code: string): Promise<Rsvp> {

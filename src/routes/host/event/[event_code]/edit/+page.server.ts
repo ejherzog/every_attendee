@@ -1,9 +1,9 @@
-import { getEventById } from "$lib/server/server";
+import { getEventDetailsById } from "$lib/server/server";
 import { redirect } from "@sveltejs/kit";
 
 export async function load({ params }) {
     try {
-        let event = await getEventById(params.event_code.toUpperCase());
+        let event = await getEventDetailsById(params.event_code.toUpperCase());
         return {
             event: structuredClone(event)
         };
