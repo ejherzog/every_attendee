@@ -192,6 +192,16 @@ export async function updateRsvp(rsvp_id: string, attending: string, comments: s
     await executeQuery(updateRsvp);
 }
 
+export async function updateEvent(event_id: string, title: string, start_time: string, end_time: string, location: string, address: string, description: string, image_url: string) {
+    const updateEvent = `UPDATE events SET 
+        title = $1, location = $2, address = $3,
+        description = $4, image_url = '${image_url}',
+        start_time = '${start_time}', end_time = '${end_time}'
+        WHERE id = '${event_id}'`;
+    const values = [`${title}`, `${location}`, `${address}`, `${description}`];
+    await executeQuery(updateEvent, values);
+}
+
 // ** UTILITY FUNCTIONS ** //
 async function executeQuery(query_string: string, values?: string[]): Promise<QueryResult> {
     try {

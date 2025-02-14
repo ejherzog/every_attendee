@@ -6,19 +6,19 @@ import { Event_Details } from "$lib/types/view/Event_Details";
 import { Rsvp } from "$lib/types/view/Rsvp";
 import { SelectOption } from "$lib/types/view/SelectOption";
 import { generateRsvpCode } from "./codes";
-import { addDietToPerson, addPronounToPerson, createOrFindCustomDiet, createOrFindCustomPronoun, createPerson, createRsvp, findEventById, findEventsByUserId, findHostsByEventId, findRsvp, getBasicDiets, getBasicPronouns, getDietsForPerson, getPronounsForPerson, removeAllDietsFromPerson, removeAllPronounsFromPerson, updatePerson, updateRsvp } from "./database";
-import { convertToDateTimeLocalString, getHosts, getWhenFromTimestamps } from "./formatter";
+import * as db from "./database";
+import { convertToDateTimeLocalString, convertToTimestampTz, getHosts, getWhenFromTimestamps } from "./formatter";
 
 export async function getEventInfoById(code: string): Promise<Event> {
 
-    const eventRows = await findEventById(code);
+    const eventRows = await db.findEventById(code);
 
     if (eventRows.length < 1) throw new Error(`No event found with code ${code}.`);
     if (eventRows.length > 1) throw new Error(`Multiple events found with code ${code}.`);
 
     const event = eventRows[0] as DB_Event;
 
-    const hostRows = await findHostsByEventId(code);
+    const hostRows = await db.findHostsByEventId(code);
     let hosts = '';
     if (hostRows.length > 0) {
         hosts = getHosts(hostRows);
@@ -33,7 +33,8 @@ export async function getEventInfoById(code: string): Promise<Event> {
 
 export async function getEventDetailsById(code: string): Promise<Event_Details> {
 
-    const eventRows = await findEventById(code);
+    const eventRows = await db.findEventById(code);
+    console.log(eventRows[0]);
 
     if (eventRows.length < 1) throw new Error(`No event found with code ${code}.`);
     if (eventRows.length > 1) throw new Error(`Multiple events found with code ${code}.`);
@@ -41,6 +42,8 @@ export async function getEventDetailsById(code: string): Promise<Event_Details> 
     const raw_event = eventRows[0] as DB_Event;
     const start_time = convertToDateTimeLocalString(new Date(raw_event.start_time!));
     const end_time = convertToDateTimeLocalString(new Date(raw_event.end_time!));
+    console.log(raw_event.start_time!);
+    // const timezone = 
 
     return new Event_Details(raw_event.id, raw_event.title, start_time, end_time,
         raw_event.location!, raw_event.address!, raw_event.description!, raw_event.image_url!
@@ -49,14 +52,14 @@ export async function getEventDetailsById(code: string): Promise<Event_Details> 
 
 export async function getRsvp(event_code: string, confirmation_code: string): Promise<Rsvp> {
 
-    const rsvpRows = await findRsvp(event_code, confirmation_code);
+    const rsvpRows = await db.findRsvp(event_code, confirmation_code);
 
     if (rsvpRows.length < 1) throw new Error(`No RSVP found with code ${confirmation_code} for ${event_code}.`);
     if (rsvpRows.length > 1) throw new Error(`Multiple RSVPs found with confirmation code ${confirmation_code} for ${event_code}.`);
 
     const rsvp = rsvpRows[0] as DB_Rsvp;
 
-    let [pronounRows, dietRows] = await Promise.all([getPronounsForPerson(rsvp.guest_id), getDietsForPerson(rsvp.guest_id)]);
+    let [pronounRows, dietRows] = await Promise.all([db.getPronounsForPerson(rsvp.guest_id), db.getDietsForPerson(rsvp.guest_id)]);
     const pronouns = pronounRows.map(pronoun => {
         return { label: pronoun.nickname, value: pronoun.id }
     });
@@ -71,7 +74,7 @@ export async function getRsvp(event_code: string, confirmation_code: string): Pr
 
 export async function getBasicPronounList(): Promise<SelectOption[]> {
 
-    const pronounRows = await getBasicPronouns();
+    const pronounRows = await db.getBasicPronouns();
 
     let pronounList: SelectOption[] = [];
     pronounRows.forEach(pronoun => {
@@ -83,7 +86,7 @@ export async function getBasicPronounList(): Promise<SelectOption[]> {
 
 export async function getBasicDietList(): Promise<SelectOption[]> {
 
-    const dietRows = await getBasicDiets();
+    const dietRows = await db.getBasicDiets();
 
     let dietList: SelectOption[] = [];
     dietRows.forEach(diet => {
@@ -95,7 +98,7 @@ export async function getBasicDietList(): Promise<SelectOption[]> {
 
 export async function getUsersEvents(app_user_id: number): Promise<Event[]> {
 
-    const events_data = await findEventsByUserId(app_user_id);
+    const events_data = await db.findEventsByUserId(app_user_id);
 
     return events_data.map(event => {
         return new Event(event.title, {
@@ -115,7 +118,7 @@ export async function recordRsvp(formData: any): Promise<string> {
     guest.phone = formData.get("phone");
     guest.email = formData.get("email");
 
-    const guest_id = await createPerson(guest);
+    const guest_id = await db.createPerson(guest);
     Promise.all([addPronouns(formData.get("pronouns"), guest_id), addDiets(formData.get("diets"), guest_id)]);
 
     // RSVP
@@ -124,7 +127,7 @@ export async function recordRsvp(formData: any): Promise<string> {
     const comments = formData.get("notes");
     const rsvp_id = await generateRsvpCode();
 
-    await createRsvp(rsvp_id, event_id, guest_id, guest_id, attending, comments);
+    await db.createRsvp(rsvp_id, event_id, guest_id, guest_id, attending, comments);
 
     return rsvp_id;
 }
@@ -133,13 +136,13 @@ export async function changeRsvp(formData: any): Promise<string> {
 
     // Guest
     const guest_id = formData.get("guest_id");
-    await updatePerson(guest_id, {
+    await db.updatePerson(guest_id, {
         short_name: formData.get("name"), full_name: formData.get("full_name"),
         phone: formData.get("phone"), email: formData.get("email")
     });
 
     // Pronouns & Diets
-    Promise.all([removeAllPronounsFromPerson(guest_id), removeAllDietsFromPerson(guest_id)]);
+    Promise.all([db.removeAllPronounsFromPerson(guest_id), db.removeAllDietsFromPerson(guest_id)]);
     Promise.all([addPronouns(formData.get("pronouns"), guest_id), addDiets(formData.get("diets"), guest_id)]);
 
     // RSVP
@@ -147,9 +150,29 @@ export async function changeRsvp(formData: any): Promise<string> {
     const comments = formData.get("notes");
     const rsvp_id = formData.get("confirmation_code");
 
-    await updateRsvp(rsvp_id, attending, comments);
+    await db.updateRsvp(rsvp_id, attending, comments);
 
     return rsvp_id;
+}
+
+export async function editEvent(formData: any): Promise<string> {
+
+    const event_id = formData.get("event_code");
+    const title = formData.get("title");
+    const start = formData.get("start_time");
+    const end = formData.get("end_time");
+    const timezone = formData.get("timezone");
+    const location = formData.get("location");
+    const address = formData.get("address");
+    const description = formData.get("description");
+    const image_url = formData.get("image_url");
+
+    const start_time = convertToTimestampTz(start, timezone);
+    const end_time = convertToTimestampTz(end, timezone);
+
+    await db.updateEvent(event_id, title, start_time, end_time, location, address, description, image_url);
+
+    return event_id;
 }
 
 async function addPronouns(pronounFormData: any, guest_id: string) {
@@ -157,10 +180,10 @@ async function addPronouns(pronounFormData: any, guest_id: string) {
     const pronouns = JSON.parse(pronounFormData);
     pronouns.forEach(async (item: { value: any; label: any; }) => {
         if (item.value) {
-            await addPronounToPerson(guest_id, item.value);
+            await db.addPronounToPerson(guest_id, item.value);
         } else {
-            const custom_pronoun_id = await createOrFindCustomPronoun(item.label);
-            await addPronounToPerson(guest_id, custom_pronoun_id);
+            const custom_pronoun_id = await db.createOrFindCustomPronoun(item.label);
+            await db.addPronounToPerson(guest_id, custom_pronoun_id);
         }
     });
 }
@@ -170,10 +193,10 @@ async function addDiets(dietFormData: any, guest_id: string) {
     const diets = JSON.parse(dietFormData);
     diets.forEach(async (item: { value: any; label: any; }) => {
         if (item.value) {
-            await addDietToPerson(guest_id, item.value);
+            await db.addDietToPerson(guest_id, item.value);
         } else {
-            const custom_diet_id = await createOrFindCustomDiet(item.label);
-            await addDietToPerson(guest_id, custom_diet_id);
+            const custom_diet_id = await db.createOrFindCustomDiet(item.label);
+            await db.addDietToPerson(guest_id, custom_diet_id);
         }
     });
 }
