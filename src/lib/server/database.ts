@@ -70,6 +70,15 @@ export async function findRsvp(event_code: string, confirmation_code: string): P
     return result.rows;
 }
 
+export async function findRsvpsByEventId(event_code: string): Promise<any[]> {
+
+    const result = await executeQuery(`SELECT r.id, r.guest_id, 
+        p.short_name AS name, p.full_name, p.phone, p.email, r.attending, r.comments
+        FROM rsvps r JOIN people p ON p.id = r.respondent_id
+        WHERE r.event_id = '${event_code}'`);
+    return result.rows;
+}
+
 export async function findEventsByUserId(app_user_id: number) {
     const result = await executeQuery(`SELECT * FROM events e 
         JOIN app_users_events u ON e.id = u.event_id WHERE u.app_user_id = ${app_user_id}`);

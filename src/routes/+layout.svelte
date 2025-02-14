@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Navbar, NavbarBrand, Container, NavLink, Row, Col } from '@sveltestrap/sveltestrap';
 
-	// const kofi_words = ['coffee', 'pizza', 'bacon', 'chocolate', 'cheese'];
-	// const kofi_emojis = ['☕️', '🍕', '🥓', '🍫', '🧀'];
+	// const kofi_words = ['coffee', 'pizza', 'bacon', 'chocolate', 'cheese', 'soda'];
+	// const kofi_emojis = ['☕️', '🍕', '🥓', '🍫', '🧀', '🥤'];
 	// const index = Math.floor(Math.random() * kofi_emojis.length);
 	// const treat = kofi_words[index];
 	// const emoji = kofi_emojis[index];

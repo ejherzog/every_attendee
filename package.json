@@ -39,9 +39,11 @@
 		"@oslojs/encoding": "^1.1.0",
 		"@sveltejs/adapter-node": "^5.2.2",
 		"@sveltestrap/sveltestrap": "^6.2.7",
+		"@tanstack/svelte-table": "^8.21.2",
 		"moment-timezone": "^0.5.47",
 		"pg": "^8.13.1",
 		"svelte-multiselect": "^10.2.0",
+		"svelte-table": "^0.6.3",
 		"validator": "^13.12.0"
 	}
 }

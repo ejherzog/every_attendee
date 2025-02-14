@@ -22,7 +22,8 @@
 			<Col xs="12" md="6">When: {@html event.when}</Col>
 			<Col xs="12" md="6">Where: {event.location}<br />{event.address}</Col>
 		</Row><Row class="text-center p-1 mt-1">
-			<Col xs="6"><a href={`/host/event/${event.id}/edit`}>Edit Event</a></Col><Col xs="6">Delete Event</Col>
+			<Col xs="6"><a href={`/host/event/${event.id}/edit`}>Edit Event</a></Col>
+			<Col xs="6"><a href={`/host/event/${event.id}/rsvps`}>View RSVPs</a></Col>
 		</Row>
 		<hr />
 	{/each}

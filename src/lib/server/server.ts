@@ -72,6 +72,13 @@ export async function getRsvp(event_code: string, confirmation_code: string): Pr
     );
 }
 
+export async function getRsvpsForEvent(event_code: string): Promise<Rsvp[]> {
+
+    const rsvpRows = await db.findRsvpsByEventId(event_code);
+
+    return rsvpRows;
+}
+
 export async function getBasicPronounList(): Promise<SelectOption[]> {
 
     const pronounRows = await db.getBasicPronouns();
