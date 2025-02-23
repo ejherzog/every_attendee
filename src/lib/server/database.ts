@@ -107,6 +107,13 @@ export async function getPronounsForPerson(person_id: number): Promise<any[]> {
     return result.rows;
 }
 
+export async function getPronounsForPeople(people_ids: number[]): Promise<any[]> {
+    const result = await executeQuery(`SELECT p.id, n.nickname FROM pronouns n
+        JOIN person_pronouns pp ON pp.pronoun_id = n.id
+        JOIN people p ON pp.person_id = p.id WHERE p.id IN (${people_ids.join(',')})`);
+    return result.rows;
+}
+
 export async function getBasicDiets(): Promise<any[]> {
     const result = await executeQuery(`SELECT id, details FROM diets WHERE custom = false`);
     return result.rows;
@@ -116,6 +123,13 @@ export async function getDietsForPerson(person_id: number): Promise<any[]> {
     const result = await executeQuery(`SELECT d.id, d.details FROM diets d
         JOIN person_diets pd ON pd.diet_id = d.id
         JOIN people p ON pd.person_id = p.id WHERE p.id = ${person_id}`);
+    return result.rows;
+}
+
+export async function getDietsForPeople(people_ids: number[]): Promise<any[]> {
+    const result = await executeQuery(`SELECT p.id, d.details FROM diets d
+        JOIN person_diets pd ON pd.diet_id = d.id
+        JOIN people p ON pd.person_id = p.id WHERE p.id IN (${people_ids.join(',')})`);
     return result.rows;
 }
 

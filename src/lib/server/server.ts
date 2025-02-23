@@ -34,7 +34,6 @@ export async function getEventInfoById(code: string): Promise<Event> {
 export async function getEventDetailsById(code: string): Promise<Event_Details> {
 
     const eventRows = await db.findEventById(code);
-    console.log(eventRows[0]);
 
     if (eventRows.length < 1) throw new Error(`No event found with code ${code}.`);
     if (eventRows.length > 1) throw new Error(`Multiple events found with code ${code}.`);
@@ -42,8 +41,6 @@ export async function getEventDetailsById(code: string): Promise<Event_Details> 
     const raw_event = eventRows[0] as DB_Event;
     const start_time = convertToDateTimeLocalString(new Date(raw_event.start_time!));
     const end_time = convertToDateTimeLocalString(new Date(raw_event.end_time!));
-    console.log(raw_event.start_time!);
-    // const timezone = 
 
     return new Event_Details(raw_event.id, raw_event.title, start_time, end_time,
         raw_event.location!, raw_event.address!, raw_event.description!, raw_event.image_url!
@@ -72,11 +69,26 @@ export async function getRsvp(event_code: string, confirmation_code: string): Pr
     );
 }
 
-export async function getRsvpsForEvent(event_code: string): Promise<Rsvp[]> {
+export async function getRsvpsForEvent(event_code: string): Promise<any[]> {
 
     const rsvpRows = await db.findRsvpsByEventId(event_code);
 
-    return rsvpRows;
+    const people_ids = rsvpRows.map(rsvpRow => {
+        return rsvpRow.guest_id;
+    });
+
+    const pronounRows = await db.getPronounsForPeople(people_ids);
+    const dietRows = await db.getDietsForPeople(people_ids);
+
+    const rsvps = rsvpRows.map(rsvpRow => {
+        return {
+            pronouns: pronounRows.filter(pr => pr.id == rsvpRow.guest_id).map(pr => pr.nickname).join(', '),
+            diets: dietRows.filter(dr => dr.id == rsvpRow.guest_id).map(dr => dr.details).join(', '),
+            ...rsvpRow
+        }
+    })
+
+    return rsvps;
 }
 
 export async function getBasicPronounList(): Promise<SelectOption[]> {
