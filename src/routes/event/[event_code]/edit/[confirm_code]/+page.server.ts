@@ -18,7 +18,7 @@ export async function load({ params }) {
             host_message: event.hostCount && event.hostCount > 1 ? "Anything else we should know?" : "Anything else the host should know?"
         };
     } catch (err: any) {
-        redirect(303, `/event?event_code=${params.event_code}&confirm_code=${params.confirm_code}`);
+        redirect(303, `/event/edit?event_code=${params.event_code}&confirm_code=${params.confirm_code}`);
     }
 }
 

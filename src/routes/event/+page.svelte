@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import {
-		Accordion,
-		AccordionItem,
 		Alert,
 		Button,
 		Col,
@@ -18,9 +16,6 @@
 	let event_code: string;
 	let event_invalid: boolean;
 
-	let confirm_code: string;
-	let confirm_invalid: boolean;
-
 	const handleEventSubmit = (e: Event) => {
 		if (!(event_code.length == 6 && letters_only.test(event_code))) {
 			e.preventDefault();
@@ -29,29 +24,14 @@
 			event_invalid = false;
 		}
 	};
-
-	const handleRsvpSubmit = (e: Event) => {
-		if (!(event_code.length == 6 && letters_only.test(event_code))) {
-			e.preventDefault();
-			event_invalid = true;
-		} else {
-			event_invalid = false;
-		}
-		if (!(confirm_code.length == 4 && letters_only.test(confirm_code))) {
-			e.preventDefault();
-			confirm_invalid = true;
-		} else {
-			confirm_invalid = false;
-		}
-	};
 </script>
 
 <svelte:head>
 	<title>Find Event</title>
 </svelte:head>
 
-<Accordion class="mt-3">
-	<AccordionItem header="Find Event" active>
+<!-- <Accordion class="mt-3">
+	<AccordionItem header="Find Event" active> -->
 		{#if $page.url.searchParams.has('event_code')}
 			<Alert class="col-md-7 col-10 mx-auto" color="danger">
 				Hmmm. We couldn't find an event with the code <b
@@ -85,7 +65,7 @@
 				</Form>
 			</Col>
 		</Row>
-	</AccordionItem>
+	<!-- </AccordionItem>
 	<AccordionItem header="Edit Your RSVP">
 		{#if $page.url.searchParams.has('event_code')}
 			<Alert class="col-md-7 col-10 mx-auto" color="danger">
@@ -139,4 +119,5 @@
 			</Col>
 		</Row>
 	</AccordionItem>
-</Accordion>
+</Accordion> -->
+
