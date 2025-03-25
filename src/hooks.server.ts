@@ -18,7 +18,6 @@ const authHandle: Handle = async ({ event, resolve }) => {
             }
 
             event.locals.session = session;
-            
         }
     }
 

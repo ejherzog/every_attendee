@@ -46,7 +46,7 @@ export async function updateSessionExpiration(session: Session) {
 }
 
 export async function deleteSession(sessionId: string) {
-    await executeQuery(`DELETE FROM user_sessions WHERE id = ${sessionId}`);
+    await executeQuery(`DELETE FROM user_sessions WHERE id = '${sessionId}'`);
 }
 
 // ** READ OPERATIONS ** //
