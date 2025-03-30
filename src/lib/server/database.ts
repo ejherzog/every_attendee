@@ -2,6 +2,8 @@ import pg, { type QueryResult } from 'pg';
 import { DATABASE_URL } from '$env/static/private';
 import type { Person } from "$lib/types/People";
 import { dev } from '$app/environment';
+import type { Session } from './auth';
+import type { DB_AppUser } from '$lib/types/db/DB_AppUser';
 
 let pool_settings: pg.PoolConfig = {
     max: 5,
@@ -15,6 +17,37 @@ const pool = new pg.Pool(pool_settings);
 
 type PostgresQueryResult = (sql: string, params?: any[]) => Promise<QueryResult<any>>
 const query: PostgresQueryResult = (sql, params?) => pool.query(sql, params);
+
+// ** USER AUTH OPERATIONS ** //
+export async function getUser(username: string): Promise<DB_AppUser> {
+    const result = await executeQuery(`SELECT * FROM app_users WHERE username = '${username}'`);
+    return result.rows[0] as DB_AppUser;
+}
+
+export async function getUsername(user_id: number): Promise<string> {
+    const result = await executeQuery(`SELECT username FROM app_users WHERE id = ${user_id}`);
+    return result.rows[0].username;
+}
+
+export async function insertSession(session: Session) {
+    const insertQuery = 'INSERT INTO user_sessions(id, user_id, expires_at) VALUES ($1, $2, $3)';
+    await executeQuery(insertQuery, [session.id, `${session.userId}`, session.expiresAt.toUTCString()]);
+}
+
+export async function retrieveSession(sessionId: string): Promise<any> {
+    const result = await executeQuery(`SELECT user_sessions.id, user_sessions.user_id, user_sessions.expires_at 
+        FROM user_sessions WHERE user_sessions.id = '${sessionId}'`);
+
+    return result.rows[0];
+}
+
+export async function updateSessionExpiration(session: Session) {
+    await executeQuery(`UPDATE user_sessions SET expires_at = ${session.expiresAt} WHERE id = ${session.id}`);
+}
+
+export async function deleteSession(sessionId: string) {
+    await executeQuery(`DELETE FROM user_sessions WHERE id = '${sessionId}'`);
+}
 
 // ** READ OPERATIONS ** //
 export async function findEventById(code: string): Promise<any[]> {
@@ -48,6 +81,21 @@ export async function validateRsvpId(event_code: string, confirmation_code: stri
     return result.rowCount != null && result.rowCount > 0;
 }
 
+export async function findRsvpsByEventId(event_code: string): Promise<any[]> {
+
+    const result = await executeQuery(`SELECT r.id, r.guest_id, 
+        p.short_name AS name, p.full_name, p.phone, p.email, r.attending, r.comments
+        FROM rsvps r JOIN people p ON p.id = r.respondent_id
+        WHERE r.event_id = '${event_code}'`);
+    return result.rows;
+}
+
+export async function findEventsByUserId(app_user_id: number) {
+    const result = await executeQuery(`SELECT * FROM events e 
+        JOIN app_users_events u ON e.id = u.event_id WHERE u.app_user_id = ${app_user_id}`);
+    return result.rows;
+}
+
 export async function getAllEventCodes(): Promise<string[]> {
     const result = await executeQuery('SELECT id FROM events');
     return result.rows;
@@ -70,6 +118,13 @@ export async function getPronounsForPerson(person_id: number): Promise<any[]> {
     return result.rows;
 }
 
+export async function getPronounsForPeople(people_ids: number[]): Promise<any[]> {
+    const result = await executeQuery(`SELECT p.id, n.nickname FROM pronouns n
+        JOIN person_pronouns pp ON pp.pronoun_id = n.id
+        JOIN people p ON pp.person_id = p.id WHERE p.id IN (${people_ids.join(',')})`);
+    return result.rows;
+}
+
 export async function getBasicDiets(): Promise<any[]> {
     const result = await executeQuery(`SELECT id, details FROM diets WHERE custom = false`);
     return result.rows;
@@ -79,6 +134,13 @@ export async function getDietsForPerson(person_id: number): Promise<any[]> {
     const result = await executeQuery(`SELECT d.id, d.details FROM diets d
         JOIN person_diets pd ON pd.diet_id = d.id
         JOIN people p ON pd.person_id = p.id WHERE p.id = ${person_id}`);
+    return result.rows;
+}
+
+export async function getDietsForPeople(people_ids: number[]): Promise<any[]> {
+    const result = await executeQuery(`SELECT p.id, d.details FROM diets d
+        JOIN person_diets pd ON pd.diet_id = d.id
+        JOIN people p ON pd.person_id = p.id WHERE p.id IN (${people_ids.join(',')})`);
     return result.rows;
 }
 
@@ -162,6 +224,16 @@ export async function createRsvp(rsvp_id: string, event_id: string, guest_id: st
 export async function updateRsvp(rsvp_id: string, attending: string, comments: string) {
     const updateRsvp = `UPDATE rsvps SET attending = '${attending}', comments = '${comments}' WHERE id = '${rsvp_id}'`;
     await executeQuery(updateRsvp);
+}
+
+export async function updateEvent(event_id: string, title: string, start_time: string, end_time: string, location: string, address: string, description: string, image_url: string) {
+    const updateEvent = `UPDATE events SET 
+        title = $1, location = $2, address = $3,
+        description = $4, image_url = '${image_url}',
+        start_time = '${start_time}', end_time = '${end_time}'
+        WHERE id = '${event_id}'`;
+    const values = [`${title}`, `${location}`, `${address}`, `${description}`];
+    await executeQuery(updateEvent, values);
 }
 
 // ** UTILITY FUNCTIONS ** //

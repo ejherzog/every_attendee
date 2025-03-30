@@ -1,12 +1,12 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import { getBasicDietList, getBasicPronounList, getEventById, getRsvp, changeRsvp } from '$lib/server/server';
+import { getBasicDietList, getBasicPronounList, getEventInfoById, getRsvp, changeRsvp } from '$lib/server/server';
 import { containsIgnoreCase } from '$lib/server/formatter';
 
 export async function load({ params }) {
     try {
         let [event, rsvp, pronoun_list, diet_list] = await Promise.all([
-            getEventById(params.event_code.toUpperCase()),
+            getEventInfoById(params.event_code.toUpperCase()),
             getRsvp(params.event_code.toUpperCase(), params.confirm_code.toUpperCase()),
             getBasicPronounList(),
             getBasicDietList()]);

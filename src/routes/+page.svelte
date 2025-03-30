@@ -1,10 +1,13 @@
 <script>
-	import { Container } from '@sveltestrap/sveltestrap';
+	import { Button, Container } from '@sveltestrap/sveltestrap';
 </script>
 
 <h2 class="fst-italic mt-3">You're Invited!</h2>
 
+<Button href="/event/" style="background-color: #0b473b; color: #f9b13e;" class="fs-1 m-3">RSVP Here</Button>
+
 <Container class="text-start">
+	<hr>
 	<h4>Hosting an Event?</h4>
 	<p>
 		You should be able to invite anyone you know regardless of whether they

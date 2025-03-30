@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { Rsvp } from '$lib/types/Rsvp';
 	import {
 		Button,
 		Col,
@@ -14,33 +13,23 @@
 	} from '@sveltestrap/sveltestrap';
 	import SvelteMarkdown from 'svelte-markdown';
 	import MultiSelect from 'svelte-multiselect';
-	import validator from 'validator';
 
 	/** @type {import('./$types').PageData} */
 	export let data;
-
-	let rsvp = new Rsvp();
-	rsvp.guest.pronoun_list = [];
-	rsvp.guest.diets = [];
-
 	let event_description = data.event.description;
-
-	let invalid_input = true;
-	const validate = () => {
-		invalid_input = !(
-			rsvp.guest.name.length > 0 && rsvp.attending &&
-			rsvp.guest.pronoun_list.length > 0 &&
-			((rsvp.guest.phone && validator.isMobilePhone(rsvp.guest.phone)) ||
-				(rsvp.guest.email && validator.isEmail(rsvp.guest.email)))
-		);
-	};
 </script>
 
 <svelte:head>
-	<title>RSVP for {data.event.title}</title>
+	<title>RSVP Preview</title>
 </svelte:head>
 
 <Container class="my-2">
+    <Row>
+        <Col><Button href={`/host/event/${data.event.id}/edit`}>⬅️ Edit Event</Button></Col>
+        <Col><h4><i>RSVP Page Preview</i></h4></Col>
+        <Col><Button href={`/host/dashboard`}>Dashboard ➡️</Button></Col>
+    </Row>
+    <hr>
 	<h2>RSVP for {data.event.title}</h2>
 </Container>
 
@@ -97,7 +86,7 @@
 <Container style="background-color: #ffcf8355;" class="py-2 rounded">
 	<Container class="mt-2">
 		<Form method="POST">
-			<input type="hidden" name="event_code" value={data.event.id} />
+			<input disabled type="hidden" name="event_code" value={data.event.id} />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
 					<Label
@@ -107,11 +96,9 @@
 					</Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
-						<Input
+						<Input disabled
 							class="text-end"
 							name="name"
-							on:change={validate}
-							bind:value={rsvp.guest.name}
 							required
 							aria-required="true"
 						/>
@@ -123,50 +110,29 @@
 					>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto">
-					<Input class="text-end" name="full_name" bind:value={rsvp.guest.full_name} />
+					<Input disabled class="text-end" name="full_name" />
 				</Col>
 			</Row>
 			<hr />
 			<Row class="text-start mx-1 gx-1 gx-md-4">
-				<!-- <Col class="col-md-2 col-4 my-2">
-				<Label class="text-reset"><tag class="fw-bold text-responsive">Number Attending </tag><tag class="fw-lighter fst-italic">(required aria-required="true")</tag></Label>
-			</Col>
-			<Col class="col-md-4 col-8 my-2">
-				<InputGroup class="my-1" size="sm">
-					<InputGroupText style="max-width: 40%; min-width: 35%;">Yes:</InputGroupText>
-					<Input name="yes" type="number" min="0"/>
-				</InputGroup>
-				<InputGroup class="my-1" size="sm">
-					<InputGroupText style="max-width: 40%; min-width: 35%;">Maybe:</InputGroupText>
-					<Input name="maybe" type="number" min="0"/>
-				</InputGroup>
-				<InputGroup class="my-1" size="sm">
-					<InputGroupText style="max-width: 40%; min-width: 35%;">No:</InputGroupText>
-					<Input name="no" type="number" min="0"/>
-				</InputGroup>
-			</Col> -->
 				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
 					<Label><tag class="text-reset fw-bold text-responsive fs-5">Phone Number</tag></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
-					<Input
+					<Input disabled
 						class="text-end"
 						type="tel"
 						name="phone"
-						bind:value={rsvp.guest.phone}
-						on:change={validate}
 					/>
 				</Col>
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
 					<Label><tag class="text-reset fw-bold text-responsive fs-5">Email Address</tag></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
-					<Input
+					<Input disabled
 						class="text-end"
 						type="email"
 						name="email"
-						bind:value={rsvp.guest.email}
-						on:change={validate}
 					/>
 				</Col>
 				<Col class="fst-italic col-12 my-1 text-center">
@@ -182,13 +148,11 @@
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="9" class="my-auto">
 					{#each ['Yes', 'No', 'Maybe'] as option}
-						<Input
+						<Input disabled
 							required
 							aria-required="true"
 							name="attending"
 							type="radio"
-							on:change={validate}
-							bind:group={rsvp.attending}
 							value={option}
 							label={option}
 							class="h5 form-check form-check-inline"
@@ -203,15 +167,13 @@
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="9" class="my-auto pb-1">
 					<div class="form-control">
-						<MultiSelect
+						<MultiSelect disabled
 							name="pronouns"
 							required
 							allowUserOptions
 							createOptionMsg="Press enter or click here to add your custom option"
-							bind:selected={rsvp.guest.pronoun_list}
-							options={data.pronoun_list}
-							on:change={validate}
 							--sms-bg="white"
+                            options={[]}
 							--sms-border="0"
 						></MultiSelect>
 					</div>
@@ -226,12 +188,10 @@
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="9" class="my-auto pb-1">
 					<div class="form-control">
-						<MultiSelect
+						<MultiSelect disabled
 							name="diets"
 							allowUserOptions
-							createOptionMsg="Press enter or click here to add your custom option"
-							bind:selected={rsvp.guest.diets}
-							options={data.diet_list}
+							options={[]}
 							--sms-bg="white"
 							--sms-border="0"
 						></MultiSelect>
@@ -249,18 +209,13 @@
 					>
 				</Col>
 				<Col xs="12" sm="6" md="9">
-					<Input type="textarea" name="notes"/>
+					<Input disabled type="textarea" name="notes"/>
 				</Col>
 			</Row>
-			<!-- <hr /> -->
-			<!-- <Row class="text-start mx-1">
-			<h5>~~Section to Add Additional Guest(s)~~</h5>
-		</Row> -->
 			<Row class="my-2">
 				<Col class="col-12">
-					<Button
+					<Button disabled
 						type="submit"
-						disabled={invalid_input}
 						style="background-color: #0b473b; color: #f9b13e;">Submit RSVP</Button
 					>
 				</Col>
