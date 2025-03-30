@@ -12,6 +12,7 @@
 		ListGroupItem,
 		Row
 	} from '@sveltestrap/sveltestrap';
+	import SvelteMarkdown from 'svelte-markdown';
 	import MultiSelect from 'svelte-multiselect';
 	import validator from 'validator';
 
@@ -21,6 +22,8 @@
 	let rsvp = new Rsvp();
 	rsvp.guest.pronoun_list = [];
 	rsvp.guest.diets = [];
+
+	let event_description = data.event.description;
 
 	let invalid_input = true;
 	const validate = () => {
@@ -84,7 +87,7 @@
 					<div class="h6 mb-0">Details</div>
 				</ListGroupItem>
 				<ListGroupItem class="text-reset">
-					{@html data.event.description}
+					<SvelteMarkdown source={event_description} />
 				</ListGroupItem>
 			</ListGroup>
 		</Col>
