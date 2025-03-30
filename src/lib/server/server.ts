@@ -7,7 +7,7 @@ import { Rsvp } from "$lib/types/view/Rsvp";
 import { SelectOption } from "$lib/types/view/SelectOption";
 import { generateRsvpCode } from "./codes";
 import * as db from "./database";
-import { convertToDateTimeLocalString, convertToTimestampTz, getHosts, getWhenFromTimestamps } from "./formatter";
+import { getHosts, getWhenFromTimestamps } from "./formatter";
 
 export async function getEventInfoById(code: string): Promise<Event> {
 
@@ -39,10 +39,8 @@ export async function getEventDetailsById(code: string): Promise<Event_Details> 
     if (eventRows.length > 1) throw new Error(`Multiple events found with code ${code}.`);
 
     const raw_event = eventRows[0] as DB_Event;
-    const start_time = convertToDateTimeLocalString(new Date(raw_event.start_time!));
-    const end_time = convertToDateTimeLocalString(new Date(raw_event.end_time!));
 
-    return new Event_Details(raw_event.id, raw_event.title, start_time, end_time,
+    return new Event_Details(raw_event.id, raw_event.title, raw_event.start_time!, raw_event.end_time!,
         raw_event.location!, raw_event.address!, raw_event.description!, raw_event.image_url!
     );
 }
@@ -178,16 +176,12 @@ export async function editEvent(formData: any): Promise<string> {
 
     const event_id = formData.get("event_code");
     const title = formData.get("title");
-    const start = formData.get("start_time");
-    const end = formData.get("end_time");
-    const timezone = formData.get("timezone");
+    const start_time = formData.get("start_time");
+    const end_time = formData.get("end_time");
     const location = formData.get("location");
     const address = formData.get("address");
     const description = formData.get("description");
     const image_url = formData.get("image_url");
-
-    const start_time = convertToTimestampTz(start, timezone);
-    const end_time = convertToTimestampTz(end, timezone);
 
     await db.updateEvent(event_id, title, start_time, end_time, location, address, description, image_url);
 
