@@ -5,10 +5,8 @@ import type { Actions } from "./$types";
 export async function load({ params }) {
     try {
         let event = await getEventDetailsById(params.event_code.toUpperCase());
-        let timezones = Intl.supportedValuesOf("timeZone");
         return {
-            event: structuredClone(event),
-            timezones
+            event: structuredClone(event)
         };
     } catch (err: any) {
         console.log(err);
@@ -22,6 +20,6 @@ export const actions = {
 
         const event_code = await editEvent(formData);
 
-        redirect(303, `/host/event/${event_code}/view`);
+        redirect(303, `/host/event/${event_code}/preview`);
     },
 } satisfies Actions;

@@ -12,8 +12,8 @@ CREATE TABLE people (
 CREATE TABLE events (
     id char(6) PRIMARY KEY,
     title varchar(200) NOT NULL,
-    start_time timestamptz,
-    end_time timestamptz,
+    start_time varchar(30),
+    end_time varchar(30),
     location text,
     address text,
     description text,
@@ -21,6 +21,7 @@ CREATE TABLE events (
 );
 ```
 
+// Must keep hosts table because not all hosts are app_users. An event is owned by a single app_user (at first) but can be hosted by multiple people.
 ```
 CREATE TABLE hosts (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -83,7 +84,8 @@ CREATE TABLE person_diets (
 ```
 CREATE TABLE app_users (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    username text NOT NULL UNIQUE
+    username text NOT NULL UNIQUE,
+    password_hash text NOT NULL
 );
 ```
 

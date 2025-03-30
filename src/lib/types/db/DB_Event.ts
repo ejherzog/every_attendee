@@ -19,7 +19,6 @@ export class DB_Event {
         if (params) {
             if (params.start_time) this.start_time = params.start_time;
             if (params.end_time) this.end_time = params.end_time;
-            if (params.end_time) this.end_time = params.end_time;
             if (params.location) this.location = params.location;
             if (params.address) this.address = params.address;
             if (params.description) this.description = params.description;

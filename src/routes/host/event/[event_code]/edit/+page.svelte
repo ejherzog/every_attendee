@@ -1,14 +1,13 @@
 <script lang="ts">
 	import { Button, Col, Container, Form, Image, Input, Label, Row } from '@sveltestrap/sveltestrap';
 	import { createMarkdown } from 'svelte-markdown-input';
-	import moment from 'moment-timezone';
 
 	/** @type {import('./$types').PageData} */
 	export let data;
 
 	const markdown = createMarkdown();
 
-	let timezone = moment.tz.guess();
+	console.log(data.event.start_time);
 </script>
 
 <svelte:head>
@@ -48,33 +47,21 @@
 			</Row>
 			<hr />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
-				<Col xs="12" sm="5" md="6" xl="1" class="my-auto">
+				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
 					<Label
 						><tag class="text-reset fw-bold text-responsive fs-5">Start </tag>
 					</Label>
 				</Col>
-					<Col xs="12" sm="7" md="6" xl="3" class="my-auto pb-2">
+				<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
 						<Input class="text-end" name="start_time" type="datetime-local" bind:value={data.event.start_time} />
 					</Col>
-				<Col xs="12" sm="5" md="6" xl="1" class="my-auto">
+					<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
 					<Label
 						><tag class="text-reset fw-bold text-responsive fs-5">End </tag>
 					</Label>
 				</Col>
-				<Col xs="12" sm="7" md="6" xl="3" class="my-auto pb-2">
+				<Col xs="12" sm="6" md="7" lg="4" class="my-auto">
 					<Input class="text-end" name="end_time" type="datetime-local" bind:value={data.event.end_time} />
-				</Col>
-				<Col xs="12" sm="5" md="6" xl="1" class="my-auto">
-				<Label
-						><tag class="text-reset fw-bold text-responsive fs-5">Time Zone </tag>
-					</Label>
-				</Col>
-				<Col xs="12" sm="7" md="6" xl="3" class="my-auto pb-2">
-					<Input type="select" name="timezone" bind:value={timezone}>
-						{#each data.timezones as tz}
-						  <option>{tz}</option>
-						{/each}
-					  </Input>
 				</Col>
 			</Row>
 			<hr />

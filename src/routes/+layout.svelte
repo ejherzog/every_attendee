@@ -22,7 +22,7 @@
 				<NavbarBrand href="/" style="color: #f9b13e" class="fs-2">EvA</NavbarBrand>
 			{:else}
 				<NavbarBrand href="/" style="color: #f9b13e" class="fs-2"
-					>EveryAttendee <tag class="fs-4 fw-lighter fst-italic">(𝛂 v0.1)</tag></NavbarBrand
+					>EveryAttendee <tag class="fs-4 fw-lighter fst-italic">(𝛂 v0.2)</tag></NavbarBrand
 				>
 			{/if}
 		</Col>
@@ -31,13 +31,12 @@
 				<Col>
 					<NavLink href="/event/" style="color: #f9b13e" class="fs-5">RSVP</NavLink>
 				</Col>
-				<Col>
-					{#if data.username}
-						<Form method="POST" action="/host/auth?/logout"><button style="all: unset; cursor: pointer; color: #f9b13e" class="fs-5">Logout</button></Form>
-					{:else}
-						<NavLink href="/host/auth" style="color: #f9b13e" class="fs-5">Host Login</NavLink>
-					{/if}
-				</Col>
+				{#if data.username}
+					<Col><NavLink href="/host/dashboard" style="color: #f9b13e" class="fs-5">Dashboard</NavLink></Col>
+					<Col><Form method="POST" action="/host/auth?/logout"><button style="all: unset; cursor: pointer; color: #f9b13e" class="fs-5">Logout</button></Form></Col>
+				{:else}
+					<Col><NavLink href="/host/auth" style="color: #f9b13e" class="fs-5">Host Login</NavLink></Col>
+				{/if}
 			</Row>
 		</Col>
 	</Row>
