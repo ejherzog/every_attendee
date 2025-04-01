@@ -84,7 +84,7 @@ export async function getRsvpsForEvent(event_code: string): Promise<any[]> {
             diets: dietRows.filter(dr => dr.id == rsvpRow.guest_id).map(dr => dr.details).join(', '),
             ...rsvpRow
         }
-    })
+    });
 
     return rsvps;
 }
