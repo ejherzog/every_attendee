@@ -23,8 +23,6 @@
 	rsvp.guest.pronoun_list = [];
 	rsvp.guest.diets = [];
 
-	let event_description = data.event.description;
-
 	let invalid_input = true;
 	const validate = () => {
 		invalid_input = !(
@@ -87,7 +85,7 @@
 					<div class="h6 mb-0">Details</div>
 				</ListGroupItem>
 				<ListGroupItem class="text-reset">
-					<SvelteMarkdown source={event_description} />
+					<SvelteMarkdown source={data.event.description} />
 				</ListGroupItem>
 			</ListGroup>
 		</Col>

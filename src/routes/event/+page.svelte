@@ -16,12 +16,20 @@
 	let event_code: string;
 	let event_invalid: boolean;
 
-	const handleEventSubmit = (e: Event) => {
-		if (!(event_code.length == 6 && letters_only.test(event_code))) {
+	let unknown_event_code: string;
+
+	const handleEventSubmit = async (e: Event) => {
+		event_invalid = !(event_code.length == 6 && letters_only.test(event_code));
+		if (event_invalid) {
 			e.preventDefault();
-			event_invalid = true;
 		} else {
-			event_invalid = false;
+			const response = await fetch(`/api/event/${event_code}`, {
+				method: 'GET',
+				headers: { 'content-type': 'application/json' }
+			});
+			const validation = await response.json();
+			unknown_event_code = validation.unknown_event_code;
+			if (unknown_event_code) e.preventDefault();
 		}
 	};
 </script>
@@ -30,94 +38,38 @@
 	<title>Find Event</title>
 </svelte:head>
 
-<!-- <Accordion class="mt-3">
-	<AccordionItem header="Find Event" active> -->
-		{#if $page.url.searchParams.has('event_code')}
-			<Alert class="col-md-7 col-10 mx-auto" color="danger">
-				Hmmm. We couldn't find an event with the code <b
-					>{$page.url.searchParams.get('event_code')?.toUpperCase()}</b
-				>.<br />
-				If that wasn't a typo, please contact the event host.
-			</Alert>
-		{/if}
+{#if unknown_event_code}
+	<Alert dismissible class="col-md-7 col-10 mx-auto" color="danger">
+		Hmmm. We couldn't find an event with code <b>{unknown_event_code}</b>.
+		<br />
+		If that wasn't a typo, please contact the event host.
+	</Alert>
+{/if}
 
-		<Row class="mt-3">
-			<Col class="col-md-7 col-10 mx-auto">
-				<Form on:submit={handleEventSubmit} action={`/event/${event_code}`} method="GET">
-					<InputGroup>
-						<FormGroup floating label="Enter an event code">
-							{#if event_invalid}
-								<Input
-									feedback="Event codes should be 6 letters (A-Z)."
-									invalid
-									required
-									bsSize="lg"
-									bind:value={event_code}
-								/>
-							{:else}
-								<Input required bsSize="lg" bind:value={event_code} />
-							{/if}
-						</FormGroup>
-					</InputGroup>
-					<Button type="submit" style="background-color: #0b473b; color: #f9b13e;"
-						>Find Event</Button
-					>
-				</Form>
-			</Col>
-		</Row>
-	<!-- </AccordionItem>
-	<AccordionItem header="Edit Your RSVP">
-		{#if $page.url.searchParams.has('event_code')}
-			<Alert class="col-md-7 col-10 mx-auto" color="danger">
-				Hmmm. We couldn't find an event with the code <b
-					>{$page.url.searchParams.get('event_code')?.toUpperCase()}</b
-				>.<br />
-				If that wasn't a typo, please contact the event host.
-			</Alert>
-		{/if}
-
-		<Row class="mt-3">
-			<Col class="col-md-7 col-10 mx-auto">
-				<Form
-					on:submit={handleRsvpSubmit}
-					action={`/event/${event_code}/edit/${confirm_code}`}
-					method="GET"
-				>
-					<InputGroup>
-						<FormGroup floating label="Enter an event code">
-							{#if event_invalid}
-								<Input
-									feedback="Event codes should be 6 letters (A-Z)."
-									invalid
-									required
-									bsSize="lg"
-									bind:value={event_code}
-								/>
-							{:else}
-								<Input required bsSize="lg" bind:value={event_code} />
-							{/if}
-						</FormGroup>
-					</InputGroup>
-					<InputGroup>
-						<FormGroup floating label="Enter your confirmation code">
-							{#if confirm_invalid}
-								<Input
-									feedback="Confirmation codes should be 4 letters (A-Z)."
-									invalid
-									required
-									bsSize="lg"
-									bind:value={confirm_code}
-								/>
-							{:else}
-								<Input required bsSize="lg" bind:value={confirm_code} />
-							{/if}
-						</FormGroup>
-					</InputGroup>
-					<Button type="submit" style="background-color: #0b473b; color: #f9b13e;">Edit RSVP</Button
-					>
-				</Form>
-			</Col>
-		</Row>
-	</AccordionItem>
-</Accordion> -->
-
+<Row class="mt-3">
+	<Col class="col-md-7 col-10 mx-auto">
+		<Form on:submit={handleEventSubmit} action={`/event/${event_code}`} method="GET">
+			<InputGroup>
+				<FormGroup floating label="Enter an event code">
+					{#if event_invalid}
+						<Input
+							feedback="Event codes should be 6 letters (A-Z)."
+							invalid
+							required
+							bsSize="lg"
+							bind:value={event_code}
+						/>
+					{:else}
+						<Input required bsSize="lg" bind:value={event_code} />
+					{/if}
+				</FormGroup>
+			</InputGroup>
+			<Button type="submit" style="background-color: #0b473b; color: #f9b13e;">Find Event</Button>
+		</Form>
+	</Col>
+</Row>
+<Row class="mt-3">
+	<Col class="col-md-7 col-10 mx-auto">
+		<a href="/event/edit" class="text-reset"><i>Need to edit your RSVP?</i></a>
+	</Col>
+</Row>
