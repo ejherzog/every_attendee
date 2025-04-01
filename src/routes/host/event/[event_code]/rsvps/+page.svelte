@@ -1,22 +1,4 @@
-<!-- <script lang="ts">
-	import CollapsibleRsvp from '$lib/components/CollapsibleRsvp.svelte';
-import { Col, Container, Row } from '@sveltestrap/sveltestrap';
-
-	/** @type {import('./$types').PageData} */
-	export let data;
-</script>
-
-<Container style="background-color: #ffcf8355;" class="py-2 rounded">
-	<h3>RSVPs for {data.event.title}</h3>
-	<hr />
-
-	{#each data.rsvps as rsvp}
-        <CollapsibleRsvp rsvp={rsvp}></CollapsibleRsvp>
-    {/each}
-</Container> -->
-
 <script lang="ts">
-	import type { Rsvp } from '$lib/types/Rsvp';
 	import { Col, Container, Row, TabContent, TabPane } from '@sveltestrap/sveltestrap';
 
 	/** @type {import('./$types').PageData} */
@@ -32,11 +14,18 @@ import { Col, Container, Row } from '@sveltestrap/sveltestrap';
 <Container style="background-color: #ffcf8355;" class="py-2 rounded">
 	<h3>RSVPs for {data.event.title}</h3>
 	<TabContent class="nav-fill">
-		<TabPane tabId="summary" tab="Summary">
-			<img
-				alt="Alpha Flight"
-				src="https://upload.wikimedia.org/wikipedia/en/4/49/Alpha_Flight_cast_picture_%28John_Byrne_era%29.gif"
-			/>
+		<TabPane tabId="summary" tab="Summary" active>
+			<h3>Responses*</h3>
+			<p><b>Yes: </b>{data.summary.responses.yes}</p>
+			<p><b>Maybe: </b>{data.summary.responses.maybe}</p>
+			<p><b>No: </b>{data.summary.responses.no}</p>
+			<hr>
+			<h4>Dietary Restrictions</h4>
+			{#each data.summary.diets as diet}
+				<p>{diet}</p>
+			{/each}
+			<hr>
+			<p><i>*If guests have responded more than once, these totals may be inaccurate.</i></p>
 		</TabPane>
 		<TabPane class="tab" tabId="notes" tab="Guest Notes">
 			<Row class="m-2">
@@ -68,7 +57,7 @@ import { Col, Container, Row } from '@sveltestrap/sveltestrap';
 				</Row>
 			{/each}
 		</TabPane>
-		<TabPane tabId="detailed" tab="Full Details" active>
+		<TabPane tabId="detailed" tab="Full Details">
 			{#each data.rsvps as rsvp}
 				<Row class="m-2">
 					<Col><b>Guest: </b>{rsvp.name} {#if rsvp.full_name}(<i>{rsvp.full_name}</i>){/if}</Col>

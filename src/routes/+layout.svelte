@@ -32,7 +32,7 @@
 			{#if showSmall}
 				<NavbarBrand href={home} style="color: #f9b13e" class="fs-2">EvA</NavbarBrand>
 			{:else}
-				<NavbarBrand href="/" style="color: #f9b13e" class="fs-2"
+				<NavbarBrand href={home} style="color: #f9b13e" class="fs-2"
 					>EveryAttendee <tag class="fs-4 fw-lighter fst-italic">(𝛂 v0.2)</tag></NavbarBrand
 				>
 			{/if}
