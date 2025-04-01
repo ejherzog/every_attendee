@@ -12,6 +12,7 @@
 		ListGroupItem,
 		Row
 	} from '@sveltestrap/sveltestrap';
+	import SvelteMarkdown from 'svelte-markdown';
 	import MultiSelect from 'svelte-multiselect';
 	import validator from 'validator';
 
@@ -82,7 +83,7 @@
 					<div class="h6 mb-0">Details</div>
 				</ListGroupItem>
 				<ListGroupItem class="text-reset">
-					{@html data.event.description}
+					<SvelteMarkdown source={data.event.description} />
 				</ListGroupItem>
 			</ListGroup>
 		</Col>

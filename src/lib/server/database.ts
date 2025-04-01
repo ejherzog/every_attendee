@@ -55,6 +55,11 @@ export async function findEventById(code: string): Promise<any[]> {
     return result.rows;
 }
 
+export async function validateEventId(code: string): Promise<boolean> {
+    const result = await executeQuery(`SELECT id FROM events WHERE id = '${code}'`);
+    return result.rowCount != null && result.rowCount > 0;
+}
+
 export async function findHostsByEventId(code: string): Promise<any[]> {
     const result = await executeQuery(`SELECT p.short_name AS name
         FROM hosts h JOIN people p ON p.id = h.host_id
@@ -68,6 +73,12 @@ export async function findRsvp(event_code: string, confirmation_code: string): P
         FROM rsvps r JOIN people p ON p.id = r.respondent_id
         WHERE r.id = '${confirmation_code}' AND r.event_id = '${event_code}'`);
     return result.rows;
+}
+
+export async function validateRsvpId(event_code: string, confirmation_code: string): Promise<boolean> {
+    const result = await executeQuery(`SELECT id FROM rsvps 
+        WHERE id = '${confirmation_code}' AND event_id = '${event_code}'`);
+    return result.rowCount != null && result.rowCount > 0;
 }
 
 export async function findRsvpsByEventId(event_code: string): Promise<any[]> {
