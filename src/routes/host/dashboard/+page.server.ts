@@ -4,7 +4,7 @@ import { redirect, type RequestEvent } from '@sveltejs/kit';
 
 export async function load(event: RequestEvent) {
 	if (event.locals.session === null) {
-		return redirect(302, "/host/auth");
+		return redirect(302, "/login");
 	}
 	const events: Event[] = await getUsersEvents(event.locals.session.userId);
 	return {

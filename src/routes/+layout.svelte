@@ -46,13 +46,13 @@
 				</Col>
 				<Col class="col-6">
 					{#if data.username}
-						<Form method="POST" action="/host/auth?/logout"
+						<Form method="POST" action="/api/logout"
 							><button style="all: unset; cursor: pointer; color: #f9b13e" class="fs-5"
 								>Logout</button
 							></Form
 						>
 					{:else}
-						<NavLink href="/host/auth" style="color: #f9b13e" class="fs-5">Hosts</NavLink>
+						<NavLink href="/login" style="color: #f9b13e" class="fs-5">Hosts</NavLink>
 					{/if}
 				</Col>
 			</Row>
