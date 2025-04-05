@@ -172,6 +172,10 @@ export async function changeRsvp(formData: any): Promise<string> {
     return rsvp_id;
 }
 
+export async function createEvent(formData: any): Promise<string> {
+    return "FAAAKE";
+}
+
 export async function editEvent(formData: any): Promise<string> {
 
     const event_id = formData.get("event_code");
