@@ -62,6 +62,9 @@
 			<p style="color:crimson">🤠🐴 Whooooa there, pardner!<br>The end time must be after the start time.</p>
 		{/if}
 
+		<Label>Event Code</Label>
+		<Input class="text-end" name="event_code" required aria-required="true" value={data.event_code}/>
+
 		<Label>Location</Label>
 		<Input class="text-end" name="location" required aria-required="true" />
 
@@ -70,6 +73,7 @@
 
 		<Label>Host</Label>
 		<Input disabled class="text-end" value={data.username} />
+		<input type="hidden" name="user_id" value={data.user_id} />
 
 		<Label>Image URL</Label>
 		<Input name="image_url" type="url" class="text-end" bind:value={image_url} on:change={isUrlValid} />

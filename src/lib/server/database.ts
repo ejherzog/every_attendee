@@ -67,6 +67,12 @@ export async function findHostsByEventId(code: string): Promise<any[]> {
     return result.rows;
 }
 
+export async function getPersonFromUser(app_user_id: string): Promise<string> {
+    const result = await executeQuery(`SELECT person_id FROM app_users
+        WHERE id = ${app_user_id}`);
+    return result.rows[0].person_id;
+}
+
 export async function findRsvp(event_code: string, confirmation_code: string): Promise<any[]> {
     const result = await executeQuery(`SELECT r.id, r.guest_id, 
         p.short_name AS name, p.full_name, p.phone, p.email, r.attending, r.comments
@@ -224,6 +230,16 @@ export async function createRsvp(rsvp_id: string, event_id: string, guest_id: st
 export async function updateRsvp(rsvp_id: string, attending: string, comments: string) {
     const updateRsvp = `UPDATE rsvps SET attending = '${attending}', comments = '${comments}' WHERE id = '${rsvp_id}'`;
     await executeQuery(updateRsvp);
+}
+
+export async function createEvent(event_code: string, title: string, host_id: string, start_time: string, end_time: string, location: string, address: string, description: string, image_url: string) {
+    const createEvent = `INSERT INTO events(id, title, start_time, end_time, location, address, description, image_url)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
+    const values = [`${event_code}`, `${title}`, `${start_time}`, `${end_time}`, `${location}`, `${address}`, `${description}`, `${image_url}`];
+    await executeQuery(createEvent, values);
+
+    const addHost = `INSERT INTO hosts(event_id, host_id) VALUES('${event_code}', '${host_id}')`;
+    await executeQuery(addHost);
 }
 
 export async function updateEvent(event_id: string, title: string, start_time: string, end_time: string, location: string, address: string, description: string, image_url: string) {

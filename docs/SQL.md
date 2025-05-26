@@ -85,7 +85,8 @@ CREATE TABLE person_diets (
 CREATE TABLE app_users (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     username text NOT NULL UNIQUE,
-    password_hash text NOT NULL
+    password_hash text NOT NULL,
+    person_id integer REFERENCES people
 );
 ```
 

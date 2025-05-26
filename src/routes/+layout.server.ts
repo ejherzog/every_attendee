@@ -6,7 +6,9 @@ export async function load(event: RequestEvent) {
         return { username: undefined };
     }
     const username: string = await getUsername(event.locals.session.userId);
+    const user_id: string = event.locals.session.userId;
     return {
-        username
+        username,
+        user_id
     };
 }
