@@ -6,8 +6,6 @@
 	export let data;
 
 	const markdown = createMarkdown();
-
-	console.log(data.event.start_time);
 </script>
 
 <svelte:head>

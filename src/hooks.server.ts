@@ -1,12 +1,12 @@
 import { deleteSessionTokenCookie, setSessionTokenCookie, validateSessionToken } from "$lib/server/auth";
-import type { Handle } from "@sveltejs/kit";
+import { redirect, type Handle } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 
 const authHandle: Handle = async ({ event, resolve }) => {
     event.locals.user = null;
     event.locals.session = null;
 
-    if (event.url.pathname.startsWith('/host')) {
+    if (event.url.pathname.startsWith('/host') || event.url.pathname.startsWith('/api/logout')) {
         const token = event.cookies.get("session") ?? null;
 
         if (token) {
@@ -18,6 +18,10 @@ const authHandle: Handle = async ({ event, resolve }) => {
             }
 
             event.locals.session = session;
+        }
+
+        if (!event.locals.session) {
+            throw redirect(303, "/login");
         }
     }
 

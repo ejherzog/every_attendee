@@ -5,7 +5,7 @@ import type { DB_AppUser } from '$lib/types/db/DB_AppUser';
 import { getUser } from '$lib/server/database';
 
 export const actions = {
-    login: async ({ cookies, request }) => {
+    default: async ({ cookies, request }) => {
         const formData = await request.formData();
         const username = formData.get("username");
 
@@ -54,10 +54,5 @@ export const actions = {
         });
 
         redirect(303, '/host/dashboard');
-    },
-    logout: async (event) => {
-        invalidateSession(event.locals.session.sessionId);
-        event.cookies.delete("session", { path: "/" });
-        redirect(303, '/');
-    },
+    }
 } satisfies Actions;

@@ -5,7 +5,7 @@ import { Event } from "$lib/types/view/Event";
 import { Event_Details } from "$lib/types/view/Event_Details";
 import { Rsvp } from "$lib/types/view/Rsvp";
 import { SelectOption } from "$lib/types/view/SelectOption";
-import { generateRsvpCode } from "./codes";
+import { generateRsvpCode, validateEventCode } from "./codes";
 import * as db from "./database";
 import { getHosts, getWhenFromTimestamps } from "./formatter";
 
@@ -170,6 +170,30 @@ export async function changeRsvp(formData: any): Promise<string> {
     await db.updateRsvp(rsvp_id, attending, comments);
 
     return rsvp_id;
+}
+
+export async function createEvent(formData: any): Promise<string | undefined> {
+
+    // validate host_id
+    const app_user_id = formData.get("user_id");
+    const host_id = await db.getPersonFromUser(app_user_id);
+
+    // validate event_code
+    const event_code = formData.get("event_code");
+    if (await validateEventCode(event_code)) {
+        // create event
+        const title = formData.get("title");
+        const start_time = formData.get("start_time");
+        const end_time = formData.get("end_time");
+        const location = formData.get("location");
+        const address = formData.get("address");
+        const description = formData.get("description");
+        const image_url = formData.get("image_url");
+
+        const result = await db.createEvent(event_code, title, host_id, start_time, end_time, location, address, description, image_url);
+        return event_code;
+    }
+    return undefined;
 }
 
 export async function editEvent(formData: any): Promise<string> {
