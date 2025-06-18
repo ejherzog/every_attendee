@@ -221,6 +221,12 @@ export async function removeAllDietsFromPerson(person_id: string) {
     await executeQuery(deletePersonDiet);
 }
 
+export async function addEventToAppUser(event_id: string, app_user_id: string) {
+    const insertUserEvent = `INSERT INTO app_users_events(event_id, app_user_id) VALUES($1, $2)`;
+    const values = [`${event_id}`, `${app_user_id}`];
+    await executeQuery(insertUserEvent, values);
+}
+
 export async function createRsvp(rsvp_id: string, event_id: string, guest_id: string, respondent_id: string, attending: string, comments: string) {
     const insertRsvp = 'INSERT INTO rsvps(id, respondent_id, guest_id, event_id, attending, comments) VALUES($1, $2, $3, $4, $5, $6)';
     const values = [`${rsvp_id}`, `${respondent_id}`, `${guest_id}`, `${event_id}`, `${attending}`, `${comments}`];

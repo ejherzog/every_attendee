@@ -17,12 +17,7 @@ export async function load() {
 export const actions = {
     default: async ({ request }) => {
         const formData = await request.formData();
-
-        console.log(formData);
-
         const event_code = await createEvent(formData);
-        console.log(event_code);
-
         redirect(303, `/host/event/${event_code}/preview`);
     },
 } satisfies Actions;

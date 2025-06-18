@@ -70,6 +70,8 @@ export async function getRsvp(event_code: string, confirmation_code: string): Pr
 export async function getRsvpsForEvent(event_code: string): Promise<any[]> {
 
     const rsvpRows = await db.findRsvpsByEventId(event_code);
+    
+    if (rsvpRows.length == 0) return [];
 
     const people_ids = rsvpRows.map(rsvpRow => {
         return rsvpRow.guest_id;
@@ -190,7 +192,10 @@ export async function createEvent(formData: any): Promise<string | undefined> {
         const description = formData.get("description");
         const image_url = formData.get("image_url");
 
-        const result = await db.createEvent(event_code, title, host_id, start_time, end_time, location, address, description, image_url);
+        await db.createEvent(event_code, title, host_id, start_time, end_time, location, address, description, image_url);
+
+        await db.addEventToAppUser(event_code, app_user_id);
+
         return event_code;
     }
     return undefined;
