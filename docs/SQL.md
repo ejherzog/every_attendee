@@ -42,6 +42,15 @@ CREATE TABLE rsvps (
 ```
 
 ```
+CREATE TABLE rsvp_responses (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    rsvp_id char(4) NOT NULL REFERENCES rsvps,
+    person_id integer NOT NULL REFERENCES people,
+    attending varchar(20) NOT NULL CHECK (attending IN ('Yes', 'No', 'Maybe')) 
+);
+```
+
+```
 CREATE TABLE pronouns (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     subject varchar(20),

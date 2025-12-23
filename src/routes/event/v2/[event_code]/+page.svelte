@@ -1,12 +1,15 @@
 <script lang="ts">
-	import { Rsvp } from '$lib/types/Rsvp';
+	import { Rsvp_New } from '$lib/types/RSVP_new';
 	import {
 		Button,
 		Col,
 		Container,
 		Form,
+		FormGroup,
 		Image,
 		Input,
+		InputGroup,
+		InputGroupText,
 		Label,
 		ListGroup,
 		ListGroupItem,
@@ -19,17 +22,17 @@
 	/** @type {import('./$types').PageData} */
 	export let data;
 
-	let rsvp = new Rsvp();
-	rsvp.guest.pronoun_list = [];
-	rsvp.guest.diets = [];
+	let rsvp = new Rsvp_New();
+	rsvp.respondent.guest.pronoun_list = [];
+	rsvp.respondent.guest.diets = [];
 
 	let invalid_input = true;
 	const validate = () => {
 		invalid_input = !(
-			rsvp.guest.name.length > 0 && rsvp.attending &&
-			rsvp.guest.pronoun_list.length > 0 &&
-			((rsvp.guest.phone && validator.isMobilePhone(rsvp.guest.phone)) ||
-				(rsvp.guest.email && validator.isEmail(rsvp.guest.email)))
+			rsvp.respondent.guest.name.length > 0 && rsvp.respondent.attending &&
+			rsvp.respondent.guest.pronoun_list.length > 0 &&
+			((rsvp.respondent.guest.phone && validator.isMobilePhone(rsvp.respondent.guest.phone)) ||
+				(rsvp.respondent.guest.email && validator.isEmail(rsvp.respondent.guest.email)))
 		);
 	};
 </script>
@@ -96,6 +99,10 @@
 	<Container class="mt-2">
 		<Form method="POST">
 			<input type="hidden" name="event_code" value={data.event.id} />
+            <Row class="align-items-center mx-1 gx-1 gx-md-4">
+					<Input type="switch" bsSize="lg" name="additional" class="text-reset fst-italic fw-bold text-responsive fs-5" label="I am responding on behalf of a group."/>
+            </Row>
+            <hr />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
 					<Label
@@ -109,7 +116,7 @@
 							class="text-end"
 							name="name"
 							on:change={validate}
-							bind:value={rsvp.guest.name}
+							bind:value={rsvp.respondent.guest.name}
 							required
 							aria-required="true"
 						/>
@@ -121,7 +128,7 @@
 					>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto">
-					<Input class="text-end" name="full_name" bind:value={rsvp.guest.full_name} />
+					<Input class="text-end" name="full_name" bind:value={rsvp.respondent.guest.full_name} />
 				</Col>
 			</Row>
 			<hr />
@@ -131,7 +138,7 @@
 						><tag class="text-reset fw-bold text-responsive fs-5">Are You Attending?</tag></Label
 					>
 				</Col>
-				<Col xs="12" sm="6" md="7" lg="9" class="my-auto">
+				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
 					{#each ['Yes', 'No', 'Maybe'] as option}
 						<Input
 							required
@@ -139,12 +146,15 @@
 							name="attending"
 							type="radio"
 							on:change={validate}
-							bind:group={rsvp.attending}
+							bind:group={rsvp.respondent.attending}
 							value={option}
 							label={option}
 							class="h5 form-check form-check-inline"
 						/>
 					{/each}
+				</Col>
+				<Col xs="12" sm="12" md="12" lg="6" class="my-auto">
+					
 				</Col>
 			</Row>
 			<hr />
@@ -174,7 +184,7 @@
 						class="text-end"
 						type="tel"
 						name="phone"
-						bind:value={rsvp.guest.phone}
+						bind:value={rsvp.respondent.guest.phone}
 						on:change={validate}
 					/>
 				</Col>
@@ -186,7 +196,7 @@
 						class="text-end"
 						type="email"
 						name="email"
-						bind:value={rsvp.guest.email}
+						bind:value={rsvp.respondent.guest.email}
 						on:change={validate}
 					/>
 				</Col>
@@ -206,7 +216,7 @@
 							required
 							allowUserOptions
 							createOptionMsg="Press enter or click here to add your custom option"
-							bind:selected={rsvp.guest.pronoun_list}
+							bind:selected={rsvp.respondent.guest.pronoun_list}
 							options={data.pronoun_list}
 							on:change={validate}
 							--sms-bg="white"
@@ -228,7 +238,7 @@
 							name="diets"
 							allowUserOptions
 							createOptionMsg="Press enter or click here to add your custom option"
-							bind:selected={rsvp.guest.diets}
+							bind:selected={rsvp.respondent.guest.diets}
 							options={data.diet_list}
 							--sms-bg="white"
 							--sms-border="0"
