@@ -8,6 +8,6 @@ export class Rsvp_New {
 
     constructor(respondent: Response = new Response(), other_guests: Response[] = []) {
         this.respondent = respondent;
-        this.other_guests = [];
+        this.other_guests = other_guests;
     }
 }
