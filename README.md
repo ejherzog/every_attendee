@@ -3,6 +3,7 @@
 Hosting an event? You should be able to invite anyone you know regardless of whether they use Facebook, Google Calendar, Discord, or any other platform.
 
 This application has two main features:
+
 - invite guests to an event you are planning
 - find a good date and time to get together with your guests
 
@@ -23,8 +24,8 @@ None of your guests pay a cent; just the person hosting the event and using our 
 5. If you're happy with everything, checkout to pay for and publish your event.
 6. Generate email or text messages with event information and a link to RSVP.
 7. (Eventually, we'll add the ability to send emails and texts on your behalf, but we HIGHLY recommend you personally send the invites to your guests.)
-9. (Optional) Add your guest list: name(s), email and/or phone number, number of people
-10. Send messages to your guests and watch the RSVPs roll in!
+8. (Optional) Add your guest list: name(s), email and/or phone number, number of people
+9. Send messages to your guests and watch the RSVPs roll in!
 
 **Respond to an event invitation**
 

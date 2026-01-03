@@ -24,7 +24,8 @@
 	let invalid_input = false;
 	const validate = () => {
 		invalid_input = !(
-			rsvp.name.length > 0 && rsvp.attending &&
+			rsvp.name.length > 0 &&
+			rsvp.attending &&
 			rsvp.pronouns.length > 0 &&
 			((rsvp.phone && validator.isMobilePhone(rsvp.phone)) ||
 				(rsvp.email && validator.isEmail(rsvp.email)))
@@ -69,11 +70,7 @@
 			</ListGroup>
 		</Col>
 		<Col xs="12" lg="6" class="p-4">
-			<Image
-				fluid
-				class="rounded shadow align-items-center"
-				src={data.event.image_url}
-			/>
+			<Image fluid class="rounded shadow align-items-center" src={data.event.image_url} />
 		</Col>
 	</Row>
 	<Row class="align-items-center">
@@ -105,14 +102,14 @@
 					</Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
-						<Input
-							class="text-end"
-							name="name"
-							on:change={validate}
-							bind:value={rsvp.name}
-							required
-							aria-required="true"
-						/>
+					<Input
+						class="text-end"
+						name="name"
+						on:change={validate}
+						bind:value={rsvp.name}
+						required
+						aria-required="true"
+					/>
 				</Col>
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
 					<Label

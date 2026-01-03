@@ -46,20 +46,26 @@
 			<hr />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
-					<Label
-						><tag class="text-reset fw-bold text-responsive fs-5">Start </tag>
-					</Label>
+					<Label><tag class="text-reset fw-bold text-responsive fs-5">Start </tag></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
-						<Input class="text-end" name="start_time" type="datetime-local" bind:value={data.event.start_time} />
-					</Col>
-					<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
-					<Label
-						><tag class="text-reset fw-bold text-responsive fs-5">End </tag>
-					</Label>
+					<Input
+						class="text-end"
+						name="start_time"
+						type="datetime-local"
+						bind:value={data.event.start_time}
+					/>
+				</Col>
+				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
+					<Label><tag class="text-reset fw-bold text-responsive fs-5">End </tag></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto">
-					<Input class="text-end" name="end_time" type="datetime-local" bind:value={data.event.end_time} />
+					<Input
+						class="text-end"
+						name="end_time"
+						type="datetime-local"
+						bind:value={data.event.end_time}
+					/>
 				</Col>
 			</Row>
 			<hr />
@@ -104,14 +110,18 @@
 					>
 				</Col>
 				<Col xs="12" md="8" lg="9" class="my-auto">
-					<textarea name="description" style="width: 100%;" use:markdown bind:value={data.event.description}></textarea>
+					<textarea
+						name="description"
+						style="width: 100%;"
+						use:markdown
+						bind:value={data.event.description}
+					></textarea>
 				</Col>
-				</Row><Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
+			</Row><Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" md="4" lg="3" class="my-auto">
 					<Label
 						><tag class="text-reset fw-bold text-responsive fs-5">Description Preview</tag>
-						</Label
-					>
+					</Label>
 				</Col>
 				<Col xs="12" md="8" lg="9" class="my-auto">
 					<Container style="background-color: #ffffff;" class="form-control text-start max-w-full">
@@ -128,28 +138,22 @@
 					>
 				</Col>
 				<Col xs="12" md="8" lg="9" class="my-auto">
-					<textarea name="image_url" style="width: 100%;" bind:value={data.event.image_url}></textarea>
+					<textarea name="image_url" style="width: 100%;" bind:value={data.event.image_url}
+					></textarea>
 				</Col>
-				</Row><Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
+			</Row><Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" md="3" class="my-auto">
-					<Label
-						><tag class="text-reset fw-bold text-responsive fs-5">Image Preview</tag>
-						</Label
-					>
+					<Label><tag class="text-reset fw-bold text-responsive fs-5">Image Preview</tag></Label>
 				</Col>
 				<Col xs="12" md="9" class="my-auto text-center align-items-center">
-					<Image
-						class="rounded shadow align-items-center w-50"
-						src={data.event.image_url}
-					/>
+					<Image class="rounded shadow align-items-center w-50" src={data.event.image_url} />
 				</Col>
 			</Row>
 			<hr />
 			<Row class="my-2">
 				<Col class="col-12">
-					<Button
-						type="submit"
-						style="background-color: #0b473b; color: #f9b13e;">Submit Updates</Button
+					<Button type="submit" style="background-color: #0b473b; color: #f9b13e;"
+						>Submit Updates</Button
 					>
 				</Col>
 			</Row>

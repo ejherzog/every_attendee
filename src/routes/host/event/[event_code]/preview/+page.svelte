@@ -24,12 +24,12 @@
 </svelte:head>
 
 <Container class="my-2">
-    <Row>
-        <Col><Button href={`/host/event/${data.event.id}/edit`}>⬅️ Edit Event</Button></Col>
-        <Col><h4><i>RSVP Page Preview</i></h4></Col>
-        <Col><Button href={`/host/dashboard`}>Dashboard ➡️</Button></Col>
-    </Row>
-    <hr>
+	<Row>
+		<Col><Button href={`/host/event/${data.event.id}/edit`}>⬅️ Edit Event</Button></Col>
+		<Col><h4><i>RSVP Page Preview</i></h4></Col>
+		<Col><Button href={`/host/dashboard`}>Dashboard ➡️</Button></Col>
+	</Row>
+	<hr />
 	<h2>RSVP for {data.event.title}</h2>
 </Container>
 
@@ -62,11 +62,7 @@
 			</ListGroup>
 		</Col>
 		<Col xs="12" lg="6" class="p-4">
-			<Image
-				fluid
-				class="rounded shadow align-items-center"
-				src={data.event.image_url}
-			/>
+			<Image fluid class="rounded shadow align-items-center" src={data.event.image_url} />
 		</Col>
 	</Row>
 	<Row class="align-items-center">
@@ -96,12 +92,7 @@
 					</Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
-						<Input disabled
-							class="text-end"
-							name="name"
-							required
-							aria-required="true"
-						/>
+					<Input disabled class="text-end" name="name" required aria-required="true" />
 				</Col>
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
 					<Label
@@ -119,21 +110,13 @@
 					<Label><tag class="text-reset fw-bold text-responsive fs-5">Phone Number</tag></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
-					<Input disabled
-						class="text-end"
-						type="tel"
-						name="phone"
-					/>
+					<Input disabled class="text-end" type="tel" name="phone" />
 				</Col>
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
 					<Label><tag class="text-reset fw-bold text-responsive fs-5">Email Address</tag></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
-					<Input disabled
-						class="text-end"
-						type="email"
-						name="email"
-					/>
+					<Input disabled class="text-end" type="email" name="email" />
 				</Col>
 				<Col class="fst-italic col-12 my-1 text-center">
 					You must provide at least one way to contact you.
@@ -148,7 +131,8 @@
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="9" class="my-auto">
 					{#each ['Yes', 'No', 'Maybe'] as option}
-						<Input disabled
+						<Input
+							disabled
 							required
 							aria-required="true"
 							name="attending"
@@ -167,13 +151,14 @@
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="9" class="my-auto pb-1">
 					<div class="form-control">
-						<MultiSelect disabled
+						<MultiSelect
+							disabled
 							name="pronouns"
 							required
 							allowUserOptions
 							createOptionMsg="Press enter or click here to add your custom option"
 							--sms-bg="white"
-                            options={[]}
+							options={[]}
 							--sms-border="0"
 						></MultiSelect>
 					</div>
@@ -188,7 +173,8 @@
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="9" class="my-auto pb-1">
 					<div class="form-control">
-						<MultiSelect disabled
+						<MultiSelect
+							disabled
 							name="diets"
 							allowUserOptions
 							options={[]}
@@ -209,14 +195,13 @@
 					>
 				</Col>
 				<Col xs="12" sm="6" md="9">
-					<Input disabled type="textarea" name="notes"/>
+					<Input disabled type="textarea" name="notes" />
 				</Col>
 			</Row>
 			<Row class="my-2">
 				<Col class="col-12">
-					<Button disabled
-						type="submit"
-						style="background-color: #0b473b; color: #f9b13e;">Submit RSVP</Button
+					<Button disabled type="submit" style="background-color: #0b473b; color: #f9b13e;"
+						>Submit RSVP</Button
 					>
 				</Col>
 			</Row>

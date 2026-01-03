@@ -23,7 +23,7 @@
 	rsvp.respondent.guest.pronoun_list = [];
 	rsvp.respondent.guest.diets = [];
 
-	let isGroupResponse = false;
+	let isGroupResponse = true;
 	let additionalGuests = [
 		{ name: '', pronoun_list: [], diets: [] },
 		{ name: '', pronoun_list: [], diets: [] }
@@ -361,7 +361,7 @@
 
 				<Row class="mb-4">
 					<Col class="text-center">
-						<Button color="secondary" outline on:click={addGuest}>+ Add Another Guest</Button>
+						<Button color="secondary" outline on:click={addGuest}>+ Add Guest</Button>
 					</Col>
 				</Row>
 			{/if}

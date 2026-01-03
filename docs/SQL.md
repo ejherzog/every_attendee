@@ -22,6 +22,7 @@ CREATE TABLE events (
 ```
 
 // Must keep hosts table because not all hosts are app_users. An event is owned by a single app_user (at first) but can be hosted by multiple people.
+
 ```
 CREATE TABLE hosts (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -46,7 +47,7 @@ CREATE TABLE rsvp_responses (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     rsvp_id char(4) NOT NULL REFERENCES rsvps,
     person_id integer NOT NULL REFERENCES people,
-    attending varchar(20) NOT NULL CHECK (attending IN ('Yes', 'No', 'Maybe')) 
+    attending varchar(20) NOT NULL CHECK (attending IN ('Yes', 'No', 'Maybe'))
 );
 ```
 
@@ -88,7 +89,7 @@ CREATE TABLE person_diets (
 );
 ```
 
-------
+---
 
 ```
 CREATE TABLE app_users (
