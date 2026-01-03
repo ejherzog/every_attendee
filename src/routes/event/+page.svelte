@@ -64,7 +64,7 @@
 					{/if}
 				</FormGroup>
 			</InputGroup>
-			<Button type="submit" style="background-color: #0b473b; color: #f9b13e;">Find Event</Button>
+			<Button type="submit" style="background-color: var(--brand-green); color: var(--brand-gold);">Find Event</Button>
 		</Form>
 	</Col>
 </Row>

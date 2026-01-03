@@ -6,7 +6,7 @@
 	<title>Host Login</title>
 </svelte:head>
 
-<Container style="background-color: #ffcf8355;" class="py-2 rounded">
+<Container style="background-color: var(--brand-honey);" class="py-2 rounded">
 	<Container class="mt-2">
 		<Form method="POST">
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
@@ -25,7 +25,7 @@
 			</Row>
 			<Row class="my-2">
 				<Col class="col-12">
-					<Button type="submit" style="background-color: #0b473b; color: #f9b13e;">Login</Button>
+					<Button type="submit" style="background-color: var(--brand-green); color: var(--brand-gold);">Login</Button>
 				</Col>
 			</Row>
 		</Form>

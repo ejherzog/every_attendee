@@ -103,7 +103,7 @@
 	</Row>
 </Container>
 
-<Container style="background-color: #ffcf8355;" class="py-4 rounded">
+<Container style="background-color: var(--brand-honey);" class="py-4 rounded">
 	<Container class="mt-2">
 		<Form method="POST">
 			<input type="hidden" name="event_code" value={data.event.id} />
@@ -424,7 +424,7 @@
 	.toggle-text {
 		font-size: 1.2rem;
 		font-weight: 600;
-		color: #0b473b;
+		color: var(--brand-green);
 	}
 
 	.custom-switch {
@@ -432,15 +432,15 @@
 		width: 15px;
 		height: 15px;
 		appearance: none;
-		background-color: #fef3df48;
-		border: 1px solid #0b473b;
+		background-color: var(--brand-yellow);
+		border: 1px solid var(--brand-green);
 		border-radius: 2px;
 		cursor: pointer;
 	}
 
 	.custom-switch:checked {
-		background-color: #0b473b !important;
-		border-color: #0b473b !important;
+		background-color: var(--brand-green) !important;
+		border-color: var(--brand-green) !important;
 	}
 
 	.section-divider {
@@ -454,16 +454,16 @@
 	}
 
 	.section-header h4 {
-		color: #0b473b;
+		color: var(--brand-green);
 		font-weight: 600;
 	}
 
 	.guest-card {
-		background: white;
+		background: var(--brand-yellow);
 		padding: 1.5rem;
 		border-radius: 12px;
 		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-		border-left: 3px solid #0b473b;
+		border-left: 3px solid var(--brand-green);
 	}
 
 	.guest-card-header {
@@ -476,13 +476,13 @@
 	}
 
 	.guest-card-header h6 {
-		color: #0b473b;
+		color: var(--brand-green);
 		font-weight: 600;
 	}
 
 	:global(.submit-button) {
-		background-color: #0b473b !important;
-		color: #f9b13e !important;
+		background-color: var(--brand-green) !important;
+		color: var(--brand-gold) !important;
 		border: none !important;
 		padding: 0.75rem 3rem !important;
 		font-weight: 600 !important;
@@ -491,7 +491,7 @@
 	}
 
 	:global(.submit-button:hover:not(:disabled)) {
-		background-color: #083529 !important;
+		background-color: var(--brand-green) !important;
 		transform: translateY(-2px);
 		box-shadow: 0 4px 12px rgba(11, 71, 59, 0.3) !important;
 	}

@@ -87,7 +87,7 @@
 	</Row>
 </Container>
 
-<Container style="background-color: #ffcf8355;" class="py-2 rounded">
+<Container style="background-color: var(--brand-honey);" class="py-2 rounded">
 	<Container class="mt-2">
 		<Form method="POST">
 			<input type="hidden" name="event_code" value={data.event.id} />
@@ -256,7 +256,7 @@
 					<Button
 						type="submit"
 						disabled={invalid_input}
-						style="background-color: #0b473b; color: #f9b13e;">Update RSVP</Button
+						style="background-color: var(--brand-green); color: var(--brand-gold);">Update RSVP</Button
 					>
 				</Col>
 			</Row>

@@ -29,7 +29,7 @@
 	}
 </script>
 
-<Container style="background-color: #ffcf8355;" class="py-2 rounded">
+<Container style="background-color: var(--brand-honey);" class="py-2 rounded">
 	<h3>Create Your Event</h3>
 
 	<Form method="POST">
@@ -108,6 +108,6 @@
 			{@html $markdown}
 		</Container>
 
-		<Button type="submit" style="background-color: #0b473b; color: #f9b13e;">Create Event</Button>
+		<Button type="submit" style="background-color: var(--brand-green); color: var(--brand-gold);">Create Event</Button>
 	</Form>
 </Container>

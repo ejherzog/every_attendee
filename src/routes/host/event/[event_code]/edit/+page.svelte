@@ -16,7 +16,7 @@
 	<h2>Editing {data.event.title}</h2>
 </Container>
 
-<Container style="background-color: #ffcf8355;" class="py-2 rounded">
+<Container style="background-color: var(--brand-honey);" class="py-2 rounded">
 	<Container class="mt-2">
 		<Form method="POST">
 			<input type="hidden" name="event_code" value={data.event.id} />
@@ -152,7 +152,7 @@
 			<hr />
 			<Row class="my-2">
 				<Col class="col-12">
-					<Button type="submit" style="background-color: #0b473b; color: #f9b13e;"
+					<Button type="submit" style="background-color: var(--brand-green); color: var(--brand-gold);"
 						>Submit Updates</Button
 					>
 				</Col>
