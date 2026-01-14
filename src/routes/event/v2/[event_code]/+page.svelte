@@ -1,6 +1,6 @@
 <script lang="ts">
-	import PersonCard from '$lib/components/PersonCard.svelte';
-	import { Person } from '$lib/types/People';
+	import GuestCard from '$lib/components/GuestCard.svelte';
+	import { Response } from '$lib/types/Response';
 	import { Rsvp_New } from '$lib/types/RSVP_new';
 	import {
 		Button,
@@ -15,7 +15,6 @@
 		Row
 	} from '@sveltestrap/sveltestrap';
 	import SvelteMarkdown from 'svelte-markdown';
-	import MultiSelect from 'svelte-multiselect';
 	import validator from 'validator';
 
 	/** @type {import('./$types').PageData} */
@@ -24,21 +23,29 @@
 	let rsvp = new Rsvp_New();
 
 	let isGroupResponse = false;
-	let additionalGuests = [new Person(''), new Person('')];
+	let additionalGuests = [new Response(), new Response()];
 
 	let invalid_input = true;
 	const validate = () => {
-		invalid_input = !(
-			rsvp.respondent.guest.name.length > 0 &&
-			rsvp.respondent.attending &&
-			rsvp.respondent.guest.pronoun_list.length > 0 &&
-			((rsvp.respondent.guest.phone && validator.isMobilePhone(rsvp.respondent.guest.phone)) ||
-				(rsvp.respondent.guest.email && validator.isEmail(rsvp.respondent.guest.email)))
-		);
+		if (
+			!(rsvp.respondent.guest.phone && validator.isMobilePhone(rsvp.respondent.guest.phone)) &&
+			!(rsvp.respondent.guest.email && validator.isEmail(rsvp.respondent.guest.email))
+		) {
+			invalid_input = true;
+			return;
+		}
+		if (isGroupResponse) {
+			invalid_input = !(
+				additionalGuests.length >= 2 && additionalGuests.every((response) => response.guest.name.length > 0 && response.attending.length > 0)
+			);
+		} else {
+			invalid_input = !(rsvp.respondent.guest.name.length > 0 && rsvp.respondent.attending);
+		}
 	};
 
 	function addGuest() {
-		additionalGuests = [...additionalGuests, new Person('')];
+		additionalGuests = [...additionalGuests, new Response()];
+		validate();
 	}
 
 	function removeGuest(index: number) {
@@ -102,7 +109,7 @@
 
 <Container style="background-color: var(--brand-honey);" class="py-4 rounded">
 	<Container class="mt-2">
-		<Form method="POST">
+		<Form method="POST" novalidate>
 			<input type="hidden" name="event_code" value={data.event.id} />
 
 			<!-- Toggle for Group Response -->
@@ -127,43 +134,43 @@
 			</div>
 
 			{#if isGroupResponse}
-				{#each additionalGuests as guest, index}
-					<PersonCard
-						{guest}
+				{#each additionalGuests as response, index}
+					<GuestCard
+						{response}
 						{index}
 						diet_list={data.diet_list}
 						pronoun_list={data.pronoun_list}
 						showRemove={additionalGuests.length > 2}
 						{removeGuest}
+						on:change={validate}
 					/>
 				{/each}
 
 				<Row class="mb-4">
 					<Col class="text-center">
-						<Button color="secondary" outline on:click={addGuest}>+ Add Guest</Button>
+						<Button type="button" color="secondary" outline on:click={addGuest}>+ Add Guest</Button>
 					</Col>
 				</Row>
 			{:else}
-						<PersonCard
-				guest={rsvp.respondent.guest}
-				index={0}
-				diet_list={data.diet_list}
-				pronoun_list={data.pronoun_list}
-				showRemove={false}
-				{removeGuest}
-			/>
+				<GuestCard
+					response={rsvp.respondent}
+					index={0}
+					diet_list={data.diet_list}
+					pronoun_list={data.pronoun_list}
+					showRemove={false}
+					{removeGuest}
+					on:change={validate}
+				/>
 			{/if}
 
 			<hr class="section-divider" />
 
 			<!-- Contact Information Section -->
 			<div class="section-header">
-				<h4 class="text-reset mb-1">
-					Contact Information
-				</h4>
-					<span class="fst-italic text-center text-muted">
-						Provide at least one way to reach you.
-					</span>
+				<h4 class="text-reset mb-1">Contact Information</h4>
+				<span class="fst-italic text-center text-muted">
+					Provide at least one way to reach you.
+				</span>
 			</div>
 
 			<Row class="text-start mx-1 gx-1 gx-md-4 mb-3">

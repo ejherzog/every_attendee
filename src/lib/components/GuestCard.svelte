@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Person } from '$lib/types/People';
+	import type { Response } from '$lib/types/Response';
 	import {
 		Button,
 		Col,
@@ -8,21 +8,28 @@
 		Row
 	} from '@sveltestrap/sveltestrap';
 	import MultiSelect from 'svelte-multiselect';
+	import { createEventDispatcher } from 'svelte';
 
-    export let guest: Person;
+    export let response: Response;
 	export let index: number;
     export let showRemove: boolean;
     export let removeGuest: (index: number) => void;
 
     export let diet_list: string[];
     export let pronoun_list: string[];
+
+	const dispatch = createEventDispatcher();
+
+	function notifyChange() {
+		dispatch('change');
+	}
 </script>
 
 <div class="guest-card mb-2">
 	<div class="guest-card-header">
 		<h6 class="mb-0">Guest {index + 1}</h6>
 		{#if showRemove}
-			<Button color="danger" size="sm" outline on:click={() => removeGuest(index)}>Remove</Button>
+			<Button type="button" color="danger" size="sm" outline on:click={() => removeGuest(index)}>Remove</Button>
 		{/if}
 	</div>
 
@@ -34,7 +41,7 @@
 			</Label>
 		</Col>
 		<Col xs="12" sm="8" md="7" lg="3" xl="4" class="mb-2">
-			<Input name={`guest_${index}_name`} bind:value={guest.name} required />
+			<Input name={`guest_${index}_name`} bind:value={response.guest.name} required on:change={notifyChange} />
 		</Col>
 		<Col xs="12" sm="4" md="5" lg="2" class="d-flex align-items-center mb-2">
 			<Label class="mb-0"
@@ -49,6 +56,8 @@
 					value={option}
 					label={option}
 					class="form-check form-check-inline responsive-radio mb-0"
+					on:change={notifyChange}
+					bind:group={response.attending}
 				/>
 			{/each}
 		</Col>
@@ -66,7 +75,7 @@
 					name={`guest_${index}_pronouns`}
 					allowUserOptions
 					createOptionMsg="Press enter or click here to add"
-					bind:selected={guest.pronoun_list}
+					bind:selected={response.guest.pronoun_list}
 					options={pronoun_list}
 					--sms-bg="white"
 					--sms-border="0"
@@ -84,7 +93,7 @@
 					name={`guest_${index}_diets`}
 					allowUserOptions
 					createOptionMsg="Press enter or click here to add"
-					bind:selected={guest.diets}
+					bind:selected={response.guest.diets}
 					options={diet_list}
 					--sms-bg="white"
 					--sms-border="0"
