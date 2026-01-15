@@ -4,7 +4,7 @@ import {
 	getBasicDietList,
 	getBasicPronounList,
 	getEventInfoById,
-	recordRsvp
+	recordSoloResponse
 } from '$lib/server/server';
 import { containsIgnoreCase } from '$lib/server/formatter';
 
@@ -32,18 +32,28 @@ export async function load({ params }) {
 export const actions = {
 	default: async ({ request }) => {
 		const formData = await request.formData();
+		console.log(formData);
 
-		if (
-			formData.get('event_code') &&
-			request.headers.get('referer') &&
-			!containsIgnoreCase(request.headers.get('referer')!, formData.get('event_code')!.toString())
-		) {
-			error(400, {
-				message: 'Bad request: Event ID in URL does not match Event ID in submitted form.'
-			});
+		if (formData.get('group') === 'on') {
+			// group response
+		} else {
+			const confirmation_code = await recordSoloResponse(formData);
+			redirect(303, `/event/${formData.get('event_code')}/confirm/${confirmation_code}`);
 		}
 
-		const confirmation_code = await recordRsvp(formData);
-		redirect(303, `/event/${formData.get('event_code')}/confirm/${confirmation_code}`);
+		redirect(303, `/event/v2/${formData.get('event_code')}`);
+
+		// if (
+		// 	formData.get('event_code') &&
+		// 	request.headers.get('referer') &&
+		// 	!containsIgnoreCase(request.headers.get('referer')!, formData.get('event_code')!.toString())
+		// ) {
+		// 	error(400, {
+		// 		message: 'Bad request: Event ID in URL does not match Event ID in submitted form.'
+		// 	});
+		// }
+
+		// const confirmation_code = await recordSoloResponse(formData);
+		// redirect(303, `/event/${formData.get('event_code')}/confirm/${confirmation_code}`);
 	}
 } satisfies Actions;

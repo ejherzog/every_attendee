@@ -1,5 +1,7 @@
 <script lang="ts">
-	import { Rsvp } from '$lib/types/Rsvp';
+	import GuestCard from '$lib/components/GuestCard.svelte';
+	import { Response } from '$lib/types/Response';
+	import { Rsvp_New } from '$lib/types/RSVP_new';
 	import {
 		Button,
 		Col,
@@ -13,26 +15,42 @@
 		Row
 	} from '@sveltestrap/sveltestrap';
 	import SvelteMarkdown from 'svelte-markdown';
-	import MultiSelect from 'svelte-multiselect';
 	import validator from 'validator';
 
 	/** @type {import('./$types').PageData} */
 	export let data;
 
-	let rsvp = new Rsvp();
-	rsvp.guest.pronoun_list = [];
-	rsvp.guest.diets = [];
+	let rsvp = new Rsvp_New();
+
+	let isGroupResponse = false;
+	let additionalGuests = [new Response(), new Response()];
 
 	let invalid_input = true;
 	const validate = () => {
-		invalid_input = !(
-			rsvp.guest.name.length > 0 &&
-			rsvp.attending &&
-			rsvp.guest.pronoun_list.length > 0 &&
-			((rsvp.guest.phone && validator.isMobilePhone(rsvp.guest.phone)) ||
-				(rsvp.guest.email && validator.isEmail(rsvp.guest.email)))
-		);
+		if (
+			!(rsvp.respondent.guest.phone && validator.isMobilePhone(rsvp.respondent.guest.phone)) &&
+			!(rsvp.respondent.guest.email && validator.isEmail(rsvp.respondent.guest.email))
+		) {
+			invalid_input = true;
+			return;
+		}
+		if (isGroupResponse) {
+			invalid_input = !(
+				additionalGuests.length >= 2 && additionalGuests.every((response) => response.guest.name.length > 0 && response.attending.length > 0)
+			);
+		} else {
+			invalid_input = !(rsvp.respondent.guest.name.length > 0 && rsvp.respondent.attending);
+		}
 	};
+
+	function addGuest() {
+		additionalGuests = [...additionalGuests, new Response()];
+		validate();
+	}
+
+	function removeGuest(index: number) {
+		additionalGuests = additionalGuests.filter((_, i) => i !== index);
+	}
 </script>
 
 <svelte:head>
@@ -89,175 +107,120 @@
 	</Row>
 </Container>
 
-<Container style="background-color: var(--brand-honey);" class="py-2 rounded">
+<Container style="background-color: var(--brand-honey);" class="py-4 rounded">
 	<Container class="mt-2">
-		<Form method="POST">
+		<Form method="POST" novalidate>
 			<input type="hidden" name="event_code" value={data.event.id} />
-			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
-				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
-					<Label
-						><tag class="text-reset fw-bold text-responsive fs-5">Your Name </tag>
-						<tag class="fst-italic text-responsive fs-6">(required)</tag><br />
-						<tag class="fst-italic text-responsive fs-6">How should we address you?</tag>
-					</Label>
-				</Col>
-				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
-					<Input
-						class="text-end"
-						name="name"
-						on:change={validate}
-						bind:value={rsvp.guest.name}
-						required
-						aria-required="true"
-					/>
-				</Col>
-				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
-					<Label
-						><tag class="text-reset fw-bold text-responsive fs-5">Full Name </tag>
-						<tag class="fst-italic text-responsive fs-6">(optional)</tag></Label
-					>
-				</Col>
-				<Col xs="12" sm="6" md="7" lg="4" class="my-auto">
-					<Input class="text-end" name="full_name" bind:value={rsvp.guest.full_name} />
-				</Col>
-			</Row>
-			<hr />
-			<Row class="text-start mx-1 gx-1 gx-md-4">
-				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
-					<Label
-						><tag class="text-reset fw-bold text-responsive fs-5">Are You Attending?</tag></Label
-					>
-				</Col>
-				<Col xs="12" sm="6" md="7" lg="9" class="my-auto">
-					{#each ['Yes', 'No', 'Maybe'] as option}
-						<Input
-							required
-							aria-required="true"
-							name="attending"
-							type="radio"
-							on:change={validate}
-							bind:group={rsvp.attending}
-							value={option}
-							label={option}
-							class="h5 form-check form-check-inline"
+
+			<!-- Toggle for Group Response -->
+			<Row class="justify-content-center mx-1 gx-1 gx-md-4 mb-3">
+				<div class="toggle-container">
+					<label class="toggle-label">
+						<input
+							type="checkbox"
+							bind:checked={isGroupResponse}
+							name="group"
+							class="custom-switch"
 						/>
-					{/each}
-				</Col>
+						<span class="toggle-text">Respond for a Group</span>
+					</label>
+				</div>
 			</Row>
-			<hr />
-			<Row class="text-start mx-1 gx-1 gx-md-4">
-				<!-- <Col class="col-md-2 col-4 my-2">
-				<Label class="text-reset"><tag class="fw-bold text-responsive">Number Attending </tag><tag class="fw-lighter fst-italic">(required aria-required="true")</tag></Label>
-			</Col>
-			<Col class="col-md-4 col-8 my-2">
-				<InputGroup class="my-1" size="sm">
-					<InputGroupText style="max-width: 40%; min-width: 35%;">Yes:</InputGroupText>
-					<Input name="yes" type="number" min="0"/>
-				</InputGroup>
-				<InputGroup class="my-1" size="sm">
-					<InputGroupText style="max-width: 40%; min-width: 35%;">Maybe:</InputGroupText>
-					<Input name="maybe" type="number" min="0"/>
-				</InputGroup>
-				<InputGroup class="my-1" size="sm">
-					<InputGroupText style="max-width: 40%; min-width: 35%;">No:</InputGroupText>
-					<Input name="no" type="number" min="0"/>
-				</InputGroup>
-			</Col> -->
+
+			<hr class="section-divider" />
+
+			<div class="section-header mb-3">
+				<h4 class="text-reset">Guest Information</h4>
+			</div>
+
+			{#if isGroupResponse}
+				{#each additionalGuests as response, index}
+					<GuestCard
+						{response}
+						{index}
+						diet_list={data.diet_list}
+						pronoun_list={data.pronoun_list}
+						showRemove={additionalGuests.length > 2}
+						{removeGuest}
+						on:change={validate}
+					/>
+				{/each}
+
+				<Row class="mb-4">
+					<Col class="text-center">
+						<Button type="button" color="secondary" outline on:click={addGuest}>+ Add Guest</Button>
+					</Col>
+				</Row>
+			{:else}
+				<GuestCard
+					response={rsvp.respondent}
+					index={0}
+					diet_list={data.diet_list}
+					pronoun_list={data.pronoun_list}
+					showRemove={false}
+					{removeGuest}
+					on:change={validate}
+				/>
+			{/if}
+
+			<hr class="section-divider" />
+
+			<!-- Contact Information Section -->
+			<div class="section-header">
+				<h4 class="text-reset mb-1">Contact Information</h4>
+				<span class="fst-italic text-center text-muted">
+					Provide at least one way to reach you.
+				</span>
+			</div>
+
+			<Row class="text-start mx-1 gx-1 gx-md-4 mb-3">
 				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
-					<Label><tag class="text-reset fw-bold text-responsive fs-5">Phone Number</tag></Label>
+					<Label><span class="text-reset fw-bold text-responsive fs-5">Phone Number</span></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
 					<Input
 						class="text-end"
 						type="tel"
 						name="phone"
-						bind:value={rsvp.guest.phone}
+						bind:value={rsvp.respondent.guest.phone}
 						on:change={validate}
 					/>
 				</Col>
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
-					<Label><tag class="text-reset fw-bold text-responsive fs-5">Email Address</tag></Label>
+					<Label><span class="text-reset fw-bold text-responsive fs-5">Email Address</span></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
 					<Input
 						class="text-end"
 						type="email"
 						name="email"
-						bind:value={rsvp.guest.email}
+						bind:value={rsvp.respondent.guest.email}
 						on:change={validate}
 					/>
 				</Col>
-				<Col class="fst-italic col-12 my-1 text-center">
-					You must provide at least one way to contact you.
-				</Col>
 			</Row>
-			<hr />
-			<Row class="text-start mx-1 my-2 gx-1 gx-md-4 align-items-center">
-				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
-					<Label><tag class="text-reset fw-bold text-responsive fs-5">Pronouns</tag></Label>
-				</Col>
-				<Col xs="12" sm="6" md="7" lg="9" class="my-auto pb-1">
-					<div class="form-control">
-						<MultiSelect
-							name="pronouns"
-							required
-							allowUserOptions
-							createOptionMsg="Press enter or click here to add your custom option"
-							bind:selected={rsvp.guest.pronoun_list}
-							options={data.pronoun_list}
-							on:change={validate}
-							--sms-bg="white"
-							--sms-border="0"
-						></MultiSelect>
-					</div>
-				</Col>
-			</Row>
-			<hr />
-			<Row class="text-start mx-1 gx-1 gx-md-4">
-				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
-					<Label
-						><tag class="text-reset fw-bold text-responsive fs-5">Dietary Restrictions</tag></Label
-					>
-				</Col>
-				<Col xs="12" sm="6" md="7" lg="9" class="my-auto pb-1">
-					<div class="form-control">
-						<MultiSelect
-							name="diets"
-							allowUserOptions
-							createOptionMsg="Press enter or click here to add your custom option"
-							bind:selected={rsvp.guest.diets}
-							options={data.diet_list}
-							--sms-bg="white"
-							--sms-border="0"
-						></MultiSelect>
-					</div>
-				</Col>
-			</Row>
-			<hr />
-			<Row class="text-start mx-1 my-2 align-items-center gx-1 gx-md-4">
+
+			<hr class="section-divider" />
+
+			<Row class="text-start mx-1 my-2 align-items-center gx-1 gx-md-4 mb-3">
 				<Col xs="12" sm="6" md="3">
 					<Label>
-						<tag class="text-reset fw-bold text-responsive fs-5"
-							>Notes for the Host{#if data.event.hosts.length > 1}s{/if}</tag
-						><br />
-						<tag class="fst-italic text-responsive fs-6">{data.host_message}</tag></Label
-					>
+						<span class="text-reset fw-bold text-responsive fs-5">
+							Notes for the Host{#if data.event.hosts.length > 1}s{/if}
+						</span><br />
+						<span class="fst-italic text-responsive fs-6 text-muted">{data.host_message}</span>
+					</Label>
 				</Col>
 				<Col xs="12" sm="6" md="9">
 					<Input type="textarea" name="notes" />
 				</Col>
 			</Row>
-			<!-- <hr /> -->
-			<!-- <Row class="text-start mx-1">
-			<h5>~~Section to Add Additional Guest(s)~~</h5>
-		</Row> -->
-			<Row class="my-2">
-				<Col class="col-12">
-					<Button
-						type="submit"
-						disabled={invalid_input}
-						style="background-color: var(--brand-green); color: var(--brand-gold);">Submit RSVP</Button
-					>
+
+			<Row class="my-4">
+				<Col class="col-12 text-center">
+					<Button type="submit" disabled={invalid_input} size="lg" class="submit-button">
+						Submit RSVP
+					</Button>
 				</Col>
 			</Row>
 		</Form>
@@ -273,5 +236,80 @@
 		.text-responsive {
 			font-size: 1.2rem;
 		}
+	}
+
+	.toggle-container {
+		background: var(--brand-yellow);
+		padding: 1rem;
+		border-radius: 12px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		text-align: center;
+	}
+
+	.toggle-label {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 1rem;
+		margin-bottom: 0;
+		cursor: pointer;
+	}
+
+	.toggle-text {
+		font-size: 1.2rem;
+		font-weight: 600;
+		color: var(--brand-green);
+	}
+
+	.custom-switch {
+		transform: scale(1.5);
+		width: 15px;
+		height: 15px;
+		appearance: none;
+		background-color: var(--brand-yellow);
+		border: 1px solid var(--brand-green);
+		border-radius: 2px;
+		cursor: pointer;
+	}
+
+	.custom-switch:checked {
+		background-color: var(--brand-green) !important;
+		border-color: var(--brand-green) !important;
+	}
+
+	.section-divider {
+		border-top: 2px solid rgba(11, 71, 59, 0.2);
+		margin: 1rem 0;
+	}
+
+	.section-header {
+		text-align: center;
+		margin-bottom: 1rem;
+	}
+
+	.section-header h4 {
+		color: var(--brand-green);
+		font-weight: 600;
+	}
+
+	:global(.submit-button) {
+		background-color: var(--brand-green) !important;
+		color: var(--brand-gold) !important;
+		border: none !important;
+		padding: 0.75rem 3rem !important;
+		font-weight: 600 !important;
+		font-size: 1.1rem !important;
+		transition: all 0.3s ease !important;
+	}
+
+	:global(.submit-button:hover:not(:disabled)) {
+		background-color: var(--brand-green) !important;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(11, 71, 59, 0.3) !important;
+	}
+
+	:global(.submit-button:disabled) {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 </style>
