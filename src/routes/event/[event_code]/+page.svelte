@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GuestCard from '$lib/components/GuestCard.svelte';
 	import { Guest } from '$lib/types/Guest';
-	import { Response } from '$lib/types/Response';
+	import { Reply } from '$lib/types/Reply';
 	import {
 		Button,
 		Col,
@@ -20,15 +20,17 @@
 	/** @type {import('./$types').PageData} */
 	export let data;
 
-	let response = new Response();
+	let response = new Reply();
 
 	let isGroupResponse = false;
-	let additionalGuests = [new Guest(), new Guest()];
 
 	let invalid_input = true;
 	const validate = () => {
 		if (
-			!(response.respondent.person.phone && validator.isMobilePhone(response.respondent.person.phone)) &&
+			!(
+				response.respondent.person.phone &&
+				validator.isMobilePhone(response.respondent.person.phone)
+			) &&
 			!(response.respondent.person.email && validator.isEmail(response.respondent.person.email))
 		) {
 			invalid_input = true;
@@ -36,20 +38,29 @@
 		}
 		if (isGroupResponse) {
 			invalid_input = !(
-				additionalGuests.length >= 2 && additionalGuests.every((response) => response.person.name.length > 0 && response.attending.length > 0)
+				response.other_guests.length >= 1 &&
+				response.other_guests.every(
+					(response) => response.person.name.length > 0 && response.attending.length > 0
+				)
 			);
 		} else {
-			invalid_input = !(response.respondent.person.name.length > 0 && response.respondent.attending);
+			invalid_input = !(
+				response.respondent.person.name.length > 0 && response.respondent.attending
+			);
 		}
 	};
 
+	function updateOtherGuests() {
+		if (!isGroupResponse) response.other_guests = [];
+	}
+
 	function addGuest() {
-		additionalGuests = [...additionalGuests, new Guest()];
+		response.other_guests = [...response.other_guests, new Guest()];
 		validate();
 	}
 
 	function removeGuest(index: number) {
-		additionalGuests = additionalGuests.filter((_, i) => i !== index);
+		response.other_guests = response.other_guests.filter((_, i) => i !== (index - 1));
 	}
 </script>
 
@@ -120,8 +131,9 @@
 						<input
 							type="checkbox"
 							bind:checked={isGroupResponse}
-							name="group"
+							id="group"
 							class="custom-switch"
+							on:change={updateOtherGuests}
 						/>
 						<span class="toggle-text">Respond for a Group</span>
 					</label>
@@ -134,14 +146,24 @@
 				<h4 class="text-reset">Guest Information</h4>
 			</div>
 
+			<GuestCard
+				guest={response.respondent}
+				index={0}
+				diet_list={data.diet_list}
+				pronoun_list={data.pronoun_list}
+				showRemove={false}
+				{removeGuest}
+				on:change={validate}
+			/>
+
 			{#if isGroupResponse}
-				{#each additionalGuests as guest, index}
+				{#each response.other_guests as guest, i}
 					<GuestCard
 						{guest}
-						{index}
+						index={i + 1}
 						diet_list={data.diet_list}
 						pronoun_list={data.pronoun_list}
-						showRemove={additionalGuests.length > 2}
+						showRemove={response.other_guests.length > 1}
 						{removeGuest}
 						on:change={validate}
 					/>
@@ -152,16 +174,6 @@
 						<Button type="button" color="secondary" outline on:click={addGuest}>+ Add Guest</Button>
 					</Col>
 				</Row>
-			{:else}
-				<GuestCard
-					guest={response.respondent}
-					index={0}
-					diet_list={data.diet_list}
-					pronoun_list={data.pronoun_list}
-					showRemove={false}
-					{removeGuest}
-					on:change={validate}
-				/>
 			{/if}
 
 			<hr class="section-divider" />
@@ -182,7 +194,7 @@
 					<Input
 						class="text-end"
 						type="tel"
-						name="phone"
+						id="phone"
 						bind:value={response.respondent.person.phone}
 						on:change={validate}
 					/>
@@ -194,7 +206,7 @@
 					<Input
 						class="text-end"
 						type="email"
-						name="email"
+						id="email"
 						bind:value={response.respondent.person.email}
 						on:change={validate}
 					/>
@@ -213,7 +225,7 @@
 					</Label>
 				</Col>
 				<Col xs="12" sm="6" md="9">
-					<Input type="textarea" name="notes" />
+					<Input type="textarea" id="notes" bind:value={response.note} />
 				</Col>
 			</Row>
 

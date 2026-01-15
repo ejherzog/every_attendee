@@ -41,7 +41,7 @@
 			</Label>
 		</Col>
 		<Col xs="12" sm="8" md="7" lg="3" xl="4" class="mb-2">
-			<Input name={`guest_${index}_name`} bind:value={guest.person.name} required on:change={notifyChange} />
+			<Input id={`guest_${index}_name`} bind:value={guest.person.name} required on:change={notifyChange} />
 		</Col>
 		<Col xs="12" sm="4" md="5" lg="2" class="d-flex align-items-center mb-2">
 			<Label class="mb-0"
@@ -51,7 +51,7 @@
 		<Col xs="12" sm="8" md="7" lg="4" xl="3" class="d-flex align-items-center mb-2">
 			{#each ['Yes', 'No', 'Maybe'] as option}
 				<Input
-					name={`guest_${index}_attending`}
+					id={`guest_${index}_attending`}
 					type="radio"
 					value={option}
 					label={option}
@@ -72,10 +72,10 @@
 		<Col xs="12" sm="8" md="7" lg="9" xl="4" class="mb-2">
 			<div class="form-control">
 				<MultiSelect
-					name={`guest_${index}_pronouns`}
+					id={`guest_${index}_pronouns`}
 					allowUserOptions
 					createOptionMsg="Press enter or click here to add"
-					bind:selected={guest.person.pronoun_list}
+					bind:selected={guest.person.pronouns}
 					options={pronoun_list}
 					--sms-bg="white"
 					--sms-border="0"
@@ -90,7 +90,7 @@
 		<Col xs="12" sm="6" md="7" lg="9" xl="3" class="d-flex align-items-center mb-2">
 			<div class="form-control">
 				<MultiSelect
-					name={`guest_${index}_diets`}
+					id={`guest_${index}_diets`}
 					allowUserOptions
 					createOptionMsg="Press enter or click here to add"
 					bind:selected={guest.person.diets}

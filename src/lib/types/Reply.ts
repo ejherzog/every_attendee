@@ -1,6 +1,6 @@
 import { Guest } from './Guest';
 
-export class Response {
+export class Reply {
 	respondent: Guest;
 	other_guests: Guest[];
 	note?: string;

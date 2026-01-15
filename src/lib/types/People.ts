@@ -1,14 +1,15 @@
 export class Person {
 	name: string;
-	pronoun_list: string[];
-	diets?: string[];
+	pronouns: string[];
+	diets: string[];
 	full_name?: string;
 	phone?: string;
 	email?: string;
 
 	constructor(name: string, full_name?: string) {
 		this.name = name;
-		this.pronoun_list = [];
+		this.pronouns = [];
+		this.diets = [];
 		this.full_name = full_name;
 	}
 
@@ -21,7 +22,8 @@ export class Person {
 	}
 
 	addPronouns(pronouns: string) {
-		this.pronoun_list.push(pronouns);
+		if (!pronouns) this.pronouns = [];
+		this.pronouns!.push(pronouns);
 	}
 }
 

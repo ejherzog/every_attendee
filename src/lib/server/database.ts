@@ -1,9 +1,10 @@
-import pg, { type QueryResult } from 'pg';
+import pg, { type PoolClient, type QueryResult } from 'pg';
 import { DATABASE_URL } from '$env/static/private';
 import type { Person } from '$lib/types/People';
 import { dev } from '$app/environment';
 import type { Session } from './auth';
 import type { DB_AppUser } from '$lib/types/db/DB_AppUser';
+import type { Reply } from '$lib/types/Reply';
 
 let pool_settings: pg.PoolConfig = {
 	max: 5,
@@ -163,8 +164,24 @@ export async function getDietsForPeople(people_ids: number[]): Promise<any[]> {
 export async function createPerson(person: Person): Promise<string> {
 	const insertPerson =
 		'INSERT INTO people(short_name, full_name, phone, email) VALUES($1, $2, $3, $4) RETURNING id';
-	const values = [`${person.name}`, `${person.full_name}`, `${person.phone}`, `${person.email}`];
+	const values = [
+		person.name, 
+		person.full_name || null, 
+		person.phone || null, 
+		person.email || null];;
 	const result = await executeQuery(insertPerson, values);
+	return result.rows[0].id;
+}
+
+export async function insertPerson(client: PoolClient, person: Person): Promise<string> {
+	const insertPerson =
+		'INSERT INTO people(short_name, full_name, phone, email) VALUES($1, $2, $3, $4) RETURNING id';
+	const values = [
+		person.name, 
+		person.full_name || null, 
+		person.phone || null, 
+		person.email || null];
+	const result = await client.query(insertPerson, values);
 	return result.rows[0].id;
 }
 
@@ -244,7 +261,37 @@ export async function addEventToAppUser(event_id: string, app_user_id: string) {
 	await executeQuery(insertUserEvent, values);
 }
 
+export async function recordResponse(event_id: string, response_id: string, response: Reply) {
+
+	return withTransaction(async (client: PoolClient) => {
+
+		// Respondent
+		const respondent_id: string = await insertPerson(client, response.respondent.person);
+		
+		// Response
+		await insertResponse(client, response_id, event_id, respondent_id, response.note ?? '');
+
+		// Attendance Details
+		await insertGuest(client, response_id, respondent_id, response.respondent.attending);
+
+		for (const guest of response.other_guests) {
+			const person_id = await insertPerson(client, guest.person);
+			await insertGuest(client, response_id, person_id, guest.attending);
+
+			// add pronouns
+			// for (const pronoun_id of guest.person.pronouns) {
+
+			// }
+
+			// add diets
+		}
+
+		
+	});
+}
+
 export async function insertResponse(
+	client: PoolClient,
 	response_id: string,
 	event_id: string,
 	respondent_id: string,
@@ -256,17 +303,25 @@ export async function insertResponse(
 		`${response_id}`,
 		`${respondent_id}`,
 		`${event_id}`,
-		`${comments}`
+		comments || null
 	];
-	await executeQuery(insertRsvp, values);
+	await client.query(insertRsvp, values);
 }
 
 export async function insertGuest(
+	client: PoolClient,
 	response_id: string,
 	guest_id: string,
 	attending: string
 ) {
-
+	const insertGuest = 
+		`INSERT INTO guests(response_id, guest_id, attending) VALUES($1, $2, $3)`;
+	const values = [
+		`${response_id}`,
+		`${guest_id}`,
+		`${attending}`
+	]
+	await client.query(insertGuest, values);
 }
 
 export async function updateRsvp(rsvp_id: string, attending: string, comments: string) {
@@ -323,11 +378,27 @@ export async function updateEvent(
 }
 
 // ** UTILITY FUNCTIONS ** //
-async function executeQuery(query_string: string, values?: string[]): Promise<QueryResult> {
+async function executeQuery(query_string: string, values?: any[]): Promise<QueryResult> {
 	try {
 		return await query(query_string, values);
 	} catch (err) {
 		console.log(err);
 		throw err;
+	}
+}
+
+async function withTransaction<T> (fn: (client: PoolClient) => Promise<T>): Promise<T> {
+	const client = await pool.connect();
+
+	try {
+		await client.query('BEGIN');
+		const result = await fn(client);
+		await client.query('COMMIT');
+		return result;
+	} catch (err) {
+		await client.query('ROLLBACK');
+		throw err;
+	} finally {
+		client.release();
 	}
 }
