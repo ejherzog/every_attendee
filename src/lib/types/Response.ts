@@ -1,11 +1,12 @@
-import { Person } from './People';
+import { Guest } from './Guest';
 
 export class Response {
-	guest: Person;
-	attending: string;
+	respondent: Guest;
+	other_guests: Guest[];
+	note?: string;
 
-	constructor(guest: Person = new Person(''), attending: string = '') {
-		this.guest = guest;
-		this.attending = attending;
+	constructor(respondent: Guest = new Guest(), other_guests: Guest[] = []) {
+		this.respondent = respondent;
+		this.other_guests = other_guests;
 	}
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import GuestCard from '$lib/components/GuestCard.svelte';
+	import { Guest } from '$lib/types/Guest';
 	import { Response } from '$lib/types/Response';
-	import { Rsvp_New } from '$lib/types/RSVP_new';
 	import {
 		Button,
 		Col,
@@ -20,31 +20,31 @@
 	/** @type {import('./$types').PageData} */
 	export let data;
 
-	let rsvp = new Rsvp_New();
+	let rsvp = new Response();
 
 	let isGroupResponse = false;
-	let additionalGuests = [new Response(), new Response()];
+	let additionalGuests = [new Guest(), new Guest()];
 
 	let invalid_input = true;
 	const validate = () => {
 		if (
-			!(rsvp.respondent.guest.phone && validator.isMobilePhone(rsvp.respondent.guest.phone)) &&
-			!(rsvp.respondent.guest.email && validator.isEmail(rsvp.respondent.guest.email))
+			!(rsvp.respondent.person.phone && validator.isMobilePhone(rsvp.respondent.person.phone)) &&
+			!(rsvp.respondent.person.email && validator.isEmail(rsvp.respondent.person.email))
 		) {
 			invalid_input = true;
 			return;
 		}
 		if (isGroupResponse) {
 			invalid_input = !(
-				additionalGuests.length >= 2 && additionalGuests.every((response) => response.guest.name.length > 0 && response.attending.length > 0)
+				additionalGuests.length >= 2 && additionalGuests.every((response) => response.person.name.length > 0 && response.attending.length > 0)
 			);
 		} else {
-			invalid_input = !(rsvp.respondent.guest.name.length > 0 && rsvp.respondent.attending);
+			invalid_input = !(rsvp.respondent.person.name.length > 0 && rsvp.respondent.attending);
 		}
 	};
 
 	function addGuest() {
-		additionalGuests = [...additionalGuests, new Response()];
+		additionalGuests = [...additionalGuests, new Guest()];
 		validate();
 	}
 
@@ -111,6 +111,7 @@
 	<Container class="mt-2">
 		<Form method="POST" novalidate>
 			<input type="hidden" name="event_code" value={data.event.id} />
+			<input type="hidden" name="response" value={JSON.stringify(rsvp)} />
 
 			<!-- Toggle for Group Response -->
 			<Row class="justify-content-center mx-1 gx-1 gx-md-4 mb-3">
@@ -134,9 +135,9 @@
 			</div>
 
 			{#if isGroupResponse}
-				{#each additionalGuests as response, index}
+				{#each additionalGuests as guest, index}
 					<GuestCard
-						{response}
+						{guest}
 						{index}
 						diet_list={data.diet_list}
 						pronoun_list={data.pronoun_list}
@@ -153,7 +154,7 @@
 				</Row>
 			{:else}
 				<GuestCard
-					response={rsvp.respondent}
+					guest={rsvp.respondent}
 					index={0}
 					diet_list={data.diet_list}
 					pronoun_list={data.pronoun_list}
@@ -182,7 +183,7 @@
 						class="text-end"
 						type="tel"
 						name="phone"
-						bind:value={rsvp.respondent.guest.phone}
+						bind:value={rsvp.respondent.person.phone}
 						on:change={validate}
 					/>
 				</Col>
@@ -194,7 +195,7 @@
 						class="text-end"
 						type="email"
 						name="email"
-						bind:value={rsvp.respondent.guest.email}
+						bind:value={rsvp.respondent.person.email}
 						on:change={validate}
 					/>
 				</Col>

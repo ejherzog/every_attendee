@@ -41,7 +41,7 @@ export const actions = {
 			redirect(303, `/event/${formData.get('event_code')}/confirm/${confirmation_code}`);
 		}
 
-		redirect(303, `/event/v2/${formData.get('event_code')}`);
+		redirect(303, `/event/${formData.get('event_code')}`);
 
 		// if (
 		// 	formData.get('event_code') &&
