@@ -32,7 +32,7 @@ CREATE TABLE hosts (
 ```
 
 ```
-CREATE TABLE rsvps (
+CREATE TABLE responses (
     id char(4) PRIMARY KEY,
     respondent_id integer REFERENCES people,
     guest_id integer REFERENCES people,
@@ -43,10 +43,10 @@ CREATE TABLE rsvps (
 ```
 
 ```
-CREATE TABLE rsvp_responses (
+CREATE TABLE guests (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    rsvp_id char(4) NOT NULL REFERENCES rsvps,
-    person_id integer NOT NULL REFERENCES people,
+    response_id char(4) NOT NULL REFERENCES responses,
+    guest_id integer NOT NULL REFERENCES people,
     attending varchar(20) NOT NULL CHECK (attending IN ('Yes', 'No', 'Maybe'))
 );
 ```
