@@ -20,7 +20,7 @@
 	/** @type {import('./$types').PageData} */
 	export let data;
 
-	let rsvp = new Response();
+	let response = new Response();
 
 	let isGroupResponse = false;
 	let additionalGuests = [new Guest(), new Guest()];
@@ -28,8 +28,8 @@
 	let invalid_input = true;
 	const validate = () => {
 		if (
-			!(rsvp.respondent.person.phone && validator.isMobilePhone(rsvp.respondent.person.phone)) &&
-			!(rsvp.respondent.person.email && validator.isEmail(rsvp.respondent.person.email))
+			!(response.respondent.person.phone && validator.isMobilePhone(response.respondent.person.phone)) &&
+			!(response.respondent.person.email && validator.isEmail(response.respondent.person.email))
 		) {
 			invalid_input = true;
 			return;
@@ -39,7 +39,7 @@
 				additionalGuests.length >= 2 && additionalGuests.every((response) => response.person.name.length > 0 && response.attending.length > 0)
 			);
 		} else {
-			invalid_input = !(rsvp.respondent.person.name.length > 0 && rsvp.respondent.attending);
+			invalid_input = !(response.respondent.person.name.length > 0 && response.respondent.attending);
 		}
 	};
 
@@ -111,7 +111,7 @@
 	<Container class="mt-2">
 		<Form method="POST" novalidate>
 			<input type="hidden" name="event_code" value={data.event.id} />
-			<input type="hidden" name="response" value={JSON.stringify(rsvp)} />
+			<input type="hidden" name="response" value={JSON.stringify(response)} />
 
 			<!-- Toggle for Group Response -->
 			<Row class="justify-content-center mx-1 gx-1 gx-md-4 mb-3">
@@ -154,7 +154,7 @@
 				</Row>
 			{:else}
 				<GuestCard
-					guest={rsvp.respondent}
+					guest={response.respondent}
 					index={0}
 					diet_list={data.diet_list}
 					pronoun_list={data.pronoun_list}
@@ -183,7 +183,7 @@
 						class="text-end"
 						type="tel"
 						name="phone"
-						bind:value={rsvp.respondent.person.phone}
+						bind:value={response.respondent.person.phone}
 						on:change={validate}
 					/>
 				</Col>
@@ -195,7 +195,7 @@
 						class="text-end"
 						type="email"
 						name="email"
-						bind:value={rsvp.respondent.person.email}
+						bind:value={response.respondent.person.email}
 						on:change={validate}
 					/>
 				</Col>
