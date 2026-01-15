@@ -83,7 +83,7 @@ export async function getPersonFromUser(app_user_id: string): Promise<string> {
 export async function findRsvp(event_code: string, confirmation_code: string): Promise<any[]> {
 	const result = await executeQuery(`SELECT r.id, r.guest_id, 
         p.short_name AS name, p.full_name, p.phone, p.email, r.attending, r.comments
-        FROM rsvps r JOIN people p ON p.id = r.respondent_id
+        FROM responses r JOIN people p ON p.id = r.respondent_id
         WHERE r.id = '${confirmation_code}' AND r.event_id = '${event_code}'`);
 	return result.rows;
 }
@@ -92,15 +92,15 @@ export async function validateRsvpId(
 	event_code: string,
 	confirmation_code: string
 ): Promise<boolean> {
-	const result = await executeQuery(`SELECT id FROM rsvps 
+	const result = await executeQuery(`SELECT id FROM responses 
         WHERE id = '${confirmation_code}' AND event_id = '${event_code}'`);
 	return result.rowCount != null && result.rowCount > 0;
 }
 
-export async function findRsvpsByEventId(event_code: string): Promise<any[]> {
+export async function findResponsesByEventId(event_code: string): Promise<any[]> {
 	const result = await executeQuery(`SELECT r.id, r.guest_id, 
         p.short_name AS name, p.full_name, p.phone, p.email, r.attending, r.comments
-        FROM rsvps r JOIN people p ON p.id = r.respondent_id
+        FROM responses r JOIN people p ON p.id = r.respondent_id
         WHERE r.event_id = '${event_code}'`);
 	return result.rows;
 }
@@ -116,8 +116,8 @@ export async function getAllEventCodes(): Promise<string[]> {
 	return result.rows;
 }
 
-export async function getAllRsvpCodes(): Promise<string[]> {
-	const result = await executeQuery('SELECT id FROM rsvps');
+export async function getAllResponseCodes(): Promise<string[]> {
+	const result = await executeQuery('SELECT id FROM responses');
 	return result.rows;
 }
 
@@ -244,29 +244,33 @@ export async function addEventToAppUser(event_id: string, app_user_id: string) {
 	await executeQuery(insertUserEvent, values);
 }
 
-export async function createRsvp(
-	rsvp_id: string,
+export async function insertResponse(
+	response_id: string,
 	event_id: string,
-	guest_id: string,
 	respondent_id: string,
-	attending: string,
 	comments: string
 ) {
 	const insertRsvp =
-		'INSERT INTO rsvps(id, respondent_id, guest_id, event_id, attending, comments) VALUES($1, $2, $3, $4, $5, $6)';
+		'INSERT INTO responses(id, respondent_id, event_id, comments) VALUES($1, $2, $3, $4)';
 	const values = [
-		`${rsvp_id}`,
+		`${response_id}`,
 		`${respondent_id}`,
-		`${guest_id}`,
 		`${event_id}`,
-		`${attending}`,
 		`${comments}`
 	];
 	await executeQuery(insertRsvp, values);
 }
 
+export async function insertGuest(
+	response_id: string,
+	guest_id: string,
+	attending: string
+) {
+
+}
+
 export async function updateRsvp(rsvp_id: string, attending: string, comments: string) {
-	const updateRsvp = `UPDATE rsvps SET attending = '${attending}', comments = '${comments}' WHERE id = '${rsvp_id}'`;
+	const updateRsvp = `UPDATE responses SET attending = '${attending}', comments = '${comments}' WHERE id = '${rsvp_id}'`;
 	await executeQuery(updateRsvp);
 }
 

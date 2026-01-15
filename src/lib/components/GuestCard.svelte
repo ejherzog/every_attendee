@@ -27,8 +27,8 @@
 
 <div class="guest-card mb-2">
 	<div class="guest-card-header">
-		<h6 class="mb-0">Guest {index + 1}</h6>
-		{#if showRemove}
+		<h6 class="mb-0">{#if (index === 0)}Your Info{:else}Guest {index + 1}{/if}</h6>
+		{#if (index > 0 && showRemove)}
 			<Button type="button" color="danger" size="sm" outline on:click={() => removeGuest(index)}>Remove</Button>
 		{/if}
 	</div>

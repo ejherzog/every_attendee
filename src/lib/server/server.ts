@@ -1,11 +1,12 @@
 import type { DB_Event } from '$lib/types/db/DB_Event';
 import type { DB_Rsvp } from '$lib/types/db/DB_Rsvp';
 import { Person } from '$lib/types/People';
+import { Rsvp_New } from '$lib/types/RSVP_new';
 import { Event } from '$lib/types/view/Event';
 import { Event_Details } from '$lib/types/view/Event_Details';
 import { Rsvp } from '$lib/types/view/Rsvp';
 import { SelectOption } from '$lib/types/view/SelectOption';
-import { generateRsvpCode, validateEventCode } from './codes';
+import { generateResponseCode, validateEventCode } from './codes';
 import * as db from './database';
 import { getHosts, getWhenFromTimestamps } from './formatter';
 
@@ -87,7 +88,7 @@ export async function getRsvp(event_code: string, confirmation_code: string): Pr
 }
 
 export async function getRsvpsForEvent(event_code: string): Promise<any[]> {
-	const rsvpRows = await db.findRsvpsByEventId(event_code);
+	const rsvpRows = await db.findResponsesByEventId(event_code);
 
 	if (rsvpRows.length == 0) return [];
 
@@ -152,28 +153,53 @@ export async function getUsersEvents(app_user_id: number): Promise<Event[]> {
 	});
 }
 
-export async function recordRsvp(formData: any): Promise<string> {
+export async function recordGroupResponse(formData: any): Promise<string> {
+
+	const event_id = formData.get('event_code');
+
+	// Response
+	const response = new Rsvp_New();
+	response.note = formData.get('notes');
+
+	// Guests
+
+
+	const rsvp_id = await generateResponseCode();
+
+	return rsvp_id;
+}
+
+export async function recordSoloResponse(formData: any): Promise<string> {
+
 	// Guest
-	const guest = new Person(formData.get('name'));
-	guest.full_name = formData.get('full_name');
+	const guest = new Person(formData.get('guest_0_name'));
 	guest.phone = formData.get('phone');
 	guest.email = formData.get('email');
 
-	const guest_id = await db.createPerson(guest);
-	Promise.all([
-		addPronouns(formData.get('pronouns'), guest_id),
-		addDiets(formData.get('diets'), guest_id)
-	]);
+	const guest_id = await insertPersonForResponse(guest, formData.get('guest_0_pronouns'), formData.get('guest_0_diets'));
 
 	// RSVP
 	const event_id = formData.get('event_code');
-	const attending = formData.get('attending');
+	const attending = formData.get('guest_0_attending');
 	const comments = formData.get('notes');
-	const rsvp_id = await generateRsvpCode();
+	const response_id = await generateResponseCode();
 
-	await db.createRsvp(rsvp_id, event_id, guest_id, guest_id, attending, comments);
+	Promise.all([
+		db.insertResponse(response_id, event_id, guest_id, comments),
+		db.insertGuest(response_id, guest_id, attending)
+	]);
 
-	return rsvp_id;
+	return response_id;
+}
+
+async function insertPersonForResponse(guest: Person, pronounFormData: any, dietFormData: any): Promise<string> {
+
+	const guest_id = await db.createPerson(guest);
+	Promise.all([
+		addPronouns(pronounFormData, guest_id),
+		addDiets(dietFormData, guest_id)
+	]);
+	return guest_id;
 }
 
 export async function changeRsvp(formData: any): Promise<string> {

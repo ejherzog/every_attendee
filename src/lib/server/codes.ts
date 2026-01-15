@@ -1,4 +1,4 @@
-import { getAllEventCodes, getAllRsvpCodes } from './database';
+import { getAllEventCodes, getAllResponseCodes as getAllResponseCodes } from './database';
 
 export async function validateEventCode(desiredCode: string): Promise<boolean> {
 	const codes = await getAllEventCodes();
@@ -14,9 +14,9 @@ export async function generateEventCode(): Promise<string> {
 	return code;
 }
 
-export async function generateRsvpCode(): Promise<string> {
+export async function generateResponseCode(): Promise<string> {
 	let code;
-	const codes = await getAllRsvpCodes();
+	const codes = await getAllResponseCodes();
 	do {
 		code = generateString(4);
 	} while (codes.includes(code));

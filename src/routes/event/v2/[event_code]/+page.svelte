@@ -119,7 +119,7 @@
 						<input
 							type="checkbox"
 							bind:checked={isGroupResponse}
-							name="additional"
+							name="group"
 							class="custom-switch"
 						/>
 						<span class="toggle-text">Respond for a Group</span>
