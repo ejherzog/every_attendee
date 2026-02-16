@@ -81,15 +81,6 @@ export async function getPersonFromUser(app_user_id: string): Promise<string> {
 	return result.rows[0].person_id;
 }
 
-export async function findRsvp(event_code: string, confirmation_code: string): Promise<any[]> {
-	const result = await executeQuery(`SELECT r.id, g.guest_id, 
-        p.short_name AS name, p.full_name, p.phone, p.email, g.attending, r.comments
-        FROM responses r 
-        JOIN people p ON p.id = r.respondent_id
-        JOIN guests g ON g.response_id = r.id AND g.guest_id = r.respondent_id
-        WHERE r.id = '${confirmation_code}' AND r.event_id = '${event_code}'`);
-	return result.rows;
-}
 
 export async function findOtherGuestIds(response_id: string, respondent_id: string): Promise<number[]> {
 	const result = await executeQuery(

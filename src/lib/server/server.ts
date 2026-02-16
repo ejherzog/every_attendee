@@ -1,7 +1,5 @@
 import type { DB_Event } from '$lib/types/db/DB_Event';
-import type { DB_Rsvp } from '$lib/types/db/DB_Rsvp';
 import { Person } from '$lib/types/People';
-import { Rsvp } from '$lib/types/view/Rsvp';
 import { Reply } from '$lib/types/Reply';
 import { Guest } from '$lib/types/Guest';
 import { Event } from '$lib/types/view/Event';
@@ -104,37 +102,6 @@ export async function getResponseForEdit(
 	reply.note = first.comments;
 
 	return { response: reply, confirmation_code: first.id };
-}
-
-export async function getRsvp(event_code: string, confirmation_code: string): Promise<Rsvp> {
-	const rsvpRows = await db.findRsvp(event_code, confirmation_code);
-
-	if (rsvpRows.length < 1)
-		throw new Error(`No RSVP found with code ${confirmation_code} for ${event_code}.`);
-	if (rsvpRows.length > 1)
-		throw new Error(
-			`Multiple RSVPs found with confirmation code ${confirmation_code} for ${event_code}.`
-		);
-
-	const rsvp = rsvpRows[0] as DB_Rsvp;
-
-	let [pronounRows, dietRows] = await Promise.all([
-		db.getPronounsForPerson(rsvp.guest_id),
-		db.getDietsForPerson(rsvp.guest_id)
-	]);
-	const pronouns = pronounRows.map((pronoun) => {
-		return { label: pronoun.nickname, value: pronoun.id };
-	});
-	const diets = dietRows.map((diet) => {
-		return { label: diet.details, value: diet.id };
-	});
-
-	return new Rsvp(rsvp.name, rsvp.guest_id, pronouns, diets, rsvp.attending, rsvp.id, {
-		full_name: rsvp.full_name,
-		phone: rsvp.phone,
-		email: rsvp.email,
-		comments: rsvp.comments
-	});
 }
 
 export async function getRsvpsForEvent(event_code: string): Promise<any[]> {
