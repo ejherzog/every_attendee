@@ -1,8 +1,8 @@
-import { hash, verify } from "@node-rs/argon2";
-import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from "@oslojs/encoding";
-import { sha256 } from "@oslojs/crypto/sha2";
-import { deleteSession, insertSession, retrieveSession, updateSessionExpiration } from "./database";
-import type { RequestEvent } from "@sveltejs/kit";
+import { hash, verify } from '@node-rs/argon2';
+import { encodeBase32LowerCaseNoPadding, encodeHexLowerCase } from '@oslojs/encoding';
+import { sha256 } from '@oslojs/crypto/sha2';
+import { deleteSession, insertSession, retrieveSession, updateSessionExpiration } from './database';
+import type { RequestEvent } from '@sveltejs/kit';
 
 export async function hashPassword(password: string): Promise<string> {
 	return await hash(password, {
@@ -45,7 +45,7 @@ export async function validateSessionToken(token: string): Promise<SessionValida
 	};
 
 	if (Date.now() >= session.expiresAt.getTime()) {
-        await deleteSession(session.id);
+		await deleteSession(session.id);
 		return { session: null };
 	}
 	if (Date.now() >= session.expiresAt.getTime() - 1000 * 60 * 60 * 24 * 15) {
@@ -60,28 +60,26 @@ export async function invalidateSession(sessionId: string): Promise<void> {
 }
 
 export function setSessionTokenCookie(event: RequestEvent, token: string, expiresAt: Date): void {
-	event.cookies.set("session", token, {
+	event.cookies.set('session', token, {
 		httpOnly: true,
-		path: "/",
+		path: '/',
 		secure: import.meta.env.PROD,
-		sameSite: "lax",
+		sameSite: 'lax',
 		expires: expiresAt
 	});
 }
 
 export function deleteSessionTokenCookie(event: RequestEvent): void {
-	event.cookies.set("session", "", {
+	event.cookies.set('session', '', {
 		httpOnly: true,
-		path: "/",
+		path: '/',
 		secure: import.meta.env.PROD,
-		sameSite: "lax",
+		sameSite: 'lax',
 		maxAge: 0
 	});
 }
 
-export type SessionValidationResult =
-	| { session: Session }
-	| { session: null };
+export type SessionValidationResult = { session: Session } | { session: null };
 
 export interface Session {
 	id: string;

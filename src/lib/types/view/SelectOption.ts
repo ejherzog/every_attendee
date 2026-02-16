@@ -1,10 +1,9 @@
 export class SelectOption {
+	label: string;
+	value: number;
 
-    label: string;
-    value: number;
-
-    constructor(label: string, value: number) {
-        this.label = label;
-        this.value = value;
-    }
+	constructor(label: string, value: number) {
+		this.label = label;
+		this.value = value;
+	}
 }

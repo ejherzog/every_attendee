@@ -11,7 +11,7 @@
 	}
 </script>
 
-<Container style="background-color: #ffcf8355;" class="py-2 rounded">
+<Container style="background-color: var(--brand-honey);" class="py-2 rounded">
 	<h3>RSVPs for {data.event.title}</h3>
 	<TabContent class="nav-fill">
 		<TabPane tabId="summary" tab="Summary" active>
@@ -19,12 +19,12 @@
 			<p><b>Yes: </b>{data.summary.responses.yes}</p>
 			<p><b>Maybe: </b>{data.summary.responses.maybe}</p>
 			<p><b>No: </b>{data.summary.responses.no}</p>
-			<hr>
+			<hr />
 			<h4>Dietary Restrictions</h4>
 			{#each data.summary.diets as diet}
 				<p>{diet}</p>
 			{/each}
-			<hr>
+			<hr />
 			<p><i>*If guests have responded more than once, these totals may be inaccurate.</i></p>
 		</TabPane>
 		<TabPane class="tab" tabId="notes" tab="Guest Notes">
@@ -60,19 +60,26 @@
 		<TabPane tabId="detailed" tab="Full Details">
 			{#each data.rsvps as rsvp}
 				<Row class="m-2">
-					<Col><b>Guest: </b>{rsvp.name} {#if rsvp.full_name}(<i>{rsvp.full_name}</i>){/if}</Col>
+					<Col
+						><b>Guest: </b>{rsvp.name}
+						{#if rsvp.full_name}(<i>{rsvp.full_name}</i>){/if}</Col
+					>
 					<Col><b>Attending: </b>{rsvp.attending}</Col>
 					<Col><b>Confirmation Code: </b>{rsvp.id}</Col>
 				</Row>
 				<Row class="m-2">
 					<Col class="col-4"><b>Pronouns: </b>{rsvp.pronouns}</Col>
-					<Col class="col-8"><b>Dietary Restrictions: </b>{#if rsvp.diets}{rsvp.diets}{:else}<i>none</i>{/if}</Col>
+					<Col class="col-8"
+						><b>Dietary Restrictions: </b>{#if rsvp.diets}{rsvp.diets}{:else}<i>none</i>{/if}</Col
+					>
 				</Row>
 				<Row class="m-2">
 					<Col class="col-4"><b>Contact Info: </b>{contactInfoString(rsvp)}</Col>
-					<Col class="col-8"><b>Notes: </b>{#if rsvp.comments}{rsvp.comments}{:else}<i>none</i>{/if}</Col>
+					<Col class="col-8"
+						><b>Notes: </b>{#if rsvp.comments}{rsvp.comments}{:else}<i>none</i>{/if}</Col
+					>
 				</Row>
-				<hr>
+				<hr />
 			{/each}
 		</TabPane>
 	</TabContent>

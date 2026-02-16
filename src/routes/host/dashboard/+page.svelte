@@ -9,7 +9,7 @@
 	<h1>Hello, {data.username}!</h1>
 </Container>
 
-<Container style="background-color: #ffcf8355;" class="py-2 rounded">
+<Container style="background-color: var(--brand-honey);" class="py-2 rounded">
 	<h3>Your Events</h3>
 	<hr />
 

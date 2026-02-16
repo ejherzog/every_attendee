@@ -6,8 +6,7 @@
 		NavLink,
 		Row,
 		Col,
-		Form,
-		Button
+		Form
 	} from '@sveltestrap/sveltestrap';
 
 	// const kofi_words = ['coffee', 'pizza', 'bacon', 'chocolate', 'cheese', 'soda'];
@@ -26,13 +25,21 @@
 
 <svelte:window bind:innerWidth />
 
-<Navbar style="background-color: #0b473b;" container="sm">
+<div id="wrapper" style="
+	--brand-honey: #FFE2B3;
+    --brand-green: #0B473B;
+	--brand-gold: #F9B13E;
+	--brand-yellow: #FFFBF2;
+	background-color: var(--brand-yellow);
+  ">
+
+<Navbar style="background-color: var(--brand-green);" container="sm">
 	<Row class="w-100 justify-content-end align-items-center">
 		<Col>
 			{#if showSmall}
-				<NavbarBrand href={home} style="color: #f9b13e" class="fs-2">EvA</NavbarBrand>
+				<NavbarBrand href={home} style="color: var(--brand-gold)" class="fs-2">EvA</NavbarBrand>
 			{:else}
-				<NavbarBrand href={home} style="color: #f9b13e" class="fs-2"
+				<NavbarBrand href={home} style="color: var(--brand-gold)" class="fs-2"
 					>EveryAttendee <tag class="fs-4 fw-lighter fst-italic">(𝛂 v0.2)</tag></NavbarBrand
 				>
 			{/if}
@@ -40,19 +47,19 @@
 		<Col class="col-5 col-md-3 col-lg-2 text-end">
 			<Row>
 				<Col class="col-6">
-					<NavLink href="/event/" style="color: #f9b13e" class="fs-5"
+					<NavLink href="/event/" style="color: var(--brand-gold)" class="fs-5"
 						>{data.username ? 'RSVP' : 'Guests'}</NavLink
 					>
 				</Col>
 				<Col class="col-6">
 					{#if data.username}
 						<Form method="POST" action="/api/logout"
-							><button style="all: unset; cursor: pointer; color: #f9b13e" class="fs-5"
+							><button style="all: unset; cursor: pointer; color: var(--brand-gold)" class="fs-5"
 								>Logout</button
 							></Form
 						>
 					{:else}
-						<NavLink href="/login" style="color: #f9b13e" class="fs-5">Hosts</NavLink>
+						<NavLink href="/login" style="color: var(--brand-gold)" class="fs-5">Hosts</NavLink>
 					{/if}
 				</Col>
 			</Row>
@@ -72,6 +79,7 @@
 	</p>
 	<a href="/credits" class="text-reset">Credits</a>
 </Container>
+</div>
 
 <style>
 	button:focus {

@@ -95,7 +95,7 @@
 					{/if}
 				</FormGroup>
 			</InputGroup>
-			<Button type="submit" style="background-color: #0b473b; color: #f9b13e;">Edit RSVP</Button>
+			<Button type="submit" style="background-color: var(--brand-green); color: var(--brand-gold);">Edit RSVP</Button>
 		</Form>
 	</Col>
 </Row>

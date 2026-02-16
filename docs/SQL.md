@@ -22,6 +22,7 @@ CREATE TABLE events (
 ```
 
 // Must keep hosts table because not all hosts are app_users. An event is owned by a single app_user (at first) but can be hosted by multiple people.
+
 ```
 CREATE TABLE hosts (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
@@ -31,13 +32,22 @@ CREATE TABLE hosts (
 ```
 
 ```
-CREATE TABLE rsvps (
+CREATE TABLE responses (
     id char(4) PRIMARY KEY,
     respondent_id integer REFERENCES people,
     guest_id integer REFERENCES people,
     event_id char(6) REFERENCES events,
     attending varchar(20) NOT NULL,
     comments text
+);
+```
+
+```
+CREATE TABLE guests (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    response_id char(4) NOT NULL REFERENCES responses,
+    guest_id integer NOT NULL REFERENCES people,
+    attending varchar(20) NOT NULL CHECK (attending IN ('Yes', 'No', 'Maybe'))
 );
 ```
 
@@ -79,7 +89,7 @@ CREATE TABLE person_diets (
 );
 ```
 
-------
+---
 
 ```
 CREATE TABLE app_users (
@@ -105,3 +115,37 @@ CREATE TABLE app_users_events (
     event_id char(6) REFERENCES events
 );
 ```
+
+#### Group Response Migration
+
+```
+-- Step 1: Rename rsvps to responses
+ALTER TABLE rsvps RENAME TO responses;
+
+-- Step 2: Create guests table
+CREATE TABLE guests (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    response_id char(4) NOT NULL REFERENCES responses,
+    guest_id integer NOT NULL REFERENCES people,
+    attending varchar(20) NOT NULL CHECK (attending IN ('Yes', 'No', 'Maybe'))
+);
+
+-- Step 3: Migrate existing data (1 old rsvp row = 1 guest row)
+INSERT INTO guests (response_id, guest_id, attending)
+SELECT r.id, r.guest_id, r.attending FROM responses r
+WHERE NOT EXISTS (
+    SELECT 1 FROM guests g WHERE g.response_id = r.id AND g.guest_id = r.guest_id
+);
+
+-- Step 4: Drop NOT NULL on legacy attending column (no longer used)
+ALTER TABLE responses ALTER COLUMN attending DROP NOT NULL;
+```
+
+#### Command History: Local DB
+
+ALTER TABLE rsvps RENAME TO responses;
+
+CREATE TABLE guests (                                                                                              id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,                                                                            response_id char(4) NOT NULL REFERENCES responses,                                                                              guest_id integer NOT NULL REFERENCES people,                                                                                    attending varchar(20) NOT NULL CHECK (attending IN ('Yes', 'No', 'Maybe'))                                                  );
+
+ALTER TABLE rsvps ALTER COLUMN attending DROP NOT NULL;
+ALTER TABLE responses ALTER COLUMN attending DROP NOT NULL;
