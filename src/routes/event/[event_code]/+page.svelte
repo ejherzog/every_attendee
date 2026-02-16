@@ -3,6 +3,7 @@
 	import GuestCard from '$lib/components/GuestCard.svelte';
 	import { Guest } from '$lib/types/Guest';
 	import { Reply } from '$lib/types/Reply';
+	import { hasValidContact, isValidName } from '$lib/utils/rsvpValidation';
 	import {
 		Button,
 		Col,
@@ -16,9 +17,6 @@
 		Row
 	} from '@sveltestrap/sveltestrap';
 	import SvelteMarkdown from 'svelte-markdown';
-	import validator from 'validator';
-
-	const NAME_MAX_LENGTH = 50;
 
 	/** @type {import('./$types').PageData} */
 	export let data;
@@ -29,18 +27,13 @@
 
 	let invalid_input = true;
 
-	function isValidName(name: string | undefined): boolean {
-		const trimmed = (name ?? '').trim();
-		return trimmed.length > 0 && trimmed.length <= NAME_MAX_LENGTH;
-	}
-
 	const validate = () => {
-		const phone = (response.respondent.person.phone ?? '').trim();
-		const email = (response.respondent.person.email ?? '').trim();
-		const hasValidPhone = phone.length > 0 && validator.isMobilePhone(phone, 'any');
-		const hasValidEmail = email.length > 0 && validator.isEmail(email);
-
-		if (!hasValidPhone && !hasValidEmail) {
+		if (
+			!hasValidContact(
+				response.respondent.person.phone,
+				response.respondent.person.email
+			)
+		) {
 			invalid_input = true;
 			return;
 		}

@@ -1,6 +1,5 @@
 import { redirect, error } from '@sveltejs/kit';
 import type { Actions } from './$types';
-import validator from 'validator';
 import {
 	getBasicDietList,
 	getBasicPronounList,
@@ -9,15 +8,12 @@ import {
 } from '$lib/server/server';
 import { containsIgnoreCase } from '$lib/server/formatter';
 import type { Reply } from '$lib/types/Reply';
-
-const NAME_MAX_LENGTH = 50;
-const VALID_ATTENDING = ['Yes', 'No', 'Maybe'];
-
-function isValidName(name: unknown): boolean {
-	if (typeof name !== 'string') return false;
-	const trimmed = name.trim();
-	return trimmed.length > 0 && trimmed.length <= NAME_MAX_LENGTH;
-}
+import {
+	hasValidContactStrict,
+	isValidAttending,
+	isValidNameStrict
+} from '$lib/utils/rsvpValidation';
+import { getHostMessage } from '$lib/utils/rsvpForm';
 
 function validateResponse(response: unknown): asserts response is Reply {
 	if (!response || typeof response !== 'object') {
@@ -33,24 +29,16 @@ function validateResponse(response: unknown): asserts response is Reply {
 	const respondent = r.respondent as Record<string, unknown>;
 	const person = respondent.person;
 
-	if (!person || typeof person !== 'object' || !isValidName((person as Record<string, unknown>).name)) {
+	if (!person || typeof person !== 'object' || !isValidNameStrict((person as Record<string, unknown>).name)) {
 		error(400, { message: 'Invalid response: respondent name is required and must be 1-50 characters.' });
 	}
 
-	const attending = respondent.attending;
-	if (
-		typeof attending !== 'string' ||
-		!VALID_ATTENDING.includes(attending)
-	) {
+	if (!isValidAttending(respondent.attending)) {
 		error(400, { message: 'Invalid response: respondent must have a valid attending selection.' });
 	}
 
-	const phone = ((person as Record<string, unknown>).phone ?? '').toString().trim();
-	const email = ((person as Record<string, unknown>).email ?? '').toString().trim();
-	const hasValidPhone = phone.length > 0 && validator.isMobilePhone(phone, 'any');
-	const hasValidEmail = email.length > 0 && validator.isEmail(email);
-
-	if (!hasValidPhone && !hasValidEmail) {
+	const personRecord = person as Record<string, unknown>;
+	if (!hasValidContactStrict(personRecord.phone, personRecord.email)) {
 		error(400, { message: 'Invalid response: at least one valid phone or email is required.' });
 	}
 
@@ -65,14 +53,10 @@ function validateResponse(response: unknown): asserts response is Reply {
 		}
 		const g = guest as Record<string, unknown>;
 		const guestPerson = g.person;
-		if (!guestPerson || typeof guestPerson !== 'object' || !isValidName((guestPerson as Record<string, unknown>).name)) {
+		if (!guestPerson || typeof guestPerson !== 'object' || !isValidNameStrict((guestPerson as Record<string, unknown>).name)) {
 			error(400, { message: 'Invalid response: each guest must have a valid name (1-50 characters).' });
 		}
-		const guestAttending = g.attending;
-		if (
-			typeof guestAttending !== 'string' ||
-			!VALID_ATTENDING.includes(guestAttending)
-		) {
+		if (!isValidAttending(g.attending)) {
 			error(400, { message: 'Invalid response: each guest must have a valid attending selection.' });
 		}
 	}
@@ -89,10 +73,7 @@ export async function load({ params }) {
 			event: structuredClone(event),
 			pronoun_list: structuredClone(pronoun_list),
 			diet_list: structuredClone(diet_list),
-			host_message:
-				event.hostCount && event.hostCount > 1
-					? 'Anything else we should know?'
-					: 'Anything else the host should know?'
+			host_message: getHostMessage(event.hostCount)
 		};
 	} catch (err: any) {
 		redirect(303, `/event?event_code=${params.event_code}`);

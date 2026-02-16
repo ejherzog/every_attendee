@@ -82,10 +82,35 @@ export async function getPersonFromUser(app_user_id: string): Promise<string> {
 }
 
 export async function findRsvp(event_code: string, confirmation_code: string): Promise<any[]> {
-	const result = await executeQuery(`SELECT r.id, r.guest_id, 
-        p.short_name AS name, p.full_name, p.phone, p.email, r.attending, r.comments
-        FROM responses r JOIN people p ON p.id = r.respondent_id
+	const result = await executeQuery(`SELECT r.id, g.guest_id, 
+        p.short_name AS name, p.full_name, p.phone, p.email, g.attending, r.comments
+        FROM responses r 
+        JOIN people p ON p.id = r.respondent_id
+        JOIN guests g ON g.response_id = r.id AND g.guest_id = r.respondent_id
         WHERE r.id = '${confirmation_code}' AND r.event_id = '${event_code}'`);
+	return result.rows;
+}
+
+export async function findOtherGuestIds(response_id: string, respondent_id: string): Promise<number[]> {
+	const result = await executeQuery(
+		`SELECT guest_id FROM guests WHERE response_id = $1 AND guest_id != $2`,
+		[response_id, respondent_id]
+	);
+	return result.rows.map((r: any) => r.guest_id);
+}
+
+/** Returns all guests for a response (respondent first, then others). */
+export async function findResponseWithGuests(
+	event_code: string,
+	confirmation_code: string
+): Promise<any[]> {
+	const result = await executeQuery(`SELECT r.id, r.respondent_id, r.comments,
+        g.guest_id, p.short_name AS name, p.full_name, p.phone, p.email, g.attending
+        FROM responses r 
+        JOIN guests g ON g.response_id = r.id
+        JOIN people p ON p.id = g.guest_id
+        WHERE r.id = '${confirmation_code}' AND r.event_id = '${event_code}'
+        ORDER BY CASE WHEN g.guest_id = r.respondent_id THEN 0 ELSE 1 END, g.id`);
 	return result.rows;
 }
 
@@ -99,9 +124,11 @@ export async function validateRsvpId(
 }
 
 export async function findResponsesByEventId(event_code: string): Promise<any[]> {
-	const result = await executeQuery(`SELECT r.id, r.guest_id, 
-        p.short_name AS name, p.full_name, p.phone, p.email, r.attending, r.comments
-        FROM responses r JOIN people p ON p.id = r.respondent_id
+	const result = await executeQuery(`SELECT r.id, g.guest_id, 
+        p.short_name AS name, p.full_name, p.phone, p.email, g.attending, r.comments
+        FROM responses r 
+        JOIN guests g ON g.response_id = r.id
+        JOIN people p ON p.id = g.guest_id
         WHERE r.event_id = '${event_code}'`);
 	return result.rows;
 }
@@ -135,7 +162,7 @@ export async function getPronounsForPerson(person_id: number): Promise<any[]> {
 }
 
 export async function getPronounsForPeople(people_ids: number[]): Promise<any[]> {
-	const result = await executeQuery(`SELECT p.id, n.nickname FROM pronouns n
+	const result = await executeQuery(`SELECT p.id, n.id as pronoun_id, n.nickname FROM pronouns n
         JOIN person_pronouns pp ON pp.pronoun_id = n.id
         JOIN people p ON pp.person_id = p.id WHERE p.id IN (${people_ids.join(',')})`);
 	return result.rows;
@@ -154,7 +181,7 @@ export async function getDietsForPerson(person_id: number): Promise<any[]> {
 }
 
 export async function getDietsForPeople(people_ids: number[]): Promise<any[]> {
-	const result = await executeQuery(`SELECT p.id, d.details FROM diets d
+	const result = await executeQuery(`SELECT p.id, d.id as diet_id, d.details FROM diets d
         JOIN person_diets pd ON pd.diet_id = d.id
         JOIN people p ON pd.person_id = p.id WHERE p.id IN (${people_ids.join(',')})`);
 	return result.rows;
@@ -394,19 +421,81 @@ export async function insertGuest(
 	guest_id: string,
 	attending: string
 ) {
-	const insertGuest = 
+	const insertGuest =
 		`INSERT INTO guests(response_id, guest_id, attending) VALUES($1, $2, $3)`;
-	const values = [
-		`${response_id}`,
-		`${guest_id}`,
-		`${attending}`
-	];
+	const values = [`${response_id}`, `${guest_id}`, `${attending}`];
 	await client.query(insertGuest, values);
 }
 
-export async function updateRsvp(rsvp_id: string, attending: string, comments: string) {
-	const updateRsvp = `UPDATE responses SET attending = '${attending}', comments = '${comments}' WHERE id = '${rsvp_id}'`;
-	await executeQuery(updateRsvp);
+export async function insertGuestStandalone(
+	response_id: string,
+	guest_id: string,
+	attending: string
+) {
+	await executeQuery(
+		`INSERT INTO guests(response_id, guest_id, attending) VALUES($1, $2, $3)`,
+		[response_id, guest_id, attending]
+	);
+}
+
+export async function updateRsvp(
+	response_id: string,
+	guest_id: string,
+	attending: string,
+	comments: string
+) {
+	return withTransaction(async (client: PoolClient) => {
+		await updateResponseCommentsWithClient(client, response_id, comments);
+		await updateGuestAttendingWithClient(client, response_id, guest_id, attending);
+	});
+}
+
+export async function updateResponseComments(response_id: string, comments: string) {
+	await executeQuery(
+		`UPDATE responses SET comments = $1 WHERE id = $2`,
+		[comments || null, response_id]
+	);
+}
+
+async function updateResponseCommentsWithClient(
+	client: PoolClient,
+	response_id: string,
+	comments: string
+) {
+	await client.query(
+		`UPDATE responses SET comments = $1 WHERE id = $2`,
+		[comments || null, response_id]
+	);
+}
+
+export async function updateGuestAttending(
+	response_id: string,
+	guest_id: string,
+	attending: string
+) {
+	await executeQuery(
+		`UPDATE guests SET attending = $1 WHERE response_id = $2 AND guest_id = $3`,
+		[attending, response_id, guest_id]
+	);
+}
+
+export async function deleteGuest(response_id: string, guest_id: string) {
+	await executeQuery(
+		`DELETE FROM guests WHERE response_id = $1 AND guest_id = $2`,
+		[response_id, guest_id]
+	);
+}
+
+async function updateGuestAttendingWithClient(
+	client: PoolClient,
+	response_id: string,
+	guest_id: string,
+	attending: string
+) {
+	await client.query(
+		`UPDATE guests SET attending = $1 WHERE response_id = $2 AND guest_id = $3`,
+		[attending, response_id, guest_id]
+	);
 }
 
 export async function createEvent(

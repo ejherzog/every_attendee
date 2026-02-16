@@ -3,6 +3,7 @@ import type { DB_Rsvp } from '$lib/types/db/DB_Rsvp';
 import { Person } from '$lib/types/People';
 import { Rsvp } from '$lib/types/view/Rsvp';
 import { Reply } from '$lib/types/Reply';
+import { Guest } from '$lib/types/Guest';
 import { Event } from '$lib/types/view/Event';
 import { Event_Details } from '$lib/types/view/Event_Details';
 import { SelectOption } from '$lib/types/view/SelectOption';
@@ -54,6 +55,55 @@ export async function getEventDetailsById(code: string): Promise<Event_Details> 
 		raw_event.description!,
 		raw_event.image_url!
 	);
+}
+
+export async function getResponseForEdit(
+	event_code: string,
+	confirmation_code: string
+): Promise<{ response: Reply; confirmation_code: string }> {
+	const guestRows = await db.findResponseWithGuests(event_code, confirmation_code);
+
+	if (guestRows.length < 1)
+		throw new Error(`No response found with code ${confirmation_code} for ${event_code}.`);
+
+	const first = guestRows[0] as any;
+	const peopleIds = guestRows.map((r: any) => r.guest_id);
+	const [pronounRows, dietRows] = await Promise.all([
+		db.getPronounsForPeople(peopleIds),
+		db.getDietsForPeople(peopleIds)
+	]);
+
+	function personFromRow(row: any): Person {
+		const person = new Person(row.name, row.full_name);
+		person.phone = row.phone;
+		person.email = row.email;
+		const pronouns = pronounRows
+			.filter((pr: any) => pr.id === row.guest_id)
+			.map((pr: any) => ({ label: pr.nickname, value: pr.pronoun_id }));
+		const diets = dietRows
+			.filter((dr: any) => dr.id === row.guest_id)
+			.map((dr: any) => ({ label: dr.details, value: dr.diet_id }));
+		(person.pronouns as any) = pronouns;
+		(person.diets as any) = diets;
+		return person;
+	}
+
+	const respondentRow = guestRows[0] as any;
+	const respondent = new Guest(
+		personFromRow(respondentRow),
+		respondentRow.attending,
+		respondentRow.guest_id
+	);
+
+	const otherGuests = guestRows.slice(1).map((row: any) => {
+		const person = personFromRow(row);
+		return new Guest(person, row.attending, row.guest_id);
+	});
+
+	const reply = new Reply(respondent, otherGuests);
+	reply.note = first.comments;
+
+	return { response: reply, confirmation_code: first.id };
 }
 
 export async function getRsvp(event_code: string, confirmation_code: string): Promise<Rsvp> {
@@ -194,30 +244,107 @@ export async function recordResponse(event_code: string, response: Reply) {
 // }
 
 export async function changeRsvp(formData: any): Promise<string> {
-	// Guest
-	const guest_id = formData.get('guest_id');
-	await db.updatePerson(guest_id, {
-		short_name: formData.get('name'),
-		full_name: formData.get('full_name'),
-		phone: formData.get('phone'),
-		email: formData.get('email')
+	const confirmation_code = formData.get('confirmation_code')!.toString();
+	const response = JSON.parse(formData.get('response')!.toString()) as Reply;
+
+	const respondent = response.respondent;
+	const respondent_guest_id = respondent.person_id;
+	if (!respondent_guest_id) {
+		throw new Error('Respondent must have person_id when editing.');
+	}
+
+	// Update respondent
+	await db.updatePerson(Number(respondent_guest_id), {
+		short_name: respondent.person.name,
+		full_name: respondent.person.full_name || undefined,
+		phone: respondent.person.phone || undefined,
+		email: respondent.person.email || undefined
 	});
+	await db.removeAllPronounsFromPerson(String(respondent_guest_id));
+	await db.removeAllDietsFromPerson(String(respondent_guest_id));
+	await addPronounsFromData(respondent.person.pronouns, String(respondent_guest_id));
+	await addDietsFromData(respondent.person.diets, String(respondent_guest_id));
 
-	// Pronouns & Diets
-	Promise.all([db.removeAllPronounsFromPerson(guest_id), db.removeAllDietsFromPerson(guest_id)]);
-	Promise.all([
-		addPronouns(formData.get('pronouns'), guest_id),
-		addDiets(formData.get('diets'), guest_id)
-	]);
+	// Update response comments and respondent's guest attending
+	await db.updateRsvp(
+		confirmation_code,
+		String(respondent_guest_id),
+		respondent.attending,
+		response.note ?? ''
+	);
 
-	// RSVP
-	const attending = formData.get('attending');
-	const comments = formData.get('notes');
-	const rsvp_id = formData.get('confirmation_code');
+	// Sync other guests
+	const currentOtherIds = await db.findOtherGuestIds(
+		confirmation_code,
+		String(respondent_guest_id)
+	);
+	const submittedPersonIds = new Set(
+		response.other_guests
+			.filter((g) => g.person_id != null)
+			.map((g) => g.person_id!)
+	);
 
-	await db.updateRsvp(rsvp_id, attending, comments);
+	for (const guest of response.other_guests) {
+		if (guest.person_id) {
+			// Update existing guest
+			await db.updatePerson(Number(guest.person_id), {
+				short_name: guest.person.name,
+				full_name: guest.person.full_name || undefined,
+				phone: guest.person.phone || undefined,
+				email: guest.person.email || undefined
+			});
+			await db.removeAllPronounsFromPerson(String(guest.person_id));
+			await db.removeAllDietsFromPerson(String(guest.person_id));
+			await addPronounsFromData(guest.person.pronouns, String(guest.person_id));
+			await addDietsFromData(guest.person.diets, String(guest.person_id));
+			await db.updateGuestAttending(
+				confirmation_code,
+				String(guest.person_id),
+				guest.attending
+			);
+		} else {
+			// Insert new guest
+			const person_id = await db.createPerson(guest.person);
+			await addPronounsFromData(guest.person.pronouns, String(person_id));
+			await addDietsFromData(guest.person.diets, String(person_id));
+			await db.insertGuestStandalone(confirmation_code, String(person_id), guest.attending);
+		}
+	}
 
-	return rsvp_id;
+	// Delete removed guests
+	for (const guest_id of currentOtherIds) {
+		if (!submittedPersonIds.has(guest_id)) {
+			await db.deleteGuest(confirmation_code, String(guest_id));
+		}
+	}
+
+	return confirmation_code;
+}
+
+async function addPronounsFromData(pronounsData: any, guest_id: string) {
+	if (!pronounsData) return;
+	const pronouns = typeof pronounsData === 'string' ? JSON.parse(pronounsData) : pronounsData;
+	for (const item of Array.isArray(pronouns) ? pronouns : []) {
+		if (item?.value) {
+			await db.addPronounToPerson(guest_id, String(item.value));
+		} else if (item?.label) {
+			const id = await db.createOrFindCustomPronoun(item.label);
+			await db.addPronounToPerson(guest_id, id);
+		}
+	}
+}
+
+async function addDietsFromData(dietsData: any, guest_id: string) {
+	if (!dietsData) return;
+	const diets = typeof dietsData === 'string' ? JSON.parse(dietsData) : dietsData;
+	for (const item of Array.isArray(diets) ? diets : []) {
+		if (item?.value) {
+			await db.addDietToPerson(guest_id, String(item.value));
+		} else if (item?.label) {
+			const id = await db.createOrFindCustomDiet(item.label);
+			await db.addDietToPerson(guest_id, id);
+		}
+	}
 }
 
 export async function createEvent(formData: any): Promise<string | undefined> {
@@ -280,26 +407,3 @@ export async function editEvent(formData: any): Promise<string> {
 	return event_id;
 }
 
-async function addPronouns(pronounFormData: any, guest_id: string) {
-	const pronouns = JSON.parse(pronounFormData);
-	pronouns.forEach(async (item: { value: any; label: any }) => {
-		if (item.value) {
-			await db.addPronounToPerson(guest_id, item.value);
-		} else {
-			const custom_pronoun_id = await db.createOrFindCustomPronoun(item.label);
-			await db.addPronounToPerson(guest_id, custom_pronoun_id);
-		}
-	});
-}
-
-async function addDiets(dietFormData: any, guest_id: string) {
-	const diets = JSON.parse(dietFormData);
-	diets.forEach(async (item: { value: any; label: any }) => {
-		if (item.value) {
-			await db.addDietToPerson(guest_id, item.value);
-		} else {
-			const custom_diet_id = await db.createOrFindCustomDiet(item.label);
-			await db.addDietToPerson(guest_id, custom_diet_id);
-		}
-	});
-}

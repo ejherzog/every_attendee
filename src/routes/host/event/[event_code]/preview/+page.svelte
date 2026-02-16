@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ATTENDING_OPTIONS } from '$lib/utils/rsvpValidation';
 	import {
 		Button,
 		Col,
@@ -130,7 +131,7 @@
 					>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="9" class="my-auto">
-					{#each ['Yes', 'No', 'Maybe'] as option}
+					{#each ATTENDING_OPTIONS as option}
 						<Input
 							disabled
 							required

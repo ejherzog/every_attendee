@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Guest } from '$lib/types/Guest';
+	import { ATTENDING_OPTIONS } from '$lib/utils/rsvpValidation';
 	import {
 		Button,
 		Col,
@@ -49,7 +50,7 @@
 			>
 		</Col>
 		<Col xs="12" sm="8" md="7" lg="4" xl="3" class="d-flex align-items-center mb-2">
-			{#each ['Yes', 'No', 'Maybe'] as option}
+			{#each ATTENDING_OPTIONS as option}
 				<Input
 					id={`guest_${index}_attending`}
 					type="radio"
