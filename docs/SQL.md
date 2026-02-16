@@ -115,3 +115,33 @@ CREATE TABLE app_users_events (
     event_id char(6) REFERENCES events
 );
 ```
+
+#### Group Response Migration
+-- Step 1: Create new tables
+CREATE TABLE IF NOT EXISTS responses (
+    id char(4) PRIMARY KEY,
+    respondent_id integer NOT NULL REFERENCES people(id),
+    event_id char(6) NOT NULL REFERENCES events(id),
+    comments text
+);
+
+CREATE TABLE IF NOT EXISTS guests (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    response_id char(4) NOT NULL REFERENCES responses(id) ON DELETE CASCADE,
+    guest_id integer NOT NULL REFERENCES people(id),
+    attending varchar(20) NOT NULL CHECK (attending IN ('Yes', 'No', 'Maybe'))
+);
+
+-- Step 2: Migrate existing rsvps data (1 rsvp row = 1 response + 1 guest)
+INSERT INTO responses (id, respondent_id, event_id, comments)
+SELECT id, respondent_id, event_id, comments FROM rsvps
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO guests (response_id, guest_id, attending)
+SELECT r.id, r.guest_id, r.attending FROM rsvps r
+WHERE NOT EXISTS (
+    SELECT 1 FROM guests g WHERE g.response_id = r.id AND g.guest_id = r.guest_id
+);
+
+-- Step 3: Rename rsvps for rollback (optional - only if you want to drop later)
+-- ALTER TABLE rsvps RENAME TO rsvps_deprecated;

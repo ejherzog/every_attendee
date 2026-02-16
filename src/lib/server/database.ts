@@ -165,10 +165,11 @@ export async function createPerson(person: Person): Promise<string> {
 	const insertPerson =
 		'INSERT INTO people(short_name, full_name, phone, email) VALUES($1, $2, $3, $4) RETURNING id';
 	const values = [
-		person.name, 
-		person.full_name || null, 
-		person.phone || null, 
-		person.email || null];;
+		person.name,
+		person.full_name || null,
+		person.phone || null,
+		person.email || null
+	];
 	const result = await executeQuery(insertPerson, values);
 	return result.rows[0].id;
 }
@@ -210,6 +211,92 @@ export async function updatePerson(
 export async function addPronounToPerson(person_id: string, pronoun_id: string) {
 	const insertPersonPronoun = 'INSERT INTO person_pronouns(person_id, pronoun_id) VALUES($1, $2)';
 	await executeQuery(insertPersonPronoun, [`${person_id}`, `${pronoun_id}`]);
+}
+
+async function addPronounToPersonWithClient(
+	client: PoolClient,
+	person_id: string,
+	pronoun_id: string
+) {
+	const insertPersonPronoun =
+		'INSERT INTO person_pronouns(person_id, pronoun_id) VALUES($1, $2)';
+	await client.query(insertPersonPronoun, [person_id, pronoun_id]);
+}
+
+async function addDietToPersonWithClient(
+	client: PoolClient,
+	person_id: string,
+	diet_id: string
+) {
+	const insertPersonDiet = 'INSERT INTO person_diets(person_id, diet_id) VALUES($1, $2)';
+	await client.query(insertPersonDiet, [person_id, diet_id]);
+}
+
+async function createOrFindCustomPronounWithClient(
+	client: PoolClient,
+	pronoun_nickname: string
+): Promise<string> {
+	const customPronouns = await client.query(
+		'SELECT id, nickname FROM pronouns WHERE custom = true'
+	);
+	const customPronoun = customPronouns.rows.find((item: any) => item.nickname === pronoun_nickname);
+
+	if (customPronoun) return customPronoun.id;
+
+	const insertPronoun =
+		'INSERT INTO pronouns(nickname, custom) VALUES($1, true) RETURNING id';
+	const result = await client.query(insertPronoun, [pronoun_nickname]);
+	return result.rows[0].id;
+}
+
+async function createOrFindCustomDietWithClient(
+	client: PoolClient,
+	diet_details: string
+): Promise<string> {
+	const customDiets = await client.query('SELECT id, details FROM diets WHERE custom = true');
+	const customDiet = customDiets.rows.find((item: any) => item.details === diet_details);
+
+	if (customDiet) return customDiet.id;
+
+	const insertDiet = 'INSERT INTO diets(details, custom) VALUES($1, true) RETURNING id';
+	const result = await client.query(insertDiet, [diet_details]);
+	return result.rows[0].id;
+}
+
+type PronounDietItem = { value?: number; label?: string };
+
+async function addPronounsAndDietsForPerson(
+	client: PoolClient,
+	person_id: string,
+	person: { pronouns?: (PronounDietItem | string)[]; diets?: (PronounDietItem | string)[] }
+) {
+	const pronouns = person?.pronouns ?? [];
+	for (const item of pronouns) {
+		if (item == null) continue;
+		const label =
+			typeof item === 'string' ? item : (item as PronounDietItem).label ?? (item as any).label;
+		const value = typeof item === 'object' ? (item as PronounDietItem).value ?? (item as any).value : null;
+		if (value != null && value !== '') {
+			await addPronounToPersonWithClient(client, person_id, String(value));
+		} else if (label) {
+			const pronounId = await createOrFindCustomPronounWithClient(client, String(label));
+			await addPronounToPersonWithClient(client, person_id, pronounId);
+		}
+	}
+
+	const diets = person?.diets ?? [];
+	for (const item of diets) {
+		if (item == null) continue;
+		const label =
+			typeof item === 'string' ? item : (item as PronounDietItem).label ?? (item as any).label;
+		const value = typeof item === 'object' ? (item as PronounDietItem).value ?? (item as any).value : null;
+		if (value != null && value !== '') {
+			await addDietToPersonWithClient(client, person_id, String(value));
+		} else if (label) {
+			const dietId = await createOrFindCustomDietWithClient(client, String(label));
+			await addDietToPersonWithClient(client, person_id, dietId);
+		}
+	}
 }
 
 export async function createOrFindCustomPronoun(pronoun_nickname: string): Promise<string> {
@@ -267,7 +354,8 @@ export async function recordResponse(event_id: string, response_id: string, resp
 
 		// Respondent
 		const respondent_id: string = await insertPerson(client, response.respondent.person);
-		
+		await addPronounsAndDietsForPerson(client, respondent_id, response.respondent.person);
+
 		// Response
 		await insertResponse(client, response_id, event_id, respondent_id, response.note ?? '');
 
@@ -276,17 +364,9 @@ export async function recordResponse(event_id: string, response_id: string, resp
 
 		for (const guest of response.other_guests) {
 			const person_id = await insertPerson(client, guest.person);
+			await addPronounsAndDietsForPerson(client, person_id, guest.person);
 			await insertGuest(client, response_id, person_id, guest.attending);
-
-			// add pronouns
-			// for (const pronoun_id of guest.person.pronouns) {
-
-			// }
-
-			// add diets
 		}
-
-		
 	});
 }
 
@@ -320,7 +400,7 @@ export async function insertGuest(
 		`${response_id}`,
 		`${guest_id}`,
 		`${attending}`
-	]
+	];
 	await client.query(insertGuest, values);
 }
 
