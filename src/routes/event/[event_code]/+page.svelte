@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import GuestCard from '$lib/components/GuestCard.svelte';
 	import { Guest } from '$lib/types/Guest';
 	import { Reply } from '$lib/types/Reply';
@@ -17,6 +18,8 @@
 	import SvelteMarkdown from 'svelte-markdown';
 	import validator from 'validator';
 
+	const NAME_MAX_LENGTH = 50;
+
 	/** @type {import('./$types').PageData} */
 	export let data;
 
@@ -25,33 +28,43 @@
 	let isGroupResponse = false;
 
 	let invalid_input = true;
+
+	function isValidName(name: string | undefined): boolean {
+		const trimmed = (name ?? '').trim();
+		return trimmed.length > 0 && trimmed.length <= NAME_MAX_LENGTH;
+	}
+
 	const validate = () => {
-		if (
-			!(
-				response.respondent.person.phone &&
-				validator.isMobilePhone(response.respondent.person.phone)
-			) &&
-			!(response.respondent.person.email && validator.isEmail(response.respondent.person.email))
-		) {
+		const phone = (response.respondent.person.phone ?? '').trim();
+		const email = (response.respondent.person.email ?? '').trim();
+		const hasValidPhone = phone.length > 0 && validator.isMobilePhone(phone, 'any');
+		const hasValidEmail = email.length > 0 && validator.isEmail(email);
+
+		if (!hasValidPhone && !hasValidEmail) {
 			invalid_input = true;
 			return;
 		}
+
 		if (isGroupResponse) {
 			invalid_input = !(
 				response.other_guests.length >= 1 &&
 				response.other_guests.every(
-					(response) => response.person.name.length > 0 && response.attending.length > 0
+					(guest) =>
+						isValidName(guest.person.name) &&
+						guest.attending &&
+						guest.attending.length > 0
 				)
 			);
 		} else {
 			invalid_input = !(
-				response.respondent.person.name.length > 0 && response.respondent.attending
+				isValidName(response.respondent.person.name) && response.respondent.attending
 			);
 		}
 	};
 
 	function updateOtherGuests() {
 		if (!isGroupResponse) response.other_guests = [];
+		validate();
 	}
 
 	function addGuest() {
@@ -60,8 +73,11 @@
 	}
 
 	function removeGuest(index: number) {
-		response.other_guests = response.other_guests.filter((_, i) => i !== (index - 1));
+		response.other_guests = response.other_guests.filter((_, i) => i !== index - 1);
+		validate();
 	}
+
+	onMount(() => validate());
 </script>
 
 <svelte:head>
