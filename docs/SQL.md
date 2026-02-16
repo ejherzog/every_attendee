@@ -117,31 +117,35 @@ CREATE TABLE app_users_events (
 ```
 
 #### Group Response Migration
--- Step 1: Create new tables
-CREATE TABLE IF NOT EXISTS responses (
-    id char(4) PRIMARY KEY,
-    respondent_id integer NOT NULL REFERENCES people(id),
-    event_id char(6) NOT NULL REFERENCES events(id),
-    comments text
-);
 
-CREATE TABLE IF NOT EXISTS guests (
+```
+-- Step 1: Rename rsvps to responses
+ALTER TABLE rsvps RENAME TO responses;
+
+-- Step 2: Create guests table
+CREATE TABLE guests (
     id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    response_id char(4) NOT NULL REFERENCES responses(id) ON DELETE CASCADE,
-    guest_id integer NOT NULL REFERENCES people(id),
+    response_id char(4) NOT NULL REFERENCES responses,
+    guest_id integer NOT NULL REFERENCES people,
     attending varchar(20) NOT NULL CHECK (attending IN ('Yes', 'No', 'Maybe'))
 );
 
--- Step 2: Migrate existing rsvps data (1 rsvp row = 1 response + 1 guest)
-INSERT INTO responses (id, respondent_id, event_id, comments)
-SELECT id, respondent_id, event_id, comments FROM rsvps
-ON CONFLICT (id) DO NOTHING;
-
+-- Step 3: Migrate existing data (1 old rsvp row = 1 guest row)
 INSERT INTO guests (response_id, guest_id, attending)
-SELECT r.id, r.guest_id, r.attending FROM rsvps r
+SELECT r.id, r.guest_id, r.attending FROM responses r
 WHERE NOT EXISTS (
     SELECT 1 FROM guests g WHERE g.response_id = r.id AND g.guest_id = r.guest_id
 );
 
--- Step 3: Rename rsvps for rollback (optional - only if you want to drop later)
--- ALTER TABLE rsvps RENAME TO rsvps_deprecated;
+-- Step 4: Drop NOT NULL on legacy attending column (no longer used)
+ALTER TABLE responses ALTER COLUMN attending DROP NOT NULL;
+```
+
+#### Command History: Local DB
+
+ALTER TABLE rsvps RENAME TO responses;
+
+CREATE TABLE guests (                                                                                              id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,                                                                            response_id char(4) NOT NULL REFERENCES responses,                                                                              guest_id integer NOT NULL REFERENCES people,                                                                                    attending varchar(20) NOT NULL CHECK (attending IN ('Yes', 'No', 'Maybe'))                                                  );
+
+ALTER TABLE rsvps ALTER COLUMN attending DROP NOT NULL;
+ALTER TABLE responses ALTER COLUMN attending DROP NOT NULL;
