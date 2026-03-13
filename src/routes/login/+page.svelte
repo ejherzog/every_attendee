@@ -14,13 +14,13 @@
 					<Label><tag class="text-reset fw-bold text-responsive fs-5">Username</tag></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
-					<Input class="text-end" name="username" required aria-required="true" />
+					<Input class="text-start" name="username" required aria-required="true" />
 				</Col>
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
 					<Label><tag class="text-reset fw-bold text-responsive fs-5">Password</tag></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto">
-					<Input type="password" class="text-end" name="password" />
+					<Input type="password" class="text-start" name="password" />
 				</Col>
 			</Row>
 			<Row class="my-2">

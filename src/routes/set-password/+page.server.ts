@@ -13,7 +13,7 @@ import {
 	getUserOptional
 } from '$lib/server/database';
 
-const MIN_PASSWORD_LENGTH = 8;
+const MIN_PASSWORD_LENGTH = 10;
 const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
 
 export const load: PageServerLoad = async ({ url }) => {

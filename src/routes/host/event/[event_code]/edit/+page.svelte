@@ -29,7 +29,7 @@
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
 					<Input
-						class="text-end"
+						class="text-start"
 						name="title"
 						required
 						aria-required="true"
@@ -40,7 +40,7 @@
 					<Label><tag class="text-reset fw-bold text-responsive fs-5">Event Code </tag></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto">
-					<Input disabled class="text-end" name="code" bind:value={data.event.id} />
+					<Input disabled class="text-start" name="code" bind:value={data.event.id} />
 				</Col>
 			</Row>
 			<hr />
@@ -50,7 +50,7 @@
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
 					<Input
-						class="text-end"
+						class="text-start"
 						name="start_time"
 						type="datetime-local"
 						bind:value={data.event.start_time}
@@ -61,7 +61,7 @@
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto">
 					<Input
-						class="text-end"
+						class="text-start"
 						name="end_time"
 						type="datetime-local"
 						bind:value={data.event.end_time}
@@ -78,7 +78,7 @@
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
 					<Input
-						class="text-end"
+						class="text-start"
 						name="location"
 						required
 						aria-required="true"
@@ -93,7 +93,7 @@
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="5" class="my-auto">
 					<Input
-						class="text-end"
+						class="text-start"
 						name="address"
 						required
 						aria-required="true"

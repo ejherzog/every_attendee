@@ -8,15 +8,12 @@
 </script>
 
 <svelte:head>
-	<title>Invite a host</title>
+	<title>Invite a Host</title>
 </svelte:head>
 
 <Container class="mt-1 mb-4">
-	<h1>Invite a host</h1>
-	<p class="text-muted">Enter their email address. They will get a link to set their own username and password.</p>
-	{#if data.username}
-		<p class="small text-muted">Logged in as {data.username}</p>
-	{/if}
+	<h1>Invite a Host</h1>
+	<p class="text-muted">Enter their email address. We'll generate a signup link for you to share with them.</p>
 </Container>
 
 <Container style="background-color: var(--brand-honey);" class="py-2 rounded">
@@ -39,7 +36,7 @@
 					}
 				}}
 			>
-				Copy link
+				Copy Link
 			</Button>
 		{:else}
 			<Form method="POST">
@@ -58,13 +55,13 @@
 							value={form?.email ?? ''}
 							required
 							aria-required="true"
-							class="text-end"
+							class="text-start"
 						/>
 					</Col>
 				</Row>
 				<Row class="my-2">
 					<Col class="col-12">
-						<Button type="submit" style="background-color: var(--brand-green); color: var(--brand-gold);">Create invite link</Button>
+						<Button type="submit" style="background-color: var(--brand-green); color: var(--brand-gold);">Create Invite Link</Button>
 					</Col>
 				</Row>
 			</Form>
