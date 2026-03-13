@@ -34,11 +34,11 @@
 
 	<Form method="POST">
 		<Label>Event Name</Label>
-		<Input class="text-end" name="title" required aria-required="true" />
+		<Input class="text-start" name="title" required aria-required="true" />
 
 		<Label>Start</Label>
 		<Input
-			class="text-end"
+			class="text-start"
 			required
 			aria-required="true"
 			name="start_time"
@@ -49,7 +49,7 @@
 
 		<Label>End</Label>
 		<Input
-			class="text-end"
+			class="text-start"
 			required
 			aria-required="true"
 			name="end_time"
@@ -66,7 +66,7 @@
 
 		<Label>Event Code</Label>
 		<Input
-			class="text-end"
+			class="text-start"
 			name="event_code"
 			required
 			aria-required="true"
@@ -74,20 +74,20 @@
 		/>
 
 		<Label>Location</Label>
-		<Input class="text-end" name="location" required aria-required="true" />
+		<Input class="text-start" name="location" required aria-required="true" />
 
 		<Label>Address</Label>
-		<Input class="text-end" name="address" required aria-required="true" />
+		<Input class="text-start" name="address" required aria-required="true" />
 
 		<Label>Host</Label>
-		<Input disabled class="text-end" value={data.username} />
+		<Input disabled class="text-start" value={data.username} />
 		<input type="hidden" name="user_id" value={data.user_id} />
 
 		<Label>Image URL</Label>
 		<Input
 			name="image_url"
 			type="url"
-			class="text-end"
+			class="text-start"
 			bind:value={image_url}
 			on:change={isUrlValid}
 		/>

@@ -93,7 +93,7 @@
 					</Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
-					<Input disabled class="text-end" name="name" required aria-required="true" />
+					<Input disabled class="text-start" name="name" required aria-required="true" />
 				</Col>
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
 					<Label
@@ -102,7 +102,7 @@
 					>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto">
-					<Input disabled class="text-end" name="full_name" />
+					<Input disabled class="text-start" name="full_name" />
 				</Col>
 			</Row>
 			<hr />
@@ -111,13 +111,13 @@
 					<Label><tag class="text-reset fw-bold text-responsive fs-5">Phone Number</tag></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
-					<Input disabled class="text-end" type="tel" name="phone" />
+					<Input disabled class="text-start" type="tel" name="phone" />
 				</Col>
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
 					<Label><tag class="text-reset fw-bold text-responsive fs-5">Email Address</tag></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
-					<Input disabled class="text-end" type="email" name="email" />
+					<Input disabled class="text-start" type="email" name="email" />
 				</Col>
 				<Col class="fst-italic col-12 my-1 text-center">
 					You must provide at least one way to contact you.

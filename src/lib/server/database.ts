@@ -12,7 +12,8 @@ import {
 	personDiets,
 	appUsers,
 	userSessions,
-	appUsersEvents
+	appUsersEvents,
+	hostInvites
 } from './db';
 import type { Person } from '$lib/types/People';
 import type { Session } from './auth';
@@ -22,9 +23,15 @@ type DbOrTx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 // ** USER AUTH OPERATIONS ** //
 export async function getUser(username: string): Promise<DB_AppUser> {
+	const u = await getUserOptional(username);
+	if (!u) throw new Error('User not found');
+	return u;
+}
+
+export async function getUserOptional(username: string): Promise<DB_AppUser | null> {
 	const rows = await db.select().from(appUsers).where(eq(appUsers.username, username));
 	const row = rows[0];
-	if (!row) throw new Error('User not found');
+	if (!row) return null;
 	return {
 		id: row.id,
 		username: row.username,
@@ -59,6 +66,63 @@ export async function updateSessionExpiration(session: Session) {
 
 export async function deleteSession(sessionId: string) {
 	await db.delete(userSessions).where(eq(userSessions.id, sessionId));
+}
+
+// ** HOST INVITES ** //
+export async function insertHostInvite(
+	email: string,
+	token: string,
+	expiresAt: Date,
+	createdByUserId?: number
+): Promise<void> {
+	await db.insert(hostInvites).values({
+		email,
+		token,
+		expiresAt,
+		createdByUserId: createdByUserId ?? null
+	});
+}
+
+export async function getHostInviteByToken(token: string): Promise<{
+	id: number;
+	email: string;
+	token: string;
+	expires_at: Date;
+	created_at: Date;
+	created_by_user_id: number | null;
+} | null> {
+	const rows = await db
+		.select()
+		.from(hostInvites)
+		.where(eq(hostInvites.token, token));
+	const row = rows[0];
+	if (!row) return null;
+	if (row.expiresAt.getTime() <= Date.now()) return null;
+	return {
+		id: row.id,
+		email: row.email,
+		token: row.token,
+		expires_at: row.expiresAt,
+		created_at: row.createdAt,
+		created_by_user_id: row.createdByUserId ?? null
+	};
+}
+
+export async function deleteHostInviteByToken(token: string): Promise<void> {
+	await db.delete(hostInvites).where(eq(hostInvites.token, token));
+}
+
+export async function insertAppUser(
+	username: string,
+	passwordHash: string,
+	personId: number | null = null
+): Promise<number> {
+	const [row] = await db
+		.insert(appUsers)
+		.values({ username, passwordHash, personId })
+		.returning({ id: appUsers.id });
+	if (!row) throw new Error('Insert app_user failed');
+	return row.id;
 }
 
 // ** READ OPERATIONS ** //

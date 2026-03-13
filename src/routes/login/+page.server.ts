@@ -7,7 +7,7 @@ import {
 	verifyPassword
 } from '$lib/server/auth';
 import type { DB_AppUser } from '$lib/types/db/DB_AppUser';
-import { getUser } from '$lib/server/database';
+import { getUserOptional } from '$lib/server/database';
 
 export const actions = {
 	default: async ({ cookies, request }) => {
@@ -29,7 +29,7 @@ export const actions = {
 			});
 		}
 
-		const user: DB_AppUser = await getUser(username);
+		const user = await getUserOptional(username.trim());
 
 		if (!user) {
 			return fail(400, {

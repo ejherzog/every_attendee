@@ -44,7 +44,7 @@
 				>
 			{/if}
 		</Col>
-		<Col class="col-5 col-md-3 col-lg-2 text-end">
+		<Col class="col-5 col-md-3 col-lg-2 text-start">
 			<Row>
 				<Col class="col-6">
 					<NavLink href="/event/" style="color: var(--brand-gold)" class="fs-5"

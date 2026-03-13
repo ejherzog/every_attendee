@@ -167,7 +167,7 @@
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
 					<Input
-						class="text-end"
+						class="text-start"
 						type="tel"
 						id="phone"
 						bind:value={response.respondent.person.phone}
@@ -179,7 +179,7 @@
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
 					<Input
-						class="text-end"
+						class="text-start"
 						type="email"
 						id="email"
 						bind:value={response.respondent.person.email}

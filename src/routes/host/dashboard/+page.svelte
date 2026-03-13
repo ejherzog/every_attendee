@@ -27,4 +27,6 @@
 		</Row>
 		<hr />
 	{/each}
+
+	<p class="mt-2 mb-0"><a href="/host/invite">Invite a host</a></p>
 </Container>
