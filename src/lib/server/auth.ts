@@ -38,6 +38,7 @@ export async function createSession(token: string, userId: number): Promise<Sess
 export async function validateSessionToken(token: string): Promise<SessionValidationResult> {
 	const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)));
 	const result = await retrieveSession(sessionId);
+	if (!result) return { session: null };
 	const session: Session = {
 		id: result.id,
 		userId: result.user_id,

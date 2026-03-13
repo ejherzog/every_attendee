@@ -1,5 +1,16 @@
 # EveryAttendee
 
+Database access uses [Drizzle ORM](https://orm.drizzle.team/) with PostgreSQL. Schema and client live in `src/lib/server/db/`. For local dev, set `DATABASE_URL` (e.g. in `.env`). On Heroku, `DATABASE_URL` is set automatically.
+
+- **Generate migrations:** `npm run db:generate`
+- **Apply migrations:** `npm run db:migrate` (or on Heroku: `heroku run npm run db:migrate`)
+- **Push schema (dev):** `npm run db:push`
+- **Studio (dev):** `npm run db:studio`
+
+To run migrations automatically on deploy, add a [release phase](https://devcenter.heroku.com/articles/release-phase) (e.g. in `Procfile`: `release: npx drizzle-kit migrate` and `web: node build/index.js`). Only do this once you have migration files; the current app uses the existing DB schema as-is.
+
+---
+
 Hosting an event? You should be able to invite anyone you know regardless of whether they use Facebook, Google Calendar, Discord, or any other platform.
 
 This application has two main features:

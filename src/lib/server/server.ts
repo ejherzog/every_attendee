@@ -149,7 +149,7 @@ export async function getBasicDietList(): Promise<SelectOption[]> {
 
 	let dietList: SelectOption[] = [];
 	dietRows.forEach((diet) => {
-		dietList.push(new SelectOption(diet.details, diet.id));
+		dietList.push(new SelectOption(diet.details ?? '', diet.id));
 	});
 
 	return dietList;
@@ -160,12 +160,12 @@ export async function getUsersEvents(app_user_id: number): Promise<Event[]> {
 
 	return events_data.map((event) => {
 		return new Event(event.title, {
-			id: event.event_id,
-			when: getWhenFromTimestamps(event.start_time, event.end_time),
-			location: event.location,
-			address: event.address,
-			description: event.description,
-			image_url: event.image_url
+			id: event.id,
+			when: getWhenFromTimestamps(event.start_time ?? undefined, event.end_time ?? undefined),
+			location: event.location ?? undefined,
+			address: event.address ?? undefined,
+			description: event.description ?? undefined,
+			image_url: event.image_url ?? undefined
 		});
 	});
 }
