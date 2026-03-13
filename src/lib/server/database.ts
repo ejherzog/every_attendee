@@ -1,93 +1,116 @@
-import pg, { type PoolClient, type QueryResult } from 'pg';
-import { DATABASE_URL } from '$env/static/private';
+import { eq, and, inArray, ne, sql } from 'drizzle-orm';
+import { db } from './db';
+import {
+	people,
+	events,
+	hosts,
+	responses,
+	guests,
+	pronouns,
+	personPronouns,
+	diets,
+	personDiets,
+	appUsers,
+	userSessions,
+	appUsersEvents
+} from './db';
 import type { Person } from '$lib/types/People';
-import { dev } from '$app/environment';
 import type { Session } from './auth';
 import type { DB_AppUser } from '$lib/types/db/DB_AppUser';
 import type { Reply } from '$lib/types/Reply';
-
-let pool_settings: pg.PoolConfig = {
-	max: 5,
-	connectionString: DATABASE_URL
-};
-if (!dev) {
-	pool_settings.ssl = { rejectUnauthorized: false };
-}
-
-const pool = new pg.Pool(pool_settings);
-
-type PostgresQueryResult = (sql: string, params?: any[]) => Promise<QueryResult<any>>;
-const query: PostgresQueryResult = (sql, params?) => pool.query(sql, params);
+type DbOrTx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 // ** USER AUTH OPERATIONS ** //
 export async function getUser(username: string): Promise<DB_AppUser> {
-	const result = await executeQuery(`SELECT * FROM app_users WHERE username = '${username}'`);
-	return result.rows[0] as DB_AppUser;
+	const rows = await db.select().from(appUsers).where(eq(appUsers.username, username));
+	const row = rows[0];
+	if (!row) throw new Error('User not found');
+	return {
+		id: row.id,
+		username: row.username,
+		password_hash: row.passwordHash,
+		person_id: row.personId ?? undefined
+	} as DB_AppUser;
 }
 
 export async function getUsername(user_id: number): Promise<string> {
-	const result = await executeQuery(`SELECT username FROM app_users WHERE id = ${user_id}`);
-	return result.rows[0].username;
+	const rows = await db.select({ username: appUsers.username }).from(appUsers).where(eq(appUsers.id, user_id));
+	return rows[0]?.username ?? '';
 }
 
 export async function insertSession(session: Session) {
-	const insertQuery = 'INSERT INTO user_sessions(id, user_id, expires_at) VALUES ($1, $2, $3)';
-	await executeQuery(insertQuery, [
-		session.id,
-		`${session.userId}`,
-		session.expiresAt.toUTCString()
-	]);
+	await db.insert(userSessions).values({
+		id: session.id,
+		userId: session.userId,
+		expiresAt: session.expiresAt
+	});
 }
 
-export async function retrieveSession(sessionId: string): Promise<any> {
-	const result =
-		await executeQuery(`SELECT user_sessions.id, user_sessions.user_id, user_sessions.expires_at 
-        FROM user_sessions WHERE user_sessions.id = '${sessionId}'`);
-
-	return result.rows[0];
+export async function retrieveSession(sessionId: string): Promise<{ id: string; user_id: number; expires_at: Date } | undefined> {
+	const rows = await db.select().from(userSessions).where(eq(userSessions.id, sessionId));
+	const row = rows[0];
+	if (!row) return undefined;
+	return { id: row.id, user_id: row.userId, expires_at: row.expiresAt };
 }
 
 export async function updateSessionExpiration(session: Session) {
-	await executeQuery(
-		`UPDATE user_sessions SET expires_at = ${session.expiresAt} WHERE id = ${session.id}`
-	);
+	await db.update(userSessions).set({ expiresAt: session.expiresAt }).where(eq(userSessions.id, session.id));
 }
 
 export async function deleteSession(sessionId: string) {
-	await executeQuery(`DELETE FROM user_sessions WHERE id = '${sessionId}'`);
+	await db.delete(userSessions).where(eq(userSessions.id, sessionId));
 }
 
 // ** READ OPERATIONS ** //
+function eventRowToSnake(row: typeof events.$inferSelect) {
+	return {
+		id: row.id,
+		title: row.title,
+		start_time: row.startTime,
+		end_time: row.endTime,
+		location: row.location,
+		address: row.address,
+		description: row.description,
+		image_url: row.imageUrl
+	};
+}
+
 export async function findEventById(code: string): Promise<any[]> {
-	const result = await executeQuery(`SELECT * FROM events WHERE id = '${code}'`);
-	return result.rows;
+	const rows = await db.select().from(events).where(eq(events.id, code));
+	return rows.map(eventRowToSnake);
 }
 
 export async function validateEventId(code: string): Promise<boolean> {
-	const result = await executeQuery(`SELECT id FROM events WHERE id = '${code}'`);
-	return result.rowCount != null && result.rowCount > 0;
+	const rows = await db.select({ id: events.id }).from(events).where(eq(events.id, code));
+	return rows.length > 0;
 }
 
-export async function findHostsByEventId(code: string): Promise<any[]> {
-	const result = await executeQuery(`SELECT p.short_name AS name
-        FROM hosts h JOIN people p ON p.id = h.host_id
-        WHERE h.event_id = '${code}'`);
-	return result.rows;
+export async function findHostsByEventId(code: string): Promise<{ name: string }[]> {
+	const rows = await db
+		.select({ name: people.shortName })
+		.from(hosts)
+		.innerJoin(people, eq(hosts.hostId, people.id))
+		.where(eq(hosts.eventId, code));
+	return rows;
 }
 
 export async function getPersonFromUser(app_user_id: string): Promise<string> {
-	const result = await executeQuery(`SELECT person_id FROM app_users
-        WHERE id = ${app_user_id}`);
-	return result.rows[0].person_id;
+	const rows = await db
+		.select({ personId: appUsers.personId })
+		.from(appUsers)
+		.where(eq(appUsers.id, parseInt(app_user_id, 10)));
+	const personId = rows[0]?.personId;
+	return personId != null ? String(personId) : '';
 }
 
-
 export async function findOtherGuestIds(response_id: string, respondent_id: string): Promise<number[]> {
-	const result = await executeQuery(
-		`SELECT guest_id FROM guests WHERE response_id = $1 AND guest_id != $2`,
-		[response_id, respondent_id]
-	);
-	return result.rows.map((r: any) => r.guest_id);
+	const rows = await db
+		.select({ guestId: guests.guestId })
+		.from(guests)
+		.where(
+			and(eq(guests.responseId, response_id), ne(guests.guestId, parseInt(respondent_id, 10)))
+		);
+	return rows.map((r) => r.guestId);
 }
 
 /** Returns all guests for a response (respondent first, then others). */
@@ -95,113 +118,176 @@ export async function findResponseWithGuests(
 	event_code: string,
 	confirmation_code: string
 ): Promise<any[]> {
-	const result = await executeQuery(`SELECT r.id, r.respondent_id, r.comments,
-        g.guest_id, p.short_name AS name, p.full_name, p.phone, p.email, g.attending
-        FROM responses r 
-        JOIN guests g ON g.response_id = r.id
-        JOIN people p ON p.id = g.guest_id
-        WHERE r.id = '${confirmation_code}' AND r.event_id = '${event_code}'
-        ORDER BY CASE WHEN g.guest_id = r.respondent_id THEN 0 ELSE 1 END, g.id`);
-	return result.rows;
+	const rows = await db
+		.select({
+			id: responses.id,
+			respondent_id: responses.respondentId,
+			comments: responses.comments,
+			guest_id: guests.guestId,
+			name: people.shortName,
+			full_name: people.fullName,
+			phone: people.phone,
+			email: people.email,
+			attending: guests.attending
+		})
+		.from(responses)
+		.innerJoin(guests, eq(guests.responseId, responses.id))
+		.innerJoin(people, eq(people.id, guests.guestId))
+		.where(and(eq(responses.id, confirmation_code), eq(responses.eventId, event_code)))
+		.orderBy(
+			sql`CASE WHEN ${guests.guestId} = ${responses.respondentId} THEN 0 ELSE 1 END`,
+			guests.id
+		);
+	return rows;
 }
 
 export async function validateRsvpId(
 	event_code: string,
 	confirmation_code: string
 ): Promise<boolean> {
-	const result = await executeQuery(`SELECT id FROM responses 
-        WHERE id = '${confirmation_code}' AND event_id = '${event_code}'`);
-	return result.rowCount != null && result.rowCount > 0;
+	const rows = await db
+		.select({ id: responses.id })
+		.from(responses)
+		.where(and(eq(responses.id, confirmation_code), eq(responses.eventId, event_code)));
+	return rows.length > 0;
 }
 
 export async function findResponsesByEventId(event_code: string): Promise<any[]> {
-	const result = await executeQuery(`SELECT r.id, g.guest_id, 
-        p.short_name AS name, p.full_name, p.phone, p.email, g.attending, r.comments
-        FROM responses r 
-        JOIN guests g ON g.response_id = r.id
-        JOIN people p ON p.id = g.guest_id
-        WHERE r.event_id = '${event_code}'`);
-	return result.rows;
+	const rows = await db
+		.select({
+			id: responses.id,
+			guest_id: guests.guestId,
+			name: people.shortName,
+			full_name: people.fullName,
+			phone: people.phone,
+			email: people.email,
+			attending: guests.attending,
+			comments: responses.comments
+		})
+		.from(responses)
+		.innerJoin(guests, eq(guests.responseId, responses.id))
+		.innerJoin(people, eq(people.id, guests.guestId))
+		.where(eq(responses.eventId, event_code));
+	return rows;
 }
 
 export async function findEventsByUserId(app_user_id: number) {
-	const result = await executeQuery(`SELECT * FROM events e 
-        JOIN app_users_events u ON e.id = u.event_id WHERE u.app_user_id = ${app_user_id}`);
-	return result.rows;
+	const rows = await db
+		.select()
+		.from(events)
+		.innerJoin(appUsersEvents, eq(events.id, appUsersEvents.eventId))
+		.where(eq(appUsersEvents.appUserId, app_user_id));
+	return rows.map((r: { events: typeof events.$inferSelect }) => eventRowToSnake(r.events));
 }
 
 export async function getAllEventCodes(): Promise<string[]> {
-	const result = await executeQuery('SELECT id FROM events');
-	return result.rows;
+	const rows = await db.select({ id: events.id }).from(events);
+	return rows.map((r) => r.id);
 }
 
 export async function getAllResponseCodes(): Promise<string[]> {
-	const result = await executeQuery('SELECT id FROM responses');
-	return result.rows;
+	const rows = await db.select({ id: responses.id }).from(responses);
+	return rows.map((r) => r.id);
 }
 
-export async function getBasicPronouns(): Promise<any[]> {
-	const result = await executeQuery(`SELECT id, nickname FROM pronouns WHERE custom = false`);
-	return result.rows;
+export async function getBasicPronouns(): Promise<{ id: number; nickname: string }[]> {
+	const rows = await db
+		.select({ id: pronouns.id, nickname: pronouns.nickname })
+		.from(pronouns)
+		.where(eq(pronouns.custom, false));
+	return rows;
 }
 
-export async function getPronounsForPerson(person_id: number): Promise<any[]> {
-	const result = await executeQuery(`SELECT n.id, n.nickname FROM pronouns n
-        JOIN person_pronouns pp ON pp.pronoun_id = n.id
-        JOIN people p ON pp.person_id = p.id WHERE p.id = ${person_id}`);
-	return result.rows;
+export async function getPronounsForPerson(person_id: number): Promise<{ id: number; nickname: string }[]> {
+	const rows = await db
+		.select({ id: pronouns.id, nickname: pronouns.nickname })
+		.from(pronouns)
+		.innerJoin(personPronouns, eq(personPronouns.pronounId, pronouns.id))
+		.where(eq(personPronouns.personId, person_id));
+	return rows;
 }
 
 export async function getPronounsForPeople(people_ids: number[]): Promise<any[]> {
-	const result = await executeQuery(`SELECT p.id, n.id as pronoun_id, n.nickname FROM pronouns n
-        JOIN person_pronouns pp ON pp.pronoun_id = n.id
-        JOIN people p ON pp.person_id = p.id WHERE p.id IN (${people_ids.join(',')})`);
-	return result.rows;
+	if (people_ids.length === 0) return [];
+	const rows = await db
+		.select({
+			id: people.id,
+			pronoun_id: pronouns.id,
+			nickname: pronouns.nickname
+		})
+		.from(people)
+		.innerJoin(personPronouns, eq(personPronouns.personId, people.id))
+		.innerJoin(pronouns, eq(pronouns.id, personPronouns.pronounId))
+		.where(inArray(people.id, people_ids));
+	return rows;
 }
 
-export async function getBasicDiets(): Promise<any[]> {
-	const result = await executeQuery(`SELECT id, details FROM diets WHERE custom = false`);
-	return result.rows;
+export async function getBasicDiets(): Promise<{ id: number; details: string | null }[]> {
+	const rows = await db
+		.select({ id: diets.id, details: diets.details })
+		.from(diets)
+		.where(eq(diets.custom, false));
+	return rows;
 }
 
-export async function getDietsForPerson(person_id: number): Promise<any[]> {
-	const result = await executeQuery(`SELECT d.id, d.details FROM diets d
-        JOIN person_diets pd ON pd.diet_id = d.id
-        JOIN people p ON pd.person_id = p.id WHERE p.id = ${person_id}`);
-	return result.rows;
+export async function getDietsForPerson(person_id: number): Promise<{ id: number; details: string | null }[]> {
+	const rows = await db
+		.select({ id: diets.id, details: diets.details })
+		.from(diets)
+		.innerJoin(personDiets, eq(personDiets.dietId, diets.id))
+		.where(eq(personDiets.personId, person_id));
+	return rows;
 }
 
 export async function getDietsForPeople(people_ids: number[]): Promise<any[]> {
-	const result = await executeQuery(`SELECT p.id, d.id as diet_id, d.details FROM diets d
-        JOIN person_diets pd ON pd.diet_id = d.id
-        JOIN people p ON pd.person_id = p.id WHERE p.id IN (${people_ids.join(',')})`);
-	return result.rows;
+	if (people_ids.length === 0) return [];
+	const rows = await db
+		.select({
+			id: people.id,
+			diet_id: diets.id,
+			details: diets.details
+		})
+		.from(people)
+		.innerJoin(personDiets, eq(personDiets.personId, people.id))
+		.innerJoin(diets, eq(diets.id, personDiets.dietId))
+		.where(inArray(people.id, people_ids));
+	return rows;
 }
 
 // ** WRITE OPERATIONS ** //
 export async function createPerson(person: Person): Promise<string> {
-	const insertPerson =
-		'INSERT INTO people(short_name, full_name, phone, email) VALUES($1, $2, $3, $4) RETURNING id';
-	const values = [
-		person.name,
-		person.full_name || null,
-		person.phone || null,
-		person.email || null
-	];
-	const result = await executeQuery(insertPerson, values);
-	return result.rows[0].id;
+	const [row] = await db
+		.insert(people)
+		.values({
+			shortName: person.name,
+			fullName: person.full_name ?? null,
+			phone: person.phone ?? null,
+			email: person.email ?? null
+		})
+		.returning({ id: people.id });
+	if (!row) throw new Error('Insert person failed');
+	return String(row.id);
 }
 
-export async function insertPerson(client: PoolClient, person: Person): Promise<string> {
-	const insertPerson =
-		'INSERT INTO people(short_name, full_name, phone, email) VALUES($1, $2, $3, $4) RETURNING id';
-	const values = [
-		person.name, 
-		person.full_name || null, 
-		person.phone || null, 
-		person.email || null];
-	const result = await client.query(insertPerson, values);
-	return result.rows[0].id;
+async function insertPersonWithTx(
+	tx: DbOrTx,
+	person: Person
+): Promise<string> {
+	const [row] = await tx
+		.insert(people)
+		.values({
+			shortName: person.name,
+			fullName: person.full_name ?? null,
+			phone: person.phone ?? null,
+			email: person.email ?? null
+		})
+		.returning({ id: people.id });
+	if (!row) throw new Error('Insert person failed');
+	return String(row.id);
+}
+
+export async function insertPerson(tx: DbOrTx, person: Person): Promise<string> {
+	return insertPersonWithTx(tx, person);
 }
 
 export async function updatePerson(
@@ -213,209 +299,217 @@ export async function updatePerson(
 		email?: string;
 	}
 ) {
-	const updateClauses: string[] = [];
-	if (params.short_name) updateClauses.push(`short_name = '${params.short_name}'`);
-	if (params.full_name) updateClauses.push(`full_name = '${params.full_name}'`);
-	if (params.phone) updateClauses.push(`phone = '${params.phone}'`);
-	if (params.email) updateClauses.push(`email = '${params.email}'`);
-
-	let updatePerson = 'UPDATE people SET ';
-	updatePerson = updatePerson.concat(updateClauses.join(', '));
-	updatePerson = updatePerson.concat(` WHERE id = ${id}`);
-
-	await executeQuery(updatePerson);
+	const set: Record<string, string | null> = {};
+	if (params.short_name !== undefined) set.shortName = params.short_name;
+	if (params.full_name !== undefined) set.fullName = params.full_name;
+	if (params.phone !== undefined) set.phone = params.phone;
+	if (params.email !== undefined) set.email = params.email;
+	if (Object.keys(set).length === 0) return;
+	await db.update(people).set(set).where(eq(people.id, id));
 }
 
-export async function addPronounToPerson(person_id: string, pronoun_id: string) {
-	const insertPersonPronoun = 'INSERT INTO person_pronouns(person_id, pronoun_id) VALUES($1, $2)';
-	await executeQuery(insertPersonPronoun, [`${person_id}`, `${pronoun_id}`]);
-}
-
-async function addPronounToPersonWithClient(
-	client: PoolClient,
+async function addPronounToPersonWithTx(
+	tx: DbOrTx,
 	person_id: string,
 	pronoun_id: string
 ) {
-	const insertPersonPronoun =
-		'INSERT INTO person_pronouns(person_id, pronoun_id) VALUES($1, $2)';
-	await client.query(insertPersonPronoun, [person_id, pronoun_id]);
+	await tx.insert(personPronouns).values({
+		personId: parseInt(person_id, 10),
+		pronounId: parseInt(pronoun_id, 10)
+	});
 }
 
-async function addDietToPersonWithClient(
-	client: PoolClient,
-	person_id: string,
-	diet_id: string
-) {
-	const insertPersonDiet = 'INSERT INTO person_diets(person_id, diet_id) VALUES($1, $2)';
-	await client.query(insertPersonDiet, [person_id, diet_id]);
+async function addDietToPersonWithTx(tx: DbOrTx, person_id: string, diet_id: string) {
+	await tx.insert(personDiets).values({
+		personId: parseInt(person_id, 10),
+		dietId: parseInt(diet_id, 10)
+	});
 }
 
-async function createOrFindCustomPronounWithClient(
-	client: PoolClient,
+async function createOrFindCustomPronounWithTx(
+	tx: DbOrTx,
 	pronoun_nickname: string
 ): Promise<string> {
-	const customPronouns = await client.query(
-		'SELECT id, nickname FROM pronouns WHERE custom = true'
-	);
-	const customPronoun = customPronouns.rows.find((item: any) => item.nickname === pronoun_nickname);
-
-	if (customPronoun) return customPronoun.id;
-
-	const insertPronoun =
-		'INSERT INTO pronouns(nickname, custom) VALUES($1, true) RETURNING id';
-	const result = await client.query(insertPronoun, [pronoun_nickname]);
-	return result.rows[0].id;
+	const customRows = await tx
+		.select({ id: pronouns.id, nickname: pronouns.nickname })
+		.from(pronouns)
+		.where(eq(pronouns.custom, true));
+	const existing = customRows.find((r) => r.nickname === pronoun_nickname);
+	if (existing) return String(existing.id);
+	const [row] = await tx
+		.insert(pronouns)
+		.values({ nickname: pronoun_nickname, custom: true })
+		.returning({ id: pronouns.id });
+	if (!row) throw new Error('Insert pronoun failed');
+	return String(row.id);
 }
 
-async function createOrFindCustomDietWithClient(
-	client: PoolClient,
+async function createOrFindCustomDietWithTx(
+	tx: DbOrTx,
 	diet_details: string
 ): Promise<string> {
-	const customDiets = await client.query('SELECT id, details FROM diets WHERE custom = true');
-	const customDiet = customDiets.rows.find((item: any) => item.details === diet_details);
-
-	if (customDiet) return customDiet.id;
-
-	const insertDiet = 'INSERT INTO diets(details, custom) VALUES($1, true) RETURNING id';
-	const result = await client.query(insertDiet, [diet_details]);
-	return result.rows[0].id;
+	const customRows = await tx
+		.select({ id: diets.id, details: diets.details })
+		.from(diets)
+		.where(eq(diets.custom, true));
+	const existing = customRows.find((r) => r.details === diet_details);
+	if (existing) return String(existing.id);
+	const [row] = await tx
+		.insert(diets)
+		.values({ details: diet_details, custom: true })
+		.returning({ id: diets.id });
+	if (!row) throw new Error('Insert diet failed');
+	return String(row.id);
 }
 
 type PronounDietItem = { value?: number; label?: string };
 
-async function addPronounsAndDietsForPerson(
-	client: PoolClient,
+async function addPronounsAndDietsForPersonWithTx(
+	tx: DbOrTx,
 	person_id: string,
 	person: { pronouns?: (PronounDietItem | string)[]; diets?: (PronounDietItem | string)[] }
 ) {
-	const pronouns = person?.pronouns ?? [];
-	for (const item of pronouns) {
+	const pronounsList = person?.pronouns ?? [];
+	for (const item of pronounsList) {
 		if (item == null) continue;
-		const label =
-			typeof item === 'string' ? item : (item as PronounDietItem).label ?? (item as any).label;
-		const value = typeof item === 'object' ? (item as PronounDietItem).value ?? (item as any).value : null;
-		if (value != null && value !== '') {
-			await addPronounToPersonWithClient(client, person_id, String(value));
+		const label = typeof item === 'string' ? item : (item as PronounDietItem).label;
+		const value = typeof item === 'object' ? (item as PronounDietItem).value : null;
+		if (value != null && value !== ('' as any)) {
+			await addPronounToPersonWithTx(tx, person_id, String(value));
 		} else if (label) {
-			const pronounId = await createOrFindCustomPronounWithClient(client, String(label));
-			await addPronounToPersonWithClient(client, person_id, pronounId);
+			const pronounId = await createOrFindCustomPronounWithTx(tx, String(label));
+			await addPronounToPersonWithTx(tx, person_id, pronounId);
 		}
 	}
-
-	const diets = person?.diets ?? [];
-	for (const item of diets) {
+	const dietsList = person?.diets ?? [];
+	for (const item of dietsList) {
 		if (item == null) continue;
-		const label =
-			typeof item === 'string' ? item : (item as PronounDietItem).label ?? (item as any).label;
-		const value = typeof item === 'object' ? (item as PronounDietItem).value ?? (item as any).value : null;
-		if (value != null && value !== '') {
-			await addDietToPersonWithClient(client, person_id, String(value));
+		const label = typeof item === 'string' ? item : (item as PronounDietItem).label;
+		const value = typeof item === 'object' ? (item as PronounDietItem).value : null;
+		if (value != null && value !== ('' as any)) {
+			await addDietToPersonWithTx(tx, person_id, String(value));
 		} else if (label) {
-			const dietId = await createOrFindCustomDietWithClient(client, String(label));
-			await addDietToPersonWithClient(client, person_id, dietId);
+			const dietId = await createOrFindCustomDietWithTx(tx, String(label));
+			await addDietToPersonWithTx(tx, person_id, dietId);
 		}
 	}
 }
 
 export async function createOrFindCustomPronoun(pronoun_nickname: string): Promise<string> {
-	// check if custom pronoun nickname already exists
-	const customPronouns = await executeQuery(
-		'SELECT id, nickname FROM pronouns WHERE custom = true'
-	);
-	const customPronoun = customPronouns.rows.find((item) => item.nickname === pronoun_nickname);
-
-	if (customPronoun) return customPronoun.id;
-
-	// if custom pronoun is brand new, add it to the database
-	const insertPronoun = `INSERT INTO pronouns(nickname, custom) VALUES('${pronoun_nickname}', true) RETURNING id`;
-	const result = await executeQuery(insertPronoun);
-	return result.rows[0].id;
+	const customRows = await db
+		.select({ id: pronouns.id, nickname: pronouns.nickname })
+		.from(pronouns)
+		.where(eq(pronouns.custom, true));
+	const existing = customRows.find((r) => r.nickname === pronoun_nickname);
+	if (existing) return String(existing.id);
+	const [row] = await db
+		.insert(pronouns)
+		.values({ nickname: pronoun_nickname, custom: true })
+		.returning({ id: pronouns.id });
+	if (!row) throw new Error('Insert pronoun failed');
+	return String(row.id);
 }
 
 export async function removeAllPronounsFromPerson(person_id: string) {
-	const deletePersonPronoun = `DELETE FROM person_pronouns WHERE person_id = ${person_id}`;
-	await executeQuery(deletePersonPronoun);
+	await db.delete(personPronouns).where(eq(personPronouns.personId, parseInt(person_id, 10)));
+}
+
+export async function addPronounToPerson(person_id: string, pronoun_id: string) {
+	await db.insert(personPronouns).values({
+		personId: parseInt(person_id, 10),
+		pronounId: parseInt(pronoun_id, 10)
+	});
 }
 
 export async function addDietToPerson(person_id: string, diet_id: string) {
-	const insertPersonDiet = 'INSERT INTO person_diets(person_id, diet_id) VALUES($1, $2)';
-	await executeQuery(insertPersonDiet, [`${person_id}`, `${diet_id}`]);
+	await db.insert(personDiets).values({
+		personId: parseInt(person_id, 10),
+		dietId: parseInt(diet_id, 10)
+	});
 }
 
 export async function createOrFindCustomDiet(diet_details: string): Promise<string> {
-	// check if custom diet details already exists
-	const customPronouns = await executeQuery('SELECT id, details FROM diets WHERE custom = true');
-	const customPronoun = customPronouns.rows.find((item) => item.details === diet_details);
-
-	if (customPronoun) return customPronoun.id;
-
-	// if custom diate is brand new, add it to the database
-	const insertPronoun = `INSERT INTO diets(details, custom) VALUES('${diet_details}', true) RETURNING id`;
-	const result = await executeQuery(insertPronoun);
-	return result.rows[0].id;
+	const customRows = await db
+		.select({ id: diets.id, details: diets.details })
+		.from(diets)
+		.where(eq(diets.custom, true));
+	const existing = customRows.find((r) => r.details === diet_details);
+	if (existing) return String(existing.id);
+	const [row] = await db
+		.insert(diets)
+		.values({ details: diet_details, custom: true })
+		.returning({ id: diets.id });
+	if (!row) throw new Error('Insert diet failed');
+	return String(row.id);
 }
 
 export async function removeAllDietsFromPerson(person_id: string) {
-	const deletePersonDiet = `DELETE FROM person_diets WHERE person_id = ${person_id}`;
-	await executeQuery(deletePersonDiet);
+	await db.delete(personDiets).where(eq(personDiets.personId, parseInt(person_id, 10)));
 }
 
 export async function addEventToAppUser(event_id: string, app_user_id: string) {
-	const insertUserEvent = `INSERT INTO app_users_events(event_id, app_user_id) VALUES($1, $2)`;
-	const values = [`${event_id}`, `${app_user_id}`];
-	await executeQuery(insertUserEvent, values);
+	await db.insert(appUsersEvents).values({
+		eventId: event_id,
+		appUserId: parseInt(app_user_id, 10)
+	});
 }
 
 export async function recordResponse(event_id: string, response_id: string, response: Reply) {
+	await db.transaction(async (tx) => {
+		const respondent_id = await insertPersonWithTx(tx, response.respondent.person);
+		await addPronounsAndDietsForPersonWithTx(tx, respondent_id, response.respondent.person);
 
-	return withTransaction(async (client: PoolClient) => {
+		await tx.insert(responses).values({
+			id: response_id,
+			respondentId: parseInt(respondent_id, 10),
+			eventId: event_id,
+			comments: response.note ?? null
+		});
 
-		// Respondent
-		const respondent_id: string = await insertPerson(client, response.respondent.person);
-		await addPronounsAndDietsForPerson(client, respondent_id, response.respondent.person);
-
-		// Response
-		await insertResponse(client, response_id, event_id, respondent_id, response.note ?? '');
-
-		// Attendance Details
-		await insertGuest(client, response_id, respondent_id, response.respondent.attending);
+		await tx.insert(guests).values({
+			responseId: response_id,
+			guestId: parseInt(respondent_id, 10),
+			attending: response.respondent.attending as 'Yes' | 'No' | 'Maybe'
+		});
 
 		for (const guest of response.other_guests) {
-			const person_id = await insertPerson(client, guest.person);
-			await addPronounsAndDietsForPerson(client, person_id, guest.person);
-			await insertGuest(client, response_id, person_id, guest.attending);
+			const person_id = await insertPersonWithTx(tx, guest.person);
+			await addPronounsAndDietsForPersonWithTx(tx, person_id, guest.person);
+			await tx.insert(guests).values({
+				responseId: response_id,
+				guestId: parseInt(person_id, 10),
+				attending: guest.attending as 'Yes' | 'No' | 'Maybe'
+			});
 		}
 	});
 }
 
 export async function insertResponse(
-	client: PoolClient,
+	tx: DbOrTx,
 	response_id: string,
 	event_id: string,
 	respondent_id: string,
 	comments: string
 ) {
-	const insertRsvp =
-		'INSERT INTO responses(id, respondent_id, event_id, comments) VALUES($1, $2, $3, $4)';
-	const values = [
-		`${response_id}`,
-		`${respondent_id}`,
-		`${event_id}`,
-		comments || null
-	];
-	await client.query(insertRsvp, values);
+	await tx.insert(responses).values({
+		id: response_id,
+		respondentId: parseInt(respondent_id, 10),
+		eventId: event_id,
+		comments: comments || null
+	});
 }
 
 export async function insertGuest(
-	client: PoolClient,
+	tx: DbOrTx,
 	response_id: string,
 	guest_id: string,
 	attending: string
 ) {
-	const insertGuest =
-		`INSERT INTO guests(response_id, guest_id, attending) VALUES($1, $2, $3)`;
-	const values = [`${response_id}`, `${guest_id}`, `${attending}`];
-	await client.query(insertGuest, values);
+	await tx.insert(guests).values({
+		responseId: response_id,
+		guestId: parseInt(guest_id, 10),
+		attending: attending as 'Yes' | 'No' | 'Maybe'
+	});
 }
 
 export async function insertGuestStandalone(
@@ -423,10 +517,11 @@ export async function insertGuestStandalone(
 	guest_id: string,
 	attending: string
 ) {
-	await executeQuery(
-		`INSERT INTO guests(response_id, guest_id, attending) VALUES($1, $2, $3)`,
-		[response_id, guest_id, attending]
-	);
+	await db.insert(guests).values({
+		responseId: response_id,
+		guestId: parseInt(guest_id, 10),
+		attending: attending as 'Yes' | 'No' | 'Maybe'
+	});
 }
 
 export async function updateRsvp(
@@ -435,28 +530,17 @@ export async function updateRsvp(
 	attending: string,
 	comments: string
 ) {
-	return withTransaction(async (client: PoolClient) => {
-		await updateResponseCommentsWithClient(client, response_id, comments);
-		await updateGuestAttendingWithClient(client, response_id, guest_id, attending);
+	await db.transaction(async (tx) => {
+		await tx.update(responses).set({ comments: comments || null }).where(eq(responses.id, response_id));
+		await tx
+			.update(guests)
+			.set({ attending: attending as 'Yes' | 'No' | 'Maybe' })
+			.where(and(eq(guests.responseId, response_id), eq(guests.guestId, parseInt(guest_id, 10))));
 	});
 }
 
 export async function updateResponseComments(response_id: string, comments: string) {
-	await executeQuery(
-		`UPDATE responses SET comments = $1 WHERE id = $2`,
-		[comments || null, response_id]
-	);
-}
-
-async function updateResponseCommentsWithClient(
-	client: PoolClient,
-	response_id: string,
-	comments: string
-) {
-	await client.query(
-		`UPDATE responses SET comments = $1 WHERE id = $2`,
-		[comments || null, response_id]
-	);
+	await db.update(responses).set({ comments: comments || null }).where(eq(responses.id, response_id));
 }
 
 export async function updateGuestAttending(
@@ -464,29 +548,16 @@ export async function updateGuestAttending(
 	guest_id: string,
 	attending: string
 ) {
-	await executeQuery(
-		`UPDATE guests SET attending = $1 WHERE response_id = $2 AND guest_id = $3`,
-		[attending, response_id, guest_id]
-	);
+	await db
+		.update(guests)
+		.set({ attending: attending as 'Yes' | 'No' | 'Maybe' })
+		.where(and(eq(guests.responseId, response_id), eq(guests.guestId, parseInt(guest_id, 10))));
 }
 
 export async function deleteGuest(response_id: string, guest_id: string) {
-	await executeQuery(
-		`DELETE FROM guests WHERE response_id = $1 AND guest_id = $2`,
-		[response_id, guest_id]
-	);
-}
-
-async function updateGuestAttendingWithClient(
-	client: PoolClient,
-	response_id: string,
-	guest_id: string,
-	attending: string
-) {
-	await client.query(
-		`UPDATE guests SET attending = $1 WHERE response_id = $2 AND guest_id = $3`,
-		[attending, response_id, guest_id]
-	);
+	await db
+		.delete(guests)
+		.where(and(eq(guests.responseId, response_id), eq(guests.guestId, parseInt(guest_id, 10))));
 }
 
 export async function createEvent(
@@ -500,22 +571,20 @@ export async function createEvent(
 	description: string,
 	image_url: string
 ) {
-	const createEvent = `INSERT INTO events(id, title, start_time, end_time, location, address, description, image_url)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`;
-	const values = [
-		`${event_code}`,
-		`${title}`,
-		`${start_time}`,
-		`${end_time}`,
-		`${location}`,
-		`${address}`,
-		`${description}`,
-		`${image_url}`
-	];
-	await executeQuery(createEvent, values);
-
-	const addHost = `INSERT INTO hosts(event_id, host_id) VALUES('${event_code}', '${host_id}')`;
-	await executeQuery(addHost);
+	await db.insert(events).values({
+		id: event_code,
+		title,
+		startTime: start_time,
+		endTime: end_time,
+		location,
+		address,
+		description,
+		imageUrl: image_url
+	});
+	await db.insert(hosts).values({
+		eventId: event_code,
+		hostId: parseInt(host_id, 10)
+	});
 }
 
 export async function updateEvent(
@@ -528,37 +597,16 @@ export async function updateEvent(
 	description: string,
 	image_url: string
 ) {
-	const updateEvent = `UPDATE events SET 
-        title = $1, location = $2, address = $3,
-        description = $4, image_url = '${image_url}',
-        start_time = '${start_time}', end_time = '${end_time}'
-        WHERE id = '${event_id}'`;
-	const values = [`${title}`, `${location}`, `${address}`, `${description}`];
-	await executeQuery(updateEvent, values);
-}
-
-// ** UTILITY FUNCTIONS ** //
-async function executeQuery(query_string: string, values?: any[]): Promise<QueryResult> {
-	try {
-		return await query(query_string, values);
-	} catch (err) {
-		console.log(err);
-		throw err;
-	}
-}
-
-async function withTransaction<T> (fn: (client: PoolClient) => Promise<T>): Promise<T> {
-	const client = await pool.connect();
-
-	try {
-		await client.query('BEGIN');
-		const result = await fn(client);
-		await client.query('COMMIT');
-		return result;
-	} catch (err) {
-		await client.query('ROLLBACK');
-		throw err;
-	} finally {
-		client.release();
-	}
+	await db
+		.update(events)
+		.set({
+			title,
+			startTime: start_time,
+			endTime: end_time,
+			location,
+			address,
+			description,
+			imageUrl: image_url
+		})
+		.where(eq(events.id, event_id));
 }

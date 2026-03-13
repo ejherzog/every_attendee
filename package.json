@@ -10,7 +10,11 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check . && eslint .",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:push": "drizzle-kit push",
+		"db:studio": "drizzle-kit studio"
 	},
 	"devDependencies": {
 		"@sveltejs/kit": "^2.17.1",
@@ -38,6 +42,8 @@
 		"@oslojs/encoding": "^1.1.0",
 		"@sveltejs/adapter-node": "^5.2.2",
 		"@sveltestrap/sveltestrap": "^6.2.7",
+		"drizzle-kit": "^0.31.9",
+		"drizzle-orm": "^0.45.1",
 		"pg": "^8.13.1",
 		"svelte-markdown": "^0.4.1",
 		"svelte-multiselect": "^10.2.0",

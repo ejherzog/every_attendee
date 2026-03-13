@@ -1,5 +1,3 @@
-import type { Person } from '$lib/types/People';
-
 const dateFormatter = new Intl.DateTimeFormat('en-US', {
 	weekday: 'short',
 	month: 'short',
@@ -13,7 +11,7 @@ const timeFormatter = new Intl.DateTimeFormat('en-US', {
 
 const lf = new Intl.ListFormat('en');
 
-export function getHosts(hosts: Person[]) {
+export function getHosts(hosts: Array<{ name: string }>) {
 	let host_names: string[] = [];
 	hosts.forEach((person) => {
 		host_names.push(person.name);
