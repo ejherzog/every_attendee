@@ -7,6 +7,7 @@
 
 <Container class="mt-1 mb-4">
 	<h1>Hello, {data.username}!</h1>
+	<p><a href="/host/invite">Invite a host</a></p>
 </Container>
 
 <Container style="background-color: var(--brand-honey);" class="py-2 rounded">

@@ -116,6 +116,20 @@ CREATE TABLE app_users_events (
 );
 ```
 
+```
+CREATE TABLE host_invites (
+    id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    email varchar(400) NOT NULL UNIQUE,
+    token text NOT NULL UNIQUE,
+    expires_at TIMESTAMPTZ NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    created_by_user_id integer REFERENCES app_users(id)
+);
+
+CREATE INDEX idx_host_invites_token ON host_invites(token);
+CREATE INDEX idx_host_invites_expires_at ON host_invites(expires_at);
+```
+
 #### Group Response Migration
 
 ```

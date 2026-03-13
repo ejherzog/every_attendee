@@ -108,3 +108,15 @@ export const appUsersEvents = pgTable('app_users_events', {
 		.references(() => appUsers.id),
 	eventId: varchar('event_id', { length: 6 }).references(() => events.id)
 });
+
+export const hostInvites = pgTable(
+	'host_invites',
+	{
+		id: serial('id').primaryKey(),
+		email: varchar('email', { length: 400 }).notNull().unique(),
+		token: text('token').notNull().unique(),
+		expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+		createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+		createdByUserId: integer('created_by_user_id').references(() => appUsers.id)
+	}
+);
