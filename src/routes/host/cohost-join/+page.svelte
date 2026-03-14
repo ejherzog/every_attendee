@@ -36,13 +36,15 @@
 			<p class="small text-muted">Don't have an account? Ask the person who sent you this link for an invite to join as a host.</p>
 		{/if}
 	{:else}
-		<h1>Be a co-host?</h1>
+		<h1>Be a Co-Host?</h1>
 		<p>You've been invited to be a co-host for <strong>{data.eventTitle}</strong>.</p>
 		<p>If you accept, your name will appear in the "Hosted by" section on the event page. You can be removed by the event host at any time.</p>
 		<Form method="POST" action="?/accept" class="d-inline">
+			<input type="hidden" name="token" value={data.token ?? ''} />
 			<Button type="submit" style="background-color: var(--brand-green); color: var(--brand-gold);">Accept</Button>
 		</Form>
 		<Form method="POST" action="?/decline" class="d-inline ms-2">
+			<input type="hidden" name="token" value={data.token ?? ''} />
 			<Button type="submit" color="secondary">Decline</Button>
 		</Form>
 	{/if}

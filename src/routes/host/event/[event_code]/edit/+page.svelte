@@ -18,7 +18,7 @@
 
 <Container style="background-color: var(--brand-honey);" class="py-2 rounded">
 	<Container class="mt-2">
-		<Form method="POST">
+		<Form method="POST" action="?/updateEvent">
 			<input type="hidden" name="event_code" value={data.event.id} />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
@@ -44,6 +44,7 @@
 					<Input id="edit-code" disabled class="text-start" name="code" bind:value={data.event.id} />
 				</Col>
 			</Row>
+			{#if data.canManageHosts}
 			<hr />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" class="my-auto">
@@ -53,10 +54,14 @@
 						{#each data.hostsList as host}
 							<li class="d-flex align-items-center gap-2 mb-1">
 								<span>{host.name}</span>
-								<Form method="POST" action="?/removeCoHost" class="d-inline">
-									<input type="hidden" name="host_id" value={host.hostId} />
-									<Button type="submit" color="light" size="sm" class="py-0">Remove</Button>
-								</Form>
+								{#if data.primaryHostPersonId != null && host.hostId === data.primaryHostPersonId}
+									<span class="text-muted small">(primary host)</span>
+								{:else}
+									<Form method="POST" action="?/removeCoHost" class="d-inline">
+										<input type="hidden" name="host_id" value={host.hostId} />
+										<Button type="submit" color="light" size="sm" class="py-0">Remove</Button>
+									</Form>
+								{/if}
 							</li>
 						{/each}
 					</ul>
@@ -96,6 +101,7 @@
 					{/if}
 				</Col>
 			</Row>
+			{/if}
 			<hr />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">

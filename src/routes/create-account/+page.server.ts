@@ -10,11 +10,9 @@ import {
 	getHostInviteByToken,
 	deleteHostInviteByToken,
 	getCohostInviteByToken,
-	deleteCohostInviteByToken,
 	insertAppUser,
 	getUserOptional,
-	createPerson,
-	addHostToEvent
+	createPerson
 } from '$lib/server/database';
 import { Person } from '$lib/types/People';
 
@@ -27,7 +25,8 @@ export const load: PageServerLoad = async ({ url }) => {
 		}
 		const existingUser = await getUserOptional(invite.email.trim().toLowerCase());
 		if (existingUser) {
-			return { valid: false, token: null, cohostToken: null, inviteEmail: null, alreadyUsed: true, flow: 'cohost' };
+			// They already have an account — send them to login, then back to co-host page to accept or decline
+			redirect(303, `/login?redirect=${encodeURIComponent('/host/cohost-join?token=' + cohostToken)}`);
 		}
 		return {
 			valid: true,
@@ -119,12 +118,11 @@ export const actions = {
 			const personId = parseInt(await createPerson(person), 10);
 			const passwordHash = await hashPassword(password);
 			const userId = await insertAppUser(trimmedEmail, passwordHash, personId);
-			await addHostToEvent(invite.eventId, personId);
-			await deleteCohostInviteByToken(cohostToken.trim());
+			// Do not add them as co-host or consume the invite — send them to accept/decline
 			const sessionToken = generateSessionToken();
 			const session = await createSession(sessionToken, userId);
 			setSessionTokenCookie(event, sessionToken, session.expiresAt);
-			throw redirect(303, `/host/event/${invite.eventId}/preview?cohost_accepted=1`);
+			throw redirect(303, `/host/cohost-join?token=${encodeURIComponent(cohostToken.trim())}`);
 		}
 
 		if (!token || typeof token !== 'string' || token.trim() === '') {

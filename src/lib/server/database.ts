@@ -341,6 +341,49 @@ export async function findResponsesByEventId(event_code: string): Promise<any[]>
 	return rows;
 }
 
+/** Accept a co-host invite: add host, add app_users_events row, delete invite. All in one transaction. */
+export async function acceptCohostInvite(
+	eventId: string,
+	appUserId: number,
+	hostPersonId: number,
+	token: string
+): Promise<void> {
+	await db.transaction(async (tx) => {
+		const existingHost = await tx
+			.select({ id: hosts.id })
+			.from(hosts)
+			.where(and(eq(hosts.eventId, eventId), eq(hosts.hostId, hostPersonId)));
+		if (existingHost.length === 0) {
+			await tx.insert(hosts).values({ eventId, hostId: hostPersonId });
+		}
+		const existingLink = await tx
+			.select({ id: appUsersEvents.id })
+			.from(appUsersEvents)
+			.where(
+				and(eq(appUsersEvents.appUserId, appUserId), eq(appUsersEvents.eventId, eventId))
+			);
+		if (existingLink.length === 0) {
+			try {
+				await tx.insert(appUsersEvents).values({
+					eventId,
+					appUserId,
+					canManageHosts: false
+				});
+			} catch (err: unknown) {
+				const msg = err instanceof Error ? err.message : String(err);
+				if (/can_manage_hosts|column.*does not exist/i.test(msg)) {
+					await tx.execute(
+						sql`INSERT INTO app_users_events (event_id, app_user_id) VALUES (${eventId}, ${appUserId})`
+					);
+				} else {
+					throw err;
+				}
+			}
+		}
+		await tx.delete(cohostInvites).where(eq(cohostInvites.token, token));
+	});
+}
+
 export async function findEventsByUserId(app_user_id: number) {
 	const rows = await db
 		.select()
@@ -348,6 +391,54 @@ export async function findEventsByUserId(app_user_id: number) {
 		.innerJoin(appUsersEvents, eq(events.id, appUsersEvents.eventId))
 		.where(eq(appUsersEvents.appUserId, app_user_id));
 	return rows.map((r: { events: typeof events.$inferSelect }) => eventRowToSnake(r.events));
+}
+
+export async function canUserAccessEvent(appUserId: number, eventId: string): Promise<boolean> {
+	const rows = await db
+		.select({ id: appUsersEvents.id })
+		.from(appUsersEvents)
+		.where(
+			and(eq(appUsersEvents.appUserId, appUserId), eq(appUsersEvents.eventId, eventId))
+		);
+	return rows.length > 0;
+}
+
+export async function canUserManageEventHosts(appUserId: number, eventId: string): Promise<boolean> {
+	const rows = await db
+		.select({ canManageHosts: appUsersEvents.canManageHosts })
+		.from(appUsersEvents)
+		.where(
+			and(eq(appUsersEvents.appUserId, appUserId), eq(appUsersEvents.eventId, eventId))
+		);
+	return rows[0]?.canManageHosts === true;
+}
+
+/** Give a co-host access to the event (dashboard, edit) but not host management. */
+export async function addEventToAppUserAsCohost(eventId: string, appUserId: number): Promise<void> {
+	const existing = await db
+		.select({ id: appUsersEvents.id })
+		.from(appUsersEvents)
+		.where(
+			and(eq(appUsersEvents.appUserId, appUserId), eq(appUsersEvents.eventId, eventId))
+		);
+	if (existing.length > 0) return;
+	try {
+		await db.insert(appUsersEvents).values({
+			eventId,
+			appUserId,
+			canManageHosts: false
+		});
+	} catch (err: unknown) {
+		// Column can_manage_hosts may not exist yet if migration hasn't run; still add so they see the event
+		const msg = err instanceof Error ? err.message : String(err);
+		if (/can_manage_hosts|column.*does not exist/i.test(msg)) {
+			await db.execute(
+				sql`INSERT INTO app_users_events (event_id, app_user_id) VALUES (${eventId}, ${appUserId})`
+			);
+		} else {
+			throw err;
+		}
+	}
 }
 
 export async function getAllEventCodes(): Promise<string[]> {

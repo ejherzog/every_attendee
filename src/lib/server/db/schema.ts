@@ -5,8 +5,7 @@ import {
 	text,
 	integer,
 	boolean,
-	timestamp,
-	primaryKey
+	timestamp
 } from 'drizzle-orm/pg-core';
 
 export const people = pgTable('people', {
@@ -106,7 +105,9 @@ export const appUsersEvents = pgTable('app_users_events', {
 	appUserId: integer('app_user_id')
 		.notNull()
 		.references(() => appUsers.id),
-	eventId: varchar('event_id', { length: 6 }).references(() => events.id)
+	eventId: varchar('event_id', { length: 6 }).references(() => events.id),
+	/** If false, user is a co-host and cannot add/remove hosts. Default true for event creator. */
+	canManageHosts: boolean('can_manage_hosts').notNull().default(true)
 });
 
 export const hostInvites = pgTable(

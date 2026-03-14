@@ -1,0 +1,1 @@
+ALTER TABLE "app_users_events" ADD COLUMN "can_manage_hosts" boolean DEFAULT true NOT NULL;

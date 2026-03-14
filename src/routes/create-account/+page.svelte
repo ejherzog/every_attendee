@@ -69,7 +69,7 @@
 		{/if}
 	{:else}
 		{#if isCohostFlow}
-			<p class="text-muted">You're creating an account to accept a co-host invite for <strong>{eventTitle}</strong>. After you create your account, you'll be listed as a host.</p>
+			<p class="text-muted">You're creating an account in response to a co-host invite for <strong>{eventTitle}</strong>. After you create your account, you'll be able to accept or decline the co-host invite.</p>
 		{:else}
 			<p class="small" style="color: #8b0000;"><strong>Note:</strong> We don't have a password reset feature—choose a password you'll remember or store it with a password manager.</p>
 		{/if}
