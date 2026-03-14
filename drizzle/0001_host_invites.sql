@@ -7,14 +7,19 @@ CREATE TABLE IF NOT EXISTS "host_invites" (
 	"created_by_user_id" integer
 );
 --> statement-breakpoint
-ALTER TABLE "host_invites" ADD CONSTRAINT "host_invites_email_unique" UNIQUE("email");
+DO $$ BEGIN
+ ALTER TABLE "host_invites" ADD CONSTRAINT "host_invites_email_unique" UNIQUE("email");
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 --> statement-breakpoint
-ALTER TABLE "host_invites" ADD CONSTRAINT "host_invites_token_unique" UNIQUE("token");
+DO $$ BEGIN
+ ALTER TABLE "host_invites" ADD CONSTRAINT "host_invites_token_unique" UNIQUE("token");
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "host_invites" ADD CONSTRAINT "host_invites_created_by_user_id_app_users_id_fk" FOREIGN KEY ("created_by_user_id") REFERENCES "public"."app_users"("id") ON DELETE no action ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
+EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 --> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "idx_host_invites_token" ON "host_invites" ("token");
