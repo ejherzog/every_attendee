@@ -1,4 +1,4 @@
-CREATE TABLE "host_invites" (
+CREATE TABLE IF NOT EXISTS "host_invites" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"email" varchar(400) NOT NULL,
 	"token" text NOT NULL,
@@ -9,4 +9,7 @@ CREATE TABLE "host_invites" (
 	CONSTRAINT "host_invites_token_unique" UNIQUE("token")
 );
 --> statement-breakpoint
-ALTER TABLE "host_invites" ADD CONSTRAINT "host_invites_created_by_user_id_app_users_id_fk" FOREIGN KEY ("created_by_user_id") REFERENCES "public"."app_users"("id") ON DELETE no action ON UPDATE no action;
+DO $$ BEGIN
+ ALTER TABLE "host_invites" ADD CONSTRAINT "host_invites_created_by_user_id_app_users_id_fk" FOREIGN KEY ("created_by_user_id") REFERENCES "public"."app_users"("id") ON DELETE no action ON UPDATE no action;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
