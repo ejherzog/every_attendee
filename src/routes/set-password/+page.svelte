@@ -11,16 +11,15 @@
 </script>
 
 <svelte:head>
-	<title>Set your password</title>
+	<title>Create Account</title>
 </svelte:head>
 
 <Container class="mt-1 mb-4">
-	<h1>Set your password</h1>
+	<h1>Create Your Account</h1>
 	{#if !data.valid}
 		<p class="text-danger">This link is invalid or has expired.</p>
-		<p><a href="/login">Go to login</a></p>
+		<p><a href="/">Go to Homepage</a></p>
 	{:else}
-		<p class="text-muted">Create a username and password for {data.email}.</p>
 		<p class="small" style="color: #8b0000;"><strong>Note:</strong> We don't have a password reset feature—choose a password you'll remember or store it with a password manager.</p>
 	{/if}
 </Container>
@@ -83,7 +82,7 @@
 				</Row>
 				<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 					<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
-						<Label for="passwordConfirm"><span class="text-reset fw-bold text-responsive fs-5">Confirm password</span></Label>
+						<Label for="passwordConfirm"><span class="text-reset fw-bold text-responsive fs-5">Confirm Password</span></Label>
 					</Col>
 					<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
 						<div class="input-group">
@@ -113,7 +112,7 @@
 				</Row>
 				<Row class="my-2">
 					<Col class="col-12">
-						<Button type="submit" style="background-color: var(--brand-green); color: var(--brand-gold);">Create account</Button>
+						<Button type="submit" style="background-color: var(--brand-green); color: var(--brand-gold);">Create Account</Button>
 					</Col>
 				</Row>
 			</Form>

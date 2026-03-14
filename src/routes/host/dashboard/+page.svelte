@@ -5,7 +5,7 @@
 	export let data;
 </script>
 
-<Container class="mt-1 mb-4">
+<Container class="mt-3 mb-4">
 	<h1>Hello, {data.username}!</h1>
 </Container>
 
@@ -27,6 +27,8 @@
 		</Row>
 		<hr />
 	{/each}
+</Container>
 
-	<p class="mt-2 mb-0"><a href="/host/invite">Invite a host</a></p>
+<Container>
+	<p class="mt-2 mb-0"><a href="/host/invite">Invite a Host</a></p>
 </Container>

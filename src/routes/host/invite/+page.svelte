@@ -11,9 +11,10 @@
 	<title>Invite a Host</title>
 </svelte:head>
 
-<Container class="mt-1 mb-4">
+<Container class="my-4">
 	<h1>Invite a Host</h1>
-	<p class="text-muted">Enter their email address. We'll generate a signup link for you to share with them.</p>
+	<p class="text-muted">Do you know someone who might enjoy this app?</p>
+	<p class="text-muted">Enter their email address and we'll generate a signup link for you to share with them.</p>
 </Container>
 
 <Container style="background-color: var(--brand-honey);" class="py-2 rounded">
@@ -21,13 +22,14 @@
 		{#if form?.success && form?.inviteLink}
 			<p class="text-success fw-bold">Invite created for {form.email}.</p>
 			<p>Send them this link (it expires in 14 days):</p>
-			<Row class="mb-2">
+			<Row class="mb-3">
 				<Col xs="12">
 					<Input type="text" readonly value={form.inviteLink} id="invite-link" class="font-monospace" />
 				</Col>
 			</Row>
 			<Button
-				color="light"
+				class="my-1"
+				style="background-color: var(--brand-green); color: var(--brand-gold);"
 				on:click={() => {
 					const input = document.getElementById('invite-link');
 					if (input instanceof HTMLInputElement) {
@@ -69,4 +71,4 @@
 	</Container>
 </Container>
 
-<p class="mt-2"><a href="/host/dashboard">Back to dashboard</a></p>
+<p class="mt-2"><a href="/host/dashboard">Back to Dashboard</a></p>
