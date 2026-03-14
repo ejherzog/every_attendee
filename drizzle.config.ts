@@ -12,7 +12,8 @@ export default defineConfig({
 	out: './drizzle',
 	dialect: 'postgresql',
 	dbCredentials: {
-		url: urlWithSsl
+		url: urlWithSsl,
+		ssl: { rejectUnauthorized: false }
 	},
 	migrations: {
 		table: '__drizzle_migrations__',
