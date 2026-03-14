@@ -163,7 +163,7 @@
 
 			<Row class="text-start mx-1 gx-1 gx-md-4 mb-3">
 				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
-					<Label><span class="text-reset fw-bold text-responsive fs-5">Phone Number</span></Label>
+					<Label for="phone"><span class="text-reset fw-bold text-responsive fs-5">Phone Number</span></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
 					<Input
@@ -175,7 +175,7 @@
 					/>
 				</Col>
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
-					<Label><span class="text-reset fw-bold text-responsive fs-5">Email Address</span></Label>
+					<Label for="email"><span class="text-reset fw-bold text-responsive fs-5">Email Address</span></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
 					<Input
@@ -192,7 +192,7 @@
 
 			<Row class="text-start mx-1 my-2 align-items-center gx-1 gx-md-4 mb-3">
 				<Col xs="12" sm="6" md="3">
-					<Label>
+					<Label for="notes">
 						<span class="text-reset fw-bold text-responsive fs-5">
 							Notes for the Host{#if hostCount > 1}s{/if}
 						</span><br />

@@ -2,7 +2,7 @@
 	import { Button, Container } from '@sveltestrap/sveltestrap';
 </script>
 
-<h2 class="fst-italic mt-3">You're Invited!</h2>
+<h1 class="fst-italic mt-3">You're Invited!</h1>
 
 <Button href="/event/" style="background-color: var(--brand-green); color: var(--brand-gold);" class="fs-1 m-3"
 	>RSVP Here</Button

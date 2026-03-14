@@ -58,7 +58,7 @@ export const actions = {
 			throw err;
 		}
 
-		const inviteLink = new URL('/set-password', url.origin);
+		const inviteLink = new URL('/create-account', url.origin);
 		inviteLink.searchParams.set('token', token);
 
 		return {

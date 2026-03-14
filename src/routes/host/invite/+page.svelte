@@ -41,15 +41,15 @@
 				Copy Link
 			</Button>
 		{:else}
-			<Form method="POST">
+			<Form method="POST" class="d-flex flex-column align-items-center">
 				{#if form?.message && !form?.success}
 					<p class="text-danger">{form.message}</p>
 				{/if}
-				<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
-					<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
+				<Row class="align-items-center text-start mx-1 gx-1 gx-md-4 justify-content-center w-100">
+					<Col xs="12" sm="4" md="2" lg="1" class="my-auto">
 						<Label for="email"><span class="text-reset fw-bold text-responsive fs-5">Email</span></Label>
 					</Col>
-					<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
+					<Col xs="12" sm="8" md="7" lg="4" class="my-auto pb-2">
 						<Input
 							id="email"
 							type="email"
@@ -61,8 +61,8 @@
 						/>
 					</Col>
 				</Row>
-				<Row class="my-2">
-					<Col class="col-12">
+				<Row class="my-2 justify-content-center w-100">
+					<Col class="col-12 d-flex justify-content-center">
 						<Button type="submit" style="background-color: var(--brand-green); color: var(--brand-gold);">Create Invite Link</Button>
 					</Col>
 				</Row>

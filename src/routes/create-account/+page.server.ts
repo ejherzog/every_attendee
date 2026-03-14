@@ -13,103 +13,110 @@ import {
 	getUserOptional
 } from '$lib/server/database';
 
-const MIN_PASSWORD_LENGTH = 10;
-const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
-
 export const load: PageServerLoad = async ({ url }) => {
 	const token = url.searchParams.get('token');
 	if (!token || token.trim() === '') {
-		return { valid: false, email: null, token: null };
+		return { valid: false, token: null, alreadyUsed: false };
 	}
 	const invite = await getHostInviteByToken(token.trim());
 	if (!invite) {
-		return { valid: false, email: null, token: null };
+		return { valid: false, token: null, alreadyUsed: false };
 	}
-	return { valid: true, email: invite.email, token: token.trim() };
+	const existingUser = await getUserOptional(invite.email.trim().toLowerCase());
+	if (existingUser) {
+		return { valid: false, token: null, alreadyUsed: true };
+	}
+	return { valid: true, token: token.trim(), inviteEmail: invite.email, alreadyUsed: false };
 };
+
+const MIN_PASSWORD_LENGTH = 10;
+
+function isValidEmail(value: string): boolean {
+	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
 
 export const actions = {
 	default: async (event) => {
 		const { request } = event;
 		const formData = await request.formData();
 		const token = formData.get('token');
-		const username = formData.get('username');
+		const emailInput = formData.get('email');
 		const password = formData.get('password');
 		const passwordConfirm = formData.get('passwordConfirm');
 
 		if (!token || typeof token !== 'string' || token.trim() === '') {
-			return fail(400, { message: 'Invalid or expired link.', username: '', email: null });
+			return fail(400, { message: 'Invalid or expired link.', email: '' });
 		}
 
 		const invite = await getHostInviteByToken(token.trim());
 		if (!invite) {
 			return fail(400, {
 				message: 'This link is invalid or has expired.',
-				username: '',
-				email: null
+				email: typeof emailInput === 'string' ? emailInput : ''
 			});
 		}
 
-		if (!username || typeof username !== 'string') {
+		if (!emailInput || typeof emailInput !== 'string') {
 			return fail(400, {
-				message: 'Username is required',
-				username: '',
-				email: invite.email
+				message: 'Email is required.',
+				email: ''
 			});
 		}
 
-		const trimmedUsername = username.trim();
-		if (!trimmedUsername) {
+		const trimmedEmail = emailInput.trim().toLowerCase();
+		if (!trimmedEmail) {
 			return fail(400, {
-				message: 'Username is required',
-				username: String(username),
-				email: invite.email
+				message: 'Email is required.',
+				email: emailInput
 			});
 		}
 
-		if (!USERNAME_REGEX.test(trimmedUsername)) {
+		if (!isValidEmail(trimmedEmail)) {
 			return fail(400, {
-				message: 'Username can only contain letters, numbers, hyphens and underscores.',
-				username: trimmedUsername,
-				email: invite.email
+				message: 'Please enter a valid email address.',
+				email: emailInput
 			});
 		}
 
-		const existingUser = await getUserOptional(trimmedUsername);
+		const inviteEmail = invite.email.trim().toLowerCase();
+		if (trimmedEmail !== inviteEmail) {
+			return fail(400, {
+				message: 'This email does not match the address this invite was sent to.',
+				email: emailInput
+			});
+		}
+
+		const existingUser = await getUserOptional(trimmedEmail);
 		if (existingUser) {
 			return fail(400, {
-				message: 'Username is already taken.',
-				username: trimmedUsername,
-				email: invite.email
+				message: 'An account already exists for this invite. If you have an account, please log in.',
+				email: ''
 			});
 		}
 
 		if (!password || typeof password !== 'string') {
 			return fail(400, {
 				message: 'Password is required',
-				username: trimmedUsername,
-				email: invite.email
+				email: trimmedEmail
 			});
 		}
 
 		if (password.length < MIN_PASSWORD_LENGTH) {
 			return fail(400, {
 				message: `Password must be at least ${MIN_PASSWORD_LENGTH} characters.`,
-				username: trimmedUsername,
-				email: invite.email
+				email: trimmedEmail
 			});
 		}
 
 		if (password !== passwordConfirm) {
 			return fail(400, {
 				message: 'Passwords do not match.',
-				username: trimmedUsername,
-				email: invite.email
+				email: trimmedEmail
 			});
 		}
 
 		const passwordHash = await hashPassword(password);
-		const userId = await insertAppUser(trimmedUsername, passwordHash, null);
+		const userId = await insertAppUser(trimmedEmail, passwordHash, null);
 		await deleteHostInviteByToken(token.trim());
 
 		const sessionToken = generateSessionToken();

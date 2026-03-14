@@ -12,7 +12,7 @@
 	} from '@sveltestrap/sveltestrap';
 </script>
 
-<h3 class="text-center my-3">Credits</h3>
+<h1 class="text-center my-3">Credits</h1>
 
 <Container class="col-md-8 justify-content-center">
 	<Card class="m-5 text-reset">
@@ -21,16 +21,16 @@
 			<CardSubtitle>Creator & Maintainer</CardSubtitle>
 		</CardHeader>
 		<CardBody>
-			<CardLink href="https://github.com/ejherzog" target="_blank" class="text-reset"
+			<CardLink href="https://github.com/ejherzog" target="_blank" rel="noopener noreferrer" class="text-reset" aria-label="Github (opens in new window)"
 				>Github</CardLink
 			>
-			<CardLink href="https://ejherzog.github.io" target="_blank" class="text-reset"
+			<CardLink href="https://ejherzog.github.io" target="_blank" rel="noopener noreferrer" class="text-reset" aria-label="Portfolio (opens in new window)"
 				>Portfolio</CardLink
 			>
-			<CardLink href="https://www.linkedin.com/in/ejherzog" target="_blank" class="text-reset"
+			<CardLink href="https://www.linkedin.com/in/ejherzog" target="_blank" rel="noopener noreferrer" class="text-reset" aria-label="LinkedIn (opens in new window)"
 				>LinkedIn</CardLink
 			>
-			<CardLink href="https://ko-fi.com/evajherzog" target="_blank" class="text-reset"
+			<CardLink href="https://ko-fi.com/evajherzog" target="_blank" rel="noopener noreferrer" class="text-reset" aria-label="Ko-Fi (opens in new window)"
 				>Ko-Fi</CardLink
 			>
 		</CardBody>

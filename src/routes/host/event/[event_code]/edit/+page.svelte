@@ -22,13 +22,14 @@
 			<input type="hidden" name="event_code" value={data.event.id} />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
-					<Label
+					<Label for="edit-title"
 						><tag class="text-reset fw-bold text-responsive fs-5">Event Title </tag>
 						<tag class="fst-italic text-responsive fs-6">(required)</tag>
 					</Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
 					<Input
+						id="edit-title"
 						class="text-start"
 						name="title"
 						required
@@ -37,19 +38,20 @@
 					/>
 				</Col>
 				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
-					<Label><tag class="text-reset fw-bold text-responsive fs-5">Event Code </tag></Label>
+					<Label for="edit-code"><tag class="text-reset fw-bold text-responsive fs-5">Event Code </tag></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto">
-					<Input disabled class="text-start" name="code" bind:value={data.event.id} />
+					<Input id="edit-code" disabled class="text-start" name="code" bind:value={data.event.id} />
 				</Col>
 			</Row>
 			<hr />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
-					<Label><tag class="text-reset fw-bold text-responsive fs-5">Start </tag></Label>
+					<Label for="edit-start_time"><tag class="text-reset fw-bold text-responsive fs-5">Start </tag></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
 					<Input
+						id="edit-start_time"
 						class="text-start"
 						name="start_time"
 						type="datetime-local"
@@ -57,10 +59,11 @@
 					/>
 				</Col>
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
-					<Label><tag class="text-reset fw-bold text-responsive fs-5">End </tag></Label>
+					<Label for="edit-end_time"><tag class="text-reset fw-bold text-responsive fs-5">End </tag></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto">
 					<Input
+						id="edit-end_time"
 						class="text-start"
 						name="end_time"
 						type="datetime-local"
@@ -71,13 +74,14 @@
 			<hr />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
-					<Label
+					<Label for="edit-location"
 						><tag class="text-reset fw-bold text-responsive fs-5">Location </tag>
 						<tag class="fst-italic text-responsive fs-6">(required)</tag>
 					</Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
 					<Input
+						id="edit-location"
 						class="text-start"
 						name="location"
 						required
@@ -86,13 +90,14 @@
 					/>
 				</Col>
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
-					<Label
+					<Label for="edit-address"
 						><tag class="text-reset fw-bold text-responsive fs-5">Address </tag>
 						<tag class="fst-italic text-responsive fs-6">(required)</tag></Label
 					>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="5" class="my-auto">
 					<Input
+						id="edit-address"
 						class="text-start"
 						name="address"
 						required
@@ -104,13 +109,14 @@
 			<hr />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" md="4" lg="3" class="my-auto">
-					<Label
+					<Label for="edit-description"
 						><tag class="text-reset fw-bold text-responsive fs-5">Description </tag>
 						<tag class="fst-italic text-responsive fs-6">(required)</tag></Label
 					>
 				</Col>
 				<Col xs="12" md="8" lg="9" class="my-auto">
 					<textarea
+						id="edit-description"
 						name="description"
 						style="width: 100%;"
 						use:markdown
@@ -119,12 +125,10 @@
 				</Col>
 			</Row><Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" md="4" lg="3" class="my-auto">
-					<Label
-						><tag class="text-reset fw-bold text-responsive fs-5">Description Preview</tag>
-					</Label>
+					<span id="edit-description-preview-label" class="fw-bold text-reset">Description Preview</span>
 				</Col>
 				<Col xs="12" md="8" lg="9" class="my-auto">
-					<Container style="background-color: #ffffff;" class="form-control text-start max-w-full">
+					<Container id="edit-description-preview" style="background-color: #ffffff;" class="form-control text-start max-w-full" role="region" aria-labelledby="edit-description-preview-label">
 						{@html $markdown}
 					</Container>
 				</Col>
@@ -132,21 +136,21 @@
 			<hr />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" md="4" lg="3" class="my-auto">
-					<Label
+					<Label for="edit-image_url"
 						><tag class="text-reset fw-bold text-responsive fs-5">Image URL </tag>
 						<tag class="fst-italic text-responsive fs-6">(required)</tag></Label
 					>
 				</Col>
 				<Col xs="12" md="8" lg="9" class="my-auto">
-					<textarea name="image_url" style="width: 100%;" bind:value={data.event.image_url}
+					<textarea id="edit-image_url" name="image_url" style="width: 100%;" bind:value={data.event.image_url}
 					></textarea>
 				</Col>
 			</Row><Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" md="3" class="my-auto">
-					<Label><tag class="text-reset fw-bold text-responsive fs-5">Image Preview</tag></Label>
+					<span id="edit-image-preview-label" class="fw-bold text-reset">Image Preview</span>
 				</Col>
 				<Col xs="12" md="9" class="my-auto text-center align-items-center">
-					<Image class="rounded shadow align-items-center w-50" src={data.event.image_url} />
+					<Image id="edit-image-preview" class="rounded shadow align-items-center w-50" src={data.event.image_url} alt="Event image preview" aria-labelledby="edit-image-preview-label" />
 				</Col>
 			</Row>
 			<hr />

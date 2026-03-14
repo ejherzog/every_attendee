@@ -31,8 +31,10 @@
 	--brand-gold: #F9B13E;
 	--brand-yellow: #FFFBF2;
 	background-color: var(--brand-yellow);
+	min-height: 100vh;
   ">
 
+<a href="#main-content" class="visually-hidden-focusable btn btn-light position-absolute top-0 start-0 m-2 z-3">Skip to main content</a>
 <Navbar style="background-color: var(--brand-green);" container="sm">
 	<Row class="w-100 justify-content-end align-items-center">
 		<Col>
@@ -67,10 +69,12 @@
 	</Row>
 </Navbar>
 
-<Container class="text-center mt-1 mb-4">
-	<slot></slot>
-	<hr />
-</Container>
+<main id="main-content" tabindex="-1">
+	<Container class="text-center mt-1 mb-4">
+		<slot></slot>
+		<hr />
+	</Container>
+</main>
 
 <Container class="text-center mt-1 mb-4 w-75 fs-6">
 	<p>
