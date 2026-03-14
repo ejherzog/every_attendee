@@ -1,16 +1,33 @@
 import { redirect, fail } from '@sveltejs/kit';
-import type { Actions } from './$types';
+import type { Actions, PageServerLoad } from './$types';
 import {
 	createSession,
 	generateSessionToken,
-	invalidateSession,
 	verifyPassword
 } from '$lib/server/auth';
-import type { DB_AppUser } from '$lib/types/db/DB_AppUser';
 import { getUserOptional } from '$lib/server/database';
 
+function isSafeRedirect(path: string): boolean {
+	try {
+		const u = new URL(path, 'http://localhost');
+		return (
+			u.pathname.startsWith('/host/') ||
+			u.pathname.startsWith('/event/') ||
+			u.pathname === '/host' ||
+			u.pathname === '/event'
+		);
+	} catch {
+		return false;
+	}
+}
+
+export const load: PageServerLoad = async ({ url }) => {
+	const redirectTo = url.searchParams.get('redirect');
+	return { redirect: redirectTo && isSafeRedirect(redirectTo) ? redirectTo : null };
+};
+
 export const actions = {
-	default: async ({ cookies, request }) => {
+	default: async ({ cookies, request, url }) => {
 		const formData = await request.formData();
 		const username = formData.get('username');
 
@@ -58,6 +75,11 @@ export const actions = {
 			expires: session.expiresAt
 		});
 
-		redirect(303, '/host/dashboard');
+		const redirectParam = formData.get('redirect');
+		const target =
+			typeof redirectParam === 'string' && isSafeRedirect(redirectParam)
+				? redirectParam
+				: '/host/dashboard';
+		redirect(303, target);
 	}
 } satisfies Actions;

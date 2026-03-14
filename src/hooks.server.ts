@@ -24,7 +24,9 @@ const authHandle: Handle = async ({ event, resolve }) => {
 			event.locals.session = session;
 		}
 
-		if (!event.locals.session) {
+		// Allow unauthenticated access to co-host join so the load can redirect to create-account
+		const isCohostJoin = event.url.pathname === '/host/cohost-join';
+		if (!event.locals.session && !isCohostJoin) {
 			throw redirect(303, '/login');
 		}
 	}

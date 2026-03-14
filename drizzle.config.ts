@@ -1,9 +1,13 @@
 import { defineConfig } from 'drizzle-kit';
 
-// Heroku Postgres requires SSL. Ensure sslmode=require so migrate works in production.
+// Heroku Postgres requires SSL; local Postgres often does not. Only enable SSL for non-local URLs.
 const url = process.env.DATABASE_URL ?? '';
+const isLocal =
+	url.includes('localhost') ||
+	url.includes('127.0.0.1') ||
+	url.startsWith('postgresql:///');
 const urlWithSsl =
-	url && !url.includes('sslmode=')
+	!isLocal && url && !url.includes('sslmode=')
 		? `${url}${url.includes('?') ? '&' : '?'}sslmode=require`
 		: url;
 
@@ -13,7 +17,7 @@ export default defineConfig({
 	dialect: 'postgresql',
 	dbCredentials: {
 		url: urlWithSsl,
-		ssl: { rejectUnauthorized: false }
+		...(isLocal ? {} : { ssl: { rejectUnauthorized: false } })
 	},
 	migrations: {
 		table: '__drizzle_migrations__',

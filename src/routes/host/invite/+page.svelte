@@ -13,6 +13,9 @@
 
 <Container class="my-4">
 	<h1>Invite a Host</h1>
+	{#if data?.username}
+		<p class="text-muted">Hello, {data.username}.</p>
+	{/if}
 	<p class="text-muted">Do you know someone who might enjoy this app?</p>
 	<p class="text-muted">Enter their email address and we'll generate a signup link for you to share with them.</p>
 </Container>

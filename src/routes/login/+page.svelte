@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { Button, Col, Container, Form, Input, Label, Row } from '@sveltestrap/sveltestrap';
+
+	/** @type {import('./$types').PageData} */
+	export let data;
 </script>
 
 <svelte:head>
@@ -10,6 +13,9 @@
 <Container style="background-color: var(--brand-honey);" class="py-2 rounded">
 	<Container class="mt-2">
 		<Form method="POST">
+			{#if data?.redirect}
+				<input type="hidden" name="redirect" value={data.redirect} />
+			{/if}
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
 					<Label for="login-username"><span class="text-reset fw-bold text-responsive fs-5">Username</span></Label>

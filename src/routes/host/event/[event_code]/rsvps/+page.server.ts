@@ -1,10 +1,15 @@
+import { canUserAccessEvent } from '$lib/server/database';
 import { getEventDetailsById, getRsvpsForEvent } from '$lib/server/server';
 import { redirect } from '@sveltejs/kit';
 
-export async function load({ params }) {
+export async function load({ params, locals }) {
+	if (!locals.session) redirect(303, '/login');
+	const eventCode = params.event_code.toUpperCase();
+	const hasAccess = await canUserAccessEvent(locals.session.userId, eventCode);
+	if (!hasAccess) redirect(303, '/host/dashboard');
 	try {
-		let event = await getEventDetailsById(params.event_code.toUpperCase());
-		let rsvps = await getRsvpsForEvent(params.event_code.toUpperCase());
+		let event = await getEventDetailsById(eventCode);
+		let rsvps = await getRsvpsForEvent(eventCode);
 
 		let yesCount = 0;
 		let maybeCount = 0;

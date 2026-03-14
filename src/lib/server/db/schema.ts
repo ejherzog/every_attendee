@@ -5,8 +5,7 @@ import {
 	text,
 	integer,
 	boolean,
-	timestamp,
-	primaryKey
+	timestamp
 } from 'drizzle-orm/pg-core';
 
 export const people = pgTable('people', {
@@ -106,7 +105,9 @@ export const appUsersEvents = pgTable('app_users_events', {
 	appUserId: integer('app_user_id')
 		.notNull()
 		.references(() => appUsers.id),
-	eventId: varchar('event_id', { length: 6 }).references(() => events.id)
+	eventId: varchar('event_id', { length: 6 }).references(() => events.id),
+	/** If false, user is a co-host and cannot add/remove hosts. Default true for event creator. */
+	canManageHosts: boolean('can_manage_hosts').notNull().default(true)
 });
 
 export const hostInvites = pgTable(
@@ -120,3 +121,16 @@ export const hostInvites = pgTable(
 		createdByUserId: integer('created_by_user_id').references(() => appUsers.id)
 	}
 );
+
+/** Token-based invite to be a co-host for an event. Email required for new invites so they can log in or create account with that address. */
+export const cohostInvites = pgTable('cohost_invites', {
+	id: serial('id').primaryKey(),
+	token: text('token').notNull().unique(),
+	email: varchar('email', { length: 400 }),
+	eventId: varchar('event_id', { length: 6 })
+		.notNull()
+		.references(() => events.id),
+	expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+	createdByUserId: integer('created_by_user_id').references(() => appUsers.id)
+});

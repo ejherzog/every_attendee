@@ -22,6 +22,20 @@
       "when": 1773441100024,
       "tag": "0002_cooing_white_tiger",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1773453170331,
+      "tag": "0003_redundant_apocalypse",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1773454192060,
+      "tag": "0004_past_warbird",
+      "breakpoints": true
     }
   ]
 }
