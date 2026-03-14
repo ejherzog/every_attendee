@@ -2,25 +2,59 @@
 	import { Button, Col, Container, Form, Input, Label, Row } from '@sveltestrap/sveltestrap';
 
 	/** @type {import('./$types').PageData} */
-	export let data;
+	export let data: import('./$types').PageData;
 	/** @type {import('./$types').ActionData} */
 	export let form;
 
 	let showPassword = false;
 	let showPasswordConfirm = false;
+	let emailValue = form?.email ?? '';
+	let emailTouched = false;
+	$: if (form?.email !== undefined) emailValue = form.email;
+
+	const emailFormatRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+	function isValidEmailFormat(value: string): boolean {
+		return emailFormatRegex.test(value.trim());
+	}
+	function emailMatchesInvite(value: string): boolean {
+		const invite = (data as { inviteEmail?: string }).inviteEmail;
+		if (!invite) return true;
+		return value.trim().toLowerCase() === invite.trim().toLowerCase();
+	}
+
+	$: emailFormatError = emailTouched && emailValue && !isValidEmailFormat(emailValue)
+		? 'Please enter a valid email address.'
+		: null;
+	$: emailMatchError = emailTouched && emailValue && isValidEmailFormat(emailValue) && !emailMatchesInvite(emailValue)
+		? 'Email does not match the invite link.'
+		: null;
+	$: emailError = emailFormatError ?? emailMatchError;
+
+	function handleSubmit(e: SubmitEvent) {
+		emailTouched = true;
+		if (emailError) {
+			e.preventDefault();
+		}
+	}
+
+	$: alreadyUsed = !data.valid && (data as { alreadyUsed?: boolean }).alreadyUsed === true;
 </script>
 
 <svelte:head>
-	<title>Set your password</title>
+	<title>Create Account</title>
 </svelte:head>
 
-<Container class="mt-1 mb-4">
-	<h1>Set your password</h1>
+<Container class="mt-3 mb-4">
+	<h1>Create Your Account</h1>
 	{#if !data.valid}
-		<p class="text-danger">This link is invalid or has expired.</p>
-		<p><a href="/login">Go to login</a></p>
+		{#if alreadyUsed}
+			<p class="text-danger">An account already exists for this invite. If you have an account, please log in.</p>
+			<p><a href="/login">Go to Login</a></p>
+		{:else}
+			<p class="text-danger">This link is invalid or has expired.</p>
+			<p><a href="/">Go to Homepage</a></p>
+		{/if}
 	{:else}
-		<p class="text-muted">Create a username and password for {data.email}.</p>
 		<p class="small" style="color: #8b0000;"><strong>Note:</strong> We don't have a password reset feature—choose a password you'll remember or store it with a password manager.</p>
 	{/if}
 </Container>
@@ -28,34 +62,39 @@
 {#if data.valid && data.token}
 	<Container style="background-color: var(--brand-honey);" class="py-2 rounded">
 		<Container class="mt-2">
-			<Form method="POST">
+			<Form method="POST" on:submit={handleSubmit} class="d-flex flex-column align-items-center">
 				<input type="hidden" name="token" value={data.token} />
 				{#if form?.message}
 					<p class="text-danger">{form.message}</p>
 				{/if}
-				<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
-					<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
-						<Label for="username"><span class="text-reset fw-bold text-responsive fs-5">Username</span></Label>
+				<Row class="align-items-center text-start mx-1 gx-1 gx-md-4 justify-content-center w-100">
+					<Col xs="12" sm="12" md="4" lg="3" class="my-auto">
+						<Label for="email"><span class="text-reset fw-bold text-responsive fs-5">Email</span></Label>
 					</Col>
-					<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
+					<Col xs="12" sm="12" md="8" lg="4" class="my-auto pb-2">
 						<Input
-							id="username"
-							type="text"
-							name="username"
-							value={form?.username ?? ''}
+							id="email"
+							type="email"
+							name="email"
+							bind:value={emailValue}
+							on:blur={() => (emailTouched = true)}
 							required
 							aria-required="true"
-							class="text-start"
-							autocomplete="username"
+							class="text-start {emailError ? 'is-invalid' : ''}"
+							autocomplete="email"
 						/>
+						{#if emailError}
+							<p class="small text-danger mb-0 mt-1">{emailError}</p>
+						{:else}
+							<p class="small text-muted mb-0 mt-1">Please use the email address that was invited.</p>
+						{/if}
 					</Col>
 				</Row>
-				<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
-					<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
+				<Row class="align-items-center text-start mx-1 gx-1 gx-md-4 justify-content-center w-100">
+					<Col xs="12" sm="12" md="4" lg="3" class="my-auto">
 						<Label for="password"><span class="text-reset fw-bold text-responsive fs-5">Password</span></Label>
-						<p class="small text-muted mb-0">At least 10 characters</p>
 					</Col>
-					<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
+					<Col xs="12" sm="12" md="8" lg="4" class="my-auto pb-2">
 						<div class="input-group">
 							<Input
 								id="password"
@@ -79,13 +118,14 @@
 								{/if}
 							</button>
 						</div>
+						<p class="small text-muted mb-0 mt-1">At least 10 characters</p>
 					</Col>
 				</Row>
-				<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
-					<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
-						<Label for="passwordConfirm"><span class="text-reset fw-bold text-responsive fs-5">Confirm password</span></Label>
+				<Row class="align-items-center text-start mx-1 gx-1 gx-md-4 justify-content-center w-100">
+					<Col xs="12" sm="12" md="4" lg="3" class="my-auto">
+						<Label for="passwordConfirm"><span class="text-reset fw-bold text-responsive fs-5">Confirm Password</span></Label>
 					</Col>
-					<Col xs="12" sm="6" md="7" lg="4" class="my-auto pb-2">
+					<Col xs="12" sm="12" md="8" lg="4" class="my-auto pb-2">
 						<div class="input-group">
 							<Input
 								id="passwordConfirm"
@@ -111,9 +151,9 @@
 						</div>
 					</Col>
 				</Row>
-				<Row class="my-2">
-					<Col class="col-12">
-						<Button type="submit" style="background-color: var(--brand-green); color: var(--brand-gold);">Create account</Button>
+				<Row class="my-2 justify-content-center w-100">
+					<Col class="col-12 d-flex justify-content-center">
+						<Button type="submit" style="background-color: var(--brand-green); color: var(--brand-gold);">Create Account</Button>
 					</Col>
 				</Row>
 			</Form>

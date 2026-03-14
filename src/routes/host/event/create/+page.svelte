@@ -33,11 +33,12 @@
 	<h3>Create Your Event</h3>
 
 	<Form method="POST">
-		<Label>Event Name</Label>
-		<Input class="text-start" name="title" required aria-required="true" />
+		<Label for="create-title">Event Name</Label>
+		<Input id="create-title" class="text-start" name="title" required aria-required="true" />
 
-		<Label>Start</Label>
+		<Label for="create-start_time">Start</Label>
 		<Input
+			id="create-start_time"
 			class="text-start"
 			required
 			aria-required="true"
@@ -45,10 +46,13 @@
 			type="datetime-local"
 			bind:value={start_time}
 			on:change={endAfterStart}
+			aria-invalid={invalid_end_time}
+			aria-describedby={invalid_end_time ? 'create-datetime-error' : undefined}
 		/>
 
-		<Label>End</Label>
+		<Label for="create-end_time">End</Label>
 		<Input
+			id="create-end_time"
 			class="text-start"
 			required
 			aria-required="true"
@@ -56,16 +60,19 @@
 			type="datetime-local"
 			bind:value={end_time}
 			on:change={endAfterStart}
+			aria-invalid={invalid_end_time}
+			aria-describedby={invalid_end_time ? 'create-datetime-error' : undefined}
 		/>
 
 		{#if invalid_end_time}
-			<p style="color:crimson">
+			<p id="create-datetime-error" style="color:crimson" role="alert">
 				🤠🐴 Whooooa there, pardner!<br />The end time must be after the start time.
 			</p>
 		{/if}
 
-		<Label>Event Code</Label>
+		<Label for="create-event_code">Event Code</Label>
 		<Input
+			id="create-event_code"
 			class="text-start"
 			name="event_code"
 			required
@@ -73,38 +80,41 @@
 			value={data.event_code}
 		/>
 
-		<Label>Location</Label>
-		<Input class="text-start" name="location" required aria-required="true" />
+		<Label for="create-location">Location</Label>
+		<Input id="create-location" class="text-start" name="location" required aria-required="true" />
 
-		<Label>Address</Label>
-		<Input class="text-start" name="address" required aria-required="true" />
+		<Label for="create-address">Address</Label>
+		<Input id="create-address" class="text-start" name="address" required aria-required="true" />
 
-		<Label>Host</Label>
-		<Input disabled class="text-start" value={data.username} />
+		<Label for="create-host">Host</Label>
+		<Input id="create-host" disabled class="text-start" value={data.username} />
 		<input type="hidden" name="user_id" value={data.user_id} />
 
-		<Label>Image URL</Label>
+		<Label for="create-image_url">Image URL</Label>
 		<Input
+			id="create-image_url"
 			name="image_url"
 			type="url"
 			class="text-start"
 			bind:value={image_url}
 			on:change={isUrlValid}
+			aria-invalid={!valid_url}
+			aria-describedby={!valid_url ? 'create-image_url-error' : undefined}
 		/>
 
-		<Label>Image Preview</Label><br />
+		<span id="create-image-preview-label" class="fw-bold">Image Preview</span><br />
 		{#if valid_url}
-			<Image class="rounded shadow align-items-center w-50" src={image_url}></Image><br />
+			<Image id="create-image-preview" class="rounded shadow align-items-center w-50" src={image_url} alt="Event image preview" aria-labelledby="create-image-preview-label"></Image><br />
 		{:else}
-			<p style="color:crimson">🖼️🚫 Hmmm... that doesn't seem to be a valid URL.</p>
+			<p id="create-image_url-error" style="color:crimson" role="alert">🖼️🚫 Hmmm... that doesn't seem to be a valid URL.</p>
 		{/if}
 
-		<Label>Description</Label>
-		<textarea name="description" style="width: 100%;" use:markdown bind:value={description}
+		<Label for="create-description">Description</Label>
+		<textarea id="create-description" name="description" style="width: 100%;" use:markdown bind:value={description}
 		></textarea>
 
-		<Label>Description Preview</Label>
-		<Container style="background-color: #ffffff;" class="form-control text-start max-w-full">
+		<span id="create-description-preview-label" class="fw-bold">Description Preview</span>
+		<Container id="create-description-preview" style="background-color: #ffffff;" class="form-control text-start max-w-full" role="region" aria-labelledby="create-description-preview-label">
 			{@html $markdown}
 		</Container>
 

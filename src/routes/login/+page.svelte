@@ -6,21 +6,22 @@
 	<title>Host Login</title>
 </svelte:head>
 
+<h1 class="visually-hidden">Host Login</h1>
 <Container style="background-color: var(--brand-honey);" class="py-2 rounded">
 	<Container class="mt-2">
 		<Form method="POST">
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" sm="6" md="5" lg="3" class="my-auto">
-					<Label><tag class="text-reset fw-bold text-responsive fs-5">Username</tag></Label>
+					<Label for="login-username"><span class="text-reset fw-bold text-responsive fs-5">Username</span></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="3" class="my-auto pb-2">
-					<Input class="text-start" name="username" required aria-required="true" />
+					<Input id="login-username" class="text-start" name="username" required aria-required="true" autocomplete="username" />
 				</Col>
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
-					<Label><tag class="text-reset fw-bold text-responsive fs-5">Password</tag></Label>
+					<Label for="login-password"><span class="text-reset fw-bold text-responsive fs-5">Password</span></Label>
 				</Col>
 				<Col xs="12" sm="6" md="7" lg="4" class="my-auto">
-					<Input type="password" class="text-start" name="password" />
+					<Input id="login-password" type="password" class="text-start" name="password" autocomplete="current-password" />
 				</Col>
 			</Row>
 			<Row class="my-2">
