@@ -46,6 +46,58 @@
 			</Row>
 			<hr />
 			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
+				<Col xs="12" class="my-auto">
+					<span class="text-reset fw-bold text-responsive fs-5">Hosts</span>
+					<p class="text-muted small mb-1">These names appear in the “Hosted by” section on the event page. Share a link with co-hosts so they can accept and be listed.</p>
+					<ul class="list-unstyled mb-2">
+						{#each data.hostsList as host}
+							<li class="d-flex align-items-center gap-2 mb-1">
+								<span>{host.name}</span>
+								<Form method="POST" action="?/removeCoHost" class="d-inline">
+									<input type="hidden" name="host_id" value={host.hostId} />
+									<Button type="submit" color="light" size="sm" class="py-0">Remove</Button>
+								</Form>
+							</li>
+						{/each}
+					</ul>
+					{#if data.cohost_invite_link}
+						<p class="text-success small fw-bold mb-1">Share this link with your co-host (it expires in 14 days):</p>
+						<div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+							<Input type="text" readonly value={data.cohost_invite_link} id="cohost-invite-link" class="font-monospace flex-grow-1" style="min-width: 12rem;" />
+							<Button
+								type="button"
+								class="btn btn-sm"
+								style="background-color: var(--brand-green); color: var(--brand-gold);"
+								on:click={() => {
+									const input = document.getElementById('cohost-invite-link');
+									if (input instanceof HTMLInputElement) {
+										input.select();
+										navigator.clipboard.writeText(input.value);
+									}
+								}}
+							>
+								Copy link
+							</Button>
+						</div>
+						<p class="small text-muted mb-0">They'll log in or create an account with that email, then accept so their name appears as a host.</p>
+						<p class="small mb-0"><a href="/host/event/{data.event.id}/edit">Generate another link</a></p>
+					{:else}
+						<Form method="POST" action="?/generateCohostLink" class="d-flex flex-wrap gap-2 align-items-end">
+							<div>
+								<Label for="cohost-email" class="small mb-0">Co-host email</Label>
+								<Input id="cohost-email" type="email" name="cohost_email" placeholder="cohost@example.com" class="form-control form-control-sm" required />
+							</div>
+							<Button type="submit" color="primary" size="sm">Generate "be my co-host" link</Button>
+						</Form>
+						{#if data.cohost_error}
+							<p class="text-danger small mt-1 mb-0" role="alert">{data.cohost_error}</p>
+						{/if}
+						<p class="small text-muted mt-1 mb-0">They'll log in or create an account with this email, then accept to be listed as a host.</p>
+					{/if}
+				</Col>
+			</Row>
+			<hr />
+			<Row class="align-items-center text-start mx-1 gx-1 gx-md-4">
 				<Col xs="12" sm="6" md="5" lg="2" class="my-auto">
 					<Label for="edit-start_time"><tag class="text-reset fw-bold text-responsive fs-5">Start </tag></Label>
 				</Col>

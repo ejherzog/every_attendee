@@ -13,7 +13,8 @@ import {
 	appUsers,
 	userSessions,
 	appUsersEvents,
-	hostInvites
+	hostInvites,
+	cohostInvites
 } from './db';
 import type { Person } from '$lib/types/People';
 import type { Session } from './auth';
@@ -112,6 +113,58 @@ export async function deleteHostInviteByToken(token: string): Promise<void> {
 	await db.delete(hostInvites).where(eq(hostInvites.token, token));
 }
 
+// ** COHOST INVITES (token-based, no email — preserves privacy and requires consent) ** //
+const COHOST_INVITE_EXPIRY_DAYS = 14;
+
+export async function insertCohostInvite(
+	eventId: string,
+	createdByUserId: number,
+	email: string
+): Promise<{ token: string; expiresAt: Date }> {
+	const token = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('');
+	const expiresAt = new Date(Date.now() + COHOST_INVITE_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
+	await db.insert(cohostInvites).values({
+		token,
+		email: email.trim().toLowerCase(),
+		eventId,
+		expiresAt,
+		createdByUserId
+	});
+	return { token, expiresAt };
+}
+
+export async function getCohostInviteByToken(token: string): Promise<{
+	eventId: string;
+	eventTitle: string;
+	email: string | null;
+	expiresAt: Date;
+} | null> {
+	const rows = await db
+		.select({
+			eventId: cohostInvites.eventId,
+			eventTitle: events.title,
+			email: cohostInvites.email,
+			expiresAt: cohostInvites.expiresAt
+		})
+		.from(cohostInvites)
+		.innerJoin(events, eq(cohostInvites.eventId, events.id))
+		.where(eq(cohostInvites.token, token));
+	const row = rows[0];
+	if (!row || row.expiresAt.getTime() <= Date.now()) return null;
+	return {
+		eventId: row.eventId,
+		eventTitle: row.eventTitle,
+		email: row.email ?? null,
+		expiresAt: row.expiresAt
+	};
+}
+
+export async function deleteCohostInviteByToken(token: string): Promise<void> {
+	await db.delete(cohostInvites).where(eq(cohostInvites.token, token));
+}
+
 export async function insertAppUser(
 	username: string,
 	passwordHash: string,
@@ -158,6 +211,51 @@ export async function findHostsByEventId(code: string): Promise<{ name: string }
 	return rows;
 }
 
+/** Returns hosts with ids for edit UI (add/remove co-hosts). */
+export async function findHostsWithIdsByEventId(code: string): Promise<{ hostId: number; name: string }[]> {
+	const rows = await db
+		.select({ hostId: hosts.hostId, name: people.shortName })
+		.from(hosts)
+		.innerJoin(people, eq(hosts.hostId, people.id))
+		.where(eq(hosts.eventId, code));
+	return rows;
+}
+
+export async function findPersonByEmail(email: string): Promise<{ id: number; shortName: string } | null> {
+	const rows = await db
+		.select({ id: people.id, shortName: people.shortName })
+		.from(people)
+		.where(sql`lower(${people.email}) = lower(${email})`);
+	const row = rows[0];
+	return row ? { id: row.id, shortName: row.shortName } : null;
+}
+
+/** Get person id for an app user whose username is the given email (case-insensitive). */
+export async function getPersonIdByAppUserEmail(email: string): Promise<number | null> {
+	const rows = await db
+		.select({ personId: appUsers.personId })
+		.from(appUsers)
+		.where(sql`lower(${appUsers.username}) = lower(${email})`);
+	const personId = rows[0]?.personId;
+	return personId ?? null;
+}
+
+export async function addHostToEvent(eventId: string, hostPersonId: number): Promise<void> {
+	const existing = await db
+		.select()
+		.from(hosts)
+		.where(and(eq(hosts.eventId, eventId), eq(hosts.hostId, hostPersonId)));
+	if (existing.length > 0) return;
+	await db.insert(hosts).values({
+		eventId,
+		hostId: hostPersonId
+	});
+}
+
+export async function removeHostFromEvent(eventId: string, hostPersonId: number): Promise<void> {
+	await db.delete(hosts).where(and(eq(hosts.eventId, eventId), eq(hosts.hostId, hostPersonId)));
+}
+
 export async function getPersonFromUser(app_user_id: string): Promise<string> {
 	const rows = await db
 		.select({ personId: appUsers.personId })
@@ -165,6 +263,14 @@ export async function getPersonFromUser(app_user_id: string): Promise<string> {
 		.where(eq(appUsers.id, parseInt(app_user_id, 10)));
 	const personId = rows[0]?.personId;
 	return personId != null ? String(personId) : '';
+}
+
+export async function getPersonShortName(personId: number): Promise<string | null> {
+	const rows = await db
+		.select({ shortName: people.shortName })
+		.from(people)
+		.where(eq(people.id, personId));
+	return rows[0]?.shortName ?? null;
 }
 
 export async function findOtherGuestIds(response_id: string, respondent_id: string): Promise<number[]> {

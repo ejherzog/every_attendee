@@ -10,7 +10,10 @@
 	let showPasswordConfirm = false;
 	let emailValue = form?.email ?? '';
 	let emailTouched = false;
+	let displayNameValue = form?.display_name ?? '';
 	$: if (form?.email !== undefined) emailValue = form.email;
+	$: if (form?.display_name !== undefined) displayNameValue = form.display_name;
+	$: if (data.flow === 'cohost' && data.inviteEmail && !emailValue) emailValue = data.inviteEmail;
 
 	const emailFormatRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 	function isValidEmailFormat(value: string): boolean {
@@ -38,6 +41,10 @@
 	}
 
 	$: alreadyUsed = !data.valid && (data as { alreadyUsed?: boolean }).alreadyUsed === true;
+	$: isCohostFlow = (data as { flow?: string }).flow === 'cohost';
+	$: cohostToken = (data as { cohostToken?: string }).cohostToken ?? null;
+	$: showForm = data.valid && (data.token || cohostToken);
+	$: eventTitle = (data as { eventTitle?: string }).eventTitle ?? '';
 </script>
 
 <svelte:head>
@@ -48,22 +55,36 @@
 	<h1>Create Your Account</h1>
 	{#if !data.valid}
 		{#if alreadyUsed}
-			<p class="text-danger">An account already exists for this invite. If you have an account, please log in.</p>
+			<p class="text-danger">
+				{#if isCohostFlow}
+					An account already exists for this email. Please <a href="/login">log in</a> and accept the co-host invite from your link.
+				{:else}
+					An account already exists for this invite. If you have an account, please log in.
+				{/if}
+			</p>
 			<p><a href="/login">Go to Login</a></p>
 		{:else}
 			<p class="text-danger">This link is invalid or has expired.</p>
 			<p><a href="/">Go to Homepage</a></p>
 		{/if}
 	{:else}
-		<p class="small" style="color: #8b0000;"><strong>Note:</strong> We don't have a password reset feature—choose a password you'll remember or store it with a password manager.</p>
+		{#if isCohostFlow}
+			<p class="text-muted">You're creating an account to accept a co-host invite for <strong>{eventTitle}</strong>. After you create your account, you'll be listed as a host.</p>
+		{:else}
+			<p class="small" style="color: #8b0000;"><strong>Note:</strong> We don't have a password reset feature—choose a password you'll remember or store it with a password manager.</p>
+		{/if}
 	{/if}
 </Container>
 
-{#if data.valid && data.token}
+{#if showForm}
 	<Container style="background-color: var(--brand-honey);" class="py-2 rounded">
 		<Container class="mt-2">
 			<Form method="POST" on:submit={handleSubmit} class="d-flex flex-column align-items-center">
-				<input type="hidden" name="token" value={data.token} />
+				{#if data.token}
+					<input type="hidden" name="token" value={data.token} />
+				{:else if cohostToken}
+					<input type="hidden" name="cohost_token" value={cohostToken} />
+				{/if}
 				{#if form?.message}
 					<p class="text-danger">{form.message}</p>
 				{/if}
@@ -72,24 +93,59 @@
 						<Label for="email"><span class="text-reset fw-bold text-responsive fs-5">Email</span></Label>
 					</Col>
 					<Col xs="12" sm="12" md="8" lg="4" class="my-auto pb-2">
-						<Input
-							id="email"
-							type="email"
-							name="email"
-							bind:value={emailValue}
-							on:blur={() => (emailTouched = true)}
-							required
-							aria-required="true"
-							class="text-start {emailError ? 'is-invalid' : ''}"
-							autocomplete="email"
-						/>
-						{#if emailError}
-							<p class="small text-danger mb-0 mt-1">{emailError}</p>
+						{#if isCohostFlow}
+							<Input
+								id="email"
+								type="email"
+								name="email"
+								value={emailValue}
+								readonly
+								class="text-start bg-light"
+								autocomplete="email"
+								aria-describedby="email-invite-note"
+							/>
+							<p id="email-invite-note" class="small text-muted mb-0 mt-1">This invite was sent to this address.</p>
 						{:else}
-							<p class="small text-muted mb-0 mt-1">Please use the email address that was invited.</p>
+							<Input
+								id="email"
+								type="email"
+								name="email"
+								bind:value={emailValue}
+								on:blur={() => (emailTouched = true)}
+								required
+								aria-required="true"
+								class="text-start {emailError ? 'is-invalid' : ''}"
+								autocomplete="email"
+							/>
+							{#if emailError}
+								<p class="small text-danger mb-0 mt-1">{emailError}</p>
+							{:else}
+								<p class="small text-muted mb-0 mt-1">Please use the email address that was invited.</p>
+							{/if}
 						{/if}
 					</Col>
 				</Row>
+				{#if isCohostFlow}
+					<Row class="align-items-center text-start mx-1 gx-1 gx-md-4 justify-content-center w-100">
+						<Col xs="12" sm="12" md="4" lg="3" class="my-auto">
+							<Label for="display_name"><span class="text-reset fw-bold text-responsive fs-5">Display name</span></Label>
+						</Col>
+						<Col xs="12" sm="12" md="8" lg="4" class="my-auto pb-2">
+							<Input
+								id="display_name"
+								type="text"
+								name="display_name"
+								bind:value={displayNameValue}
+								required
+								aria-required="true"
+								class="text-start"
+								autocomplete="name"
+								placeholder="Name as it will appear on the event"
+							/>
+							<p class="small text-muted mb-0 mt-1">This will appear in the "Hosted by" section on the event page.</p>
+						</Col>
+					</Row>
+				{/if}
 				<Row class="align-items-center text-start mx-1 gx-1 gx-md-4 justify-content-center w-100">
 					<Col xs="12" sm="12" md="4" lg="3" class="my-auto">
 						<Label for="password"><span class="text-reset fw-bold text-responsive fs-5">Password</span></Label>

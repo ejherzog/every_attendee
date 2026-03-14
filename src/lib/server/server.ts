@@ -374,3 +374,21 @@ export async function editEvent(formData: any): Promise<string> {
 	return event_id;
 }
 
+/** Returns list of hosts with ids for the event edit page. */
+export async function getEventHostsForEdit(eventCode: string): Promise<{ hostId: number; name: string }[]> {
+	return db.findHostsWithIdsByEventId(eventCode);
+}
+
+/** Create a token-based co-host invite. Email is required so they can log in or create account with that address. */
+export async function createCohostInvite(
+	eventCode: string,
+	createdByUserId: number,
+	email: string
+): Promise<{ token: string }> {
+	return db.insertCohostInvite(eventCode, createdByUserId, email);
+}
+
+export async function removeCoHostFromEvent(eventCode: string, hostPersonId: number): Promise<void> {
+	await db.removeHostFromEvent(eventCode, hostPersonId);
+}
+

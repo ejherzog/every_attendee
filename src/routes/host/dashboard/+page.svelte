@@ -7,6 +7,7 @@
 
 <Container class="mt-3 mb-4">
 	<h1>Hello, {data.username}!</h1>
+	<p class="mt-2 mb-0"><a href="/host/event/create">Create an Event</a></p>
 </Container>
 
 <Container style="background-color: var(--brand-honey);" class="py-2 rounded">

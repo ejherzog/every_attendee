@@ -120,3 +120,16 @@ export const hostInvites = pgTable(
 		createdByUserId: integer('created_by_user_id').references(() => appUsers.id)
 	}
 );
+
+/** Token-based invite to be a co-host for an event. Email required for new invites so they can log in or create account with that address. */
+export const cohostInvites = pgTable('cohost_invites', {
+	id: serial('id').primaryKey(),
+	token: text('token').notNull().unique(),
+	email: varchar('email', { length: 400 }),
+	eventId: varchar('event_id', { length: 6 })
+		.notNull()
+		.references(() => events.id),
+	expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+	createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+	createdByUserId: integer('created_by_user_id').references(() => appUsers.id)
+});
