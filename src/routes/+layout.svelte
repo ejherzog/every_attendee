@@ -42,7 +42,7 @@
 				<NavbarBrand href={home} style="color: var(--brand-gold)" class="fs-2">EvA</NavbarBrand>
 			{:else}
 				<NavbarBrand href={home} style="color: var(--brand-gold)" class="fs-2"
-					>EveryAttendee <tag class="fs-4 fw-lighter fst-italic">(𝛂 v0.3)</tag></NavbarBrand
+					>EveryAttendee <tag class="fs-4 fw-lighter fst-italic">(β 1.0)</tag></NavbarBrand
 				>
 			{/if}
 		</Col>
